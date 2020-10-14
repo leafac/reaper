@@ -26,7 +26,7 @@
 Refer to the documentation at {\field{\*\fldinst{HYPERLINK "https://github.com/leafac/reaper"}}{\fldrslt https://github.com/leafac/reaper}} for more.}]]></description>
       </metadata>
       <version name="1.0.0" author="leafac" time="2020-10-14T01:25:35.403Z">
-        <source file="leafac_Automixer.jsfx" type="effect">http://example.com/dl/1.0/Hello%20World.jsfx</source>
+        <source file="leafac_Automixer.jsfx" type="effect">https://github.com/leafac/reaper/raw/master/leafac_Automixer.jsfx</source>
         <changelog><![CDATA[Initial Release]]></changelog>
       </version>
     </reapack>

@@ -114,7 +114,8 @@ track = -1; loop(tracks, track += 1;
 
 @serialize
 
-force_slider_section_to_run_when_playback_starts = 1;
+version = 100;
+file_var(0, version);
 
 @gfx 530 180
 
