@@ -3,7 +3,7 @@
   <category name="SWS">
     <reapack name="SWS" type="extension">
       <version name="2.10.0.1">
-        <source file="reaper_sws_extension.dylib" platform="darwin">https://github.com/leafac/reaper/raw/de300ebd9820f690dd0f28745b9a02670f97c681/sws/reaper_sws_extension.dylib</source>
+        <source file="reaper_sws_extension.dylib" platform="darwin">https://github.com/leafac/reaper/raw/99c163da65b4233c3e9574dd856309abf5c8df12/reaper_sws_extension.dylib</source>
       </version>
     </reapack>
   </category>
