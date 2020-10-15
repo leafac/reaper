@@ -21,5 +21,5 @@ https://github.com/leafac/reaper/raw/master/reeq.xml
 ## SWS
 
 ```
-https://github.com/leafac/reaper/raw/master/sws/sws.xml
+https://github.com/leafac/reaper/raw/master/sws.xml
 ```
