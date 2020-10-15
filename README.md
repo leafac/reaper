@@ -14,11 +14,15 @@ If you’re new to this, check [this video](https://www.youtube.com/watch?v=gVbM
 
 ## ReEQ and ReSpectrum
 
+Temporary workaround package of the excellent [ReEQ and ReSpectrum](https://forum.cockos.com/showthread.php?t=213501) by [nitsuj](https://forum.cockos.com/member.php?u=121300):
+
 ```
 https://github.com/leafac/reaper/raw/master/reeq.xml
 ```
 
 ## SWS
+
+Workaround package of [SWS](http://sws-extension.org) for macOS (UserPlugin only, no Python, no Grooves):
 
 ```
 https://github.com/leafac/reaper/raw/master/sws.xml
