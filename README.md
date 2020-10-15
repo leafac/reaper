@@ -11,3 +11,15 @@ https://github.com/leafac/reaper/raw/master/index.xml
 If you’re new to this, check [this video](https://www.youtube.com/watch?v=gVbMbqGSB7E) (in particular, 11:26).
 
 ## Automixer
+
+## ReEQ and ReSpectrum
+
+```
+https://github.com/leafac/reaper/raw/master/reeq.xml
+```
+
+## SWS
+
+```
+https://github.com/leafac/reaper/raw/master/sws/sws.xml
+```
