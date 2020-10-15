@@ -4,7 +4,7 @@
     <reapack name="SWS" type="extension">
       <version name="2.10.0.1">
         <source file="reaper_sws_extension.dylib" platform="darwin">https://github.com/leafac/reaper/raw/de300ebd9820f690dd0f28745b9a02670f97c681/sws/reaper_sws_extension.dylib</source>
-
+        <!-- 
         <source file="sws_python.py" type="script">https://github.com/leafac/reaper/raw/de300ebd9820f690dd0f28745b9a02670f97c681/sws/sws_python.py</source>
         <source file="sws_python32.py" type="script">https://github.com/leafac/reaper/raw/de300ebd9820f690dd0f28745b9a02670f97c681/sws/sws_python32.py</source>
         <source file="sws_python64.py" type="script">https://github.com/leafac/reaper/raw/de300ebd9820f690dd0f28745b9a02670f97c681/sws/sws_python64.py</source>
@@ -91,7 +91,7 @@
         <source file="Grooves/SP1200_67%.rgt" type="data">https://github.com/leafac/reaper/raw/de300ebd9820f690dd0f28745b9a02670f97c681/sws/Grooves/SP1200_67%25.rgt</source>
         <source file="Grooves/SP1200_71%.rgt" type="data">https://github.com/leafac/reaper/raw/de300ebd9820f690dd0f28745b9a02670f97c681/sws/Grooves/SP1200_71%25.rgt</source>
         <source file="Grooves/energyXT_50%.rgt" type="data">https://github.com/leafac/reaper/raw/de300ebd9820f690dd0f28745b9a02670f97c681/sws/Grooves/energyXT_50%25.rgt</source>
-
+         -->
       </version>
     </reapack>
   </category>
