@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <index version="1" name="Leandro Facchinetti ReEQ Distribution">
   <category name="Filter">
-    <reapack name="ReEQ and ReSpectrum.jsfx" type="effect">
+    <reapack name="ReEQ and ReSpectrum" type="effect">
       <version name="1.0.11">
         <source file="ReEQ.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/ReEQ.jsfx</source>
         <source file="ReSpectrum.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/ReSpectrum.jsfx</source>
