@@ -1,0 +1,409 @@
+// Copyright 2014, tb-software.com
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without modification, are permitted 
+// provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this list of conditions 
+// and the following disclaimer. 
+//
+// Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+// and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+//
+// The name of tb-software.com may not be used to endorse or 
+// promote products derived from this software without specific prior written permission. 
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+// FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS 
+// BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+// THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// grafics classes library
+// by TB Pro Audio 2014 (www.tb-software.com)
+//
+
+desc: GFX classes + utilities
+
+@init
+
+function LDGFX_Init()
+(
+// GFX
+  this.GFX_RANGE_L = 0.05;
+  this.GFX_RANGE_R = 0.95;
+  this.GFX_RANGE_H = 0.20;
+  this.GFX_RANGE_Y = 0.13;
+  
+  this.GFX_PEAK_W = 0.02;
+  this.GFX_PEAK_H = 0.03;
+  this.GFX_PEAK_Y = 0.07;
+  this.GFX_CUR_Y = 0.08;
+  
+  this.GFX_SUM_W = 0.02;
+  this.GFX_SUM_H = 0.03;
+  this.GFX_SUM_Y = this.GFX_RANGE_Y+this.GFX_RANGE_H+0.04;
+  
+  this.GFX_METER_POS_Y = 0.48;
+  this.GFX_METER_MAJ_Y = 0.05;
+  this.GFX_METER_MIN_Y = 0.03;
+  this.GFX_METER_NUM   = 0.57;
+  
+  this.prevGfxW = 0;
+  this.prevGfxH = 0;
+ 
+  // Desity Buffer
+  this.AMP_dB = 8.6562;
+  this.DB_MAX = 0.0;
+  this.dbMin = -30;
+  this.dbRange = this.DB_MAX - this.dbMin;
+  this.ampEnvCoeff_ms = 300;
+  this.ampEnvCoeff = exp(-1.0/((0.001*this.ampEnvCoeff_ms*srate)|0));
+  
+  this.densityBufN = 2048;
+  this.densityBufL = MM.MemMgr_Alloc(this.densityBufN);
+  this.densityBufR = MM.MemMgr_Alloc(this.densityBufN);
+  
+  memset(this.densityBufL, 0, this.densityBufN);
+  memset(this.densityBufR, 0, this.densityBufN);
+  this.maxDensityL = this.maxDensityR = 0.0;
+  
+  this.peakL_val = this.peakR_val = 0;
+  this.peakL_s_val = this.peakR_s_val = 0;
+  this.mpeak_db = -144;
+  this.mpeak_s_db = -144;
+  
+  this.mrms_val = 0;
+  this.mrms_db  = -144;  
+
+  this.mrms_s_val = 0;
+  this.mrms_s_db  = -144;  
+);
+
+function LDGFX_Process(_spl0_s, _spl1_s, _spl0, _spl1, _peak_s_db, _peak_db, _rms_m0_db, _rms_m1_db, _rms_i0_db, _rms_i1_db)
+local (ampL, ampR, ampL_s, ampR_s, densityIdx) 
+(
+      // Amplitude + Peak
+      ampL = abs(_spl0);
+      ampR = abs(_spl1);
+
+      ampL_s = abs(_spl0_s);
+      ampR_s = abs(_spl1_s);
+/*
+      this.peakL_val = max(this.peakL_val, ampL);
+      this.peakR_val = max(this.peakR_val, ampR);
+
+      this.peakL_s_val = max(this.peakL_s_val, ampL_s);
+      this.peakR_s_val = max(this.peakR_s_val, ampR_s);
+*/      
+      this.peakL_val = _peak_db;
+      this.peakR_val = _peak_db;
+
+      this.peakL_s_val = _peak_s_db;
+      this.peakR_s_val = _peak_s_db;      
+
+      // Bottom Scale
+      (ampL > this.ampEnvL) ? 
+      (
+        this.ampEnvL = ampL;
+      ) : 
+      (
+        this.ampEnvL = ampL + this.ampEnvCoeff * (this.ampEnvL - ampL);
+      );
+  
+      (ampR > this.ampEnvR) ? 
+      (
+        this.ampEnvR = ampR;
+      ) : 
+      (
+        this.ampEnvR = ampR + this.ampEnvCoeff * (this.ampEnvR - ampR);
+      );
+
+    
+      // Top Scale
+      (ampL_s > this.ampEnvL_s) ? 
+      (
+        this.ampEnvL_s = ampL_s;
+      ) : 
+      (
+        this.ampEnvL_s = ampL_s + this.ampEnvCoeff * (this.ampEnvL_s - ampL_s);
+      );
+  
+      (ampR_s > this.ampEnvR_s) ? 
+      (
+        this.ampEnvR_s = ampR_s;
+      ) : 
+      (
+        this.ampEnvR_s = ampR_s + this.ampEnvCoeff * (this.ampEnvR_s - ampR_s);
+      );
+      
+      this.mrms_s_val = _rms_i0_db;
+      this.mrms_val   = _rms_i1_db;
+     
+//      this.dbRMSL = this.AMP_DB*log(sqrt(_rms_m0_db))+3.0;
+      this.dbRMSL = _rms_m0_db;
+      this.dbRMSLX = min(max((this.dbRMSL-this.dbMin)/this.dbRange, 0.0), 1.0);
+      densityIdx = floor(this.dbRMSLX*(this.densityBufN-1));
+      this.densityBufL[densityIdx] += 1;
+      this.maxDensityL = max(this.maxDensityL, this.densityBufL[densityIdx]);
+
+//      this.dbRMSR = this.AMP_DB*log(sqrt(_rms_m1_db))+3.0;
+      this.dbRMSR = _rms_m1_db;
+      this.dbRMSRX = min(max((this.dbRMSR-this.dbMin)/this.dbRange, 0.0), 1.0);
+      densityIdx = floor(this.dbRMSRX*(this.densityBufN-1));
+      this.densityBufR[densityIdx] += 1;
+      this.maxDensityR = max(this.maxDensityR, this.densityBufR[densityIdx]);
+);
+
+function LDGFX_GFX(gfx_w_final, gfx_h_final, y_offset)
+local(rangeL, rangeR, rangeW, rangeH, rangeY, peakW, peakH, peakY, curY, sumW, sumH, sumX, sumY, meterMajY,  meterMinY, meterPosY, meter_numY, 
+dbMeter, ampDB, ampX, peakX, idx, densityAtPxL, densityAtPxR, gfx_y1)
+(
+  (gfx_w_final != this.prevGfxW || gfx_h_final != this.prevGfxH) ? 
+  (
+    rangeL = floor(gfx_w_final*this.GFX_RANGE_L);
+    rangeR = floor(gfx_w_final*this.GFX_RANGE_R);
+    rangeW = rangeR-rangeL;
+    rangeH = floor(gfx_h_final*this.GFX_RANGE_H);
+    rangeY = floor(gfx_h_final*this.GFX_RANGE_Y);
+    peakW = floor(gfx_w_final*this.GFX_PEAK_W);
+    peakH = floor(gfx_h_final*this.GFX_PEAK_H);
+    peakY = floor(gfx_h_final*this.GFX_PEAK_Y);
+    curY = floor(gfx_h_final*this.GFX_CUR_Y);
+    sumW = floor(gfx_w_final*this.GFX_SUM_W);
+    sumH = floor(gfx_h_final*this.GFX_SUM_H);
+    sumY = floor(gfx_h_final*this.GFX_SUM_Y);
+    meterMajY = floor(gfx_h_final*this.GFX_METER_MAJ_Y);
+    meterMinY = floor(gfx_h_final*this.GFX_METER_MIN_Y);
+    meterPosY = floor(gfx_h_final*this.GFX_METER_POS_Y);
+    meter_numY = floor(gfx_h_final*this.GFX_METER_NUM);
+    
+    // Would be nice to preserve the existing data.
+    (gfx_w_final != this.prevGfxW) ?
+    (
+      this.densityBufN = rangeW;
+      memset(this.densityBufL, 0, this.densityBufN);
+      memset(this.densityBufR, 0, this.densityBufN);
+      this.maxDensityL = this.maxDensityR = 0.0;
+    );  
+  
+    this.prevGfxW = gfx_w_final;
+    this.prevGfxH = gfx_h_final;
+  );  
+  
+  // Frame elements.
+  
+  // Frame for Density
+  gfx_r = gfx_g = gfx_b = gfx_a = 0.5;
+  
+  gfx_x = rangeL-1;
+  gfx_y = rangeY-1;
+  gfx_y += y_offset;
+  gfx_lineto(gfx_x+rangeW+2, gfx_y, 0);
+  gfx_lineto(gfx_x, gfx_y+rangeH+2, 0);
+  gfx_lineto(gfx_x-rangeW-2, gfx_y, 0);
+  gfx_lineto(gfx_x, gfx_y-rangeH-2, 0);
+  
+  gfx_x = rangeL-1;
+  gfx_y = gfx_h_final-rangeY-rangeH-1;
+  gfx_y += y_offset;
+  gfx_lineto(gfx_x+rangeW+2, gfx_y, 0);
+  gfx_lineto(gfx_x, gfx_y+rangeH+2, 0);
+  gfx_lineto(gfx_x-rangeW-2, gfx_y, 0);
+  gfx_lineto(gfx_x, gfx_y-rangeH-2, 0);
+  
+  // Meter Scale
+  gfx_r = gfx_g = gfx_b = gfx_a = 0.7;
+  dbMeter = ceil(this.dbMin);
+  while (gfx_x = rangeL+(dbMeter-this.dbMin)/this.dbRange*rangeW;
+    (dbMeter/6.0 == floor(dbMeter/6.0)) ? 
+    (
+      gfx_y = meter_numY;
+      gfx_y += y_offset;
+      tmp_gfx_x = gfx_x;
+      gfx_x -= 15;
+      gfx_drawnumber(dbMeter,1);
+      
+      gfx_y = meterPosY - meterMajY;
+      gfx_y += y_offset;
+      gfx_x = tmp_gfx_x;
+      gfx_y1 = meterPosY + meterMajY;
+      gfx_y1 += y_offset;
+      gfx_lineto(gfx_x, gfx_y1, 0);
+    ) : 
+    (
+      gfx_y = meterPosY - meterMinY;
+      gfx_y += y_offset;
+      gfx_y1 = meterPosY + meterMinY;
+      gfx_y1 += y_offset;
+      gfx_lineto(gfx_x, gfx_y1, 0);
+    );
+    dbMeter += 1.0;
+    dbMeter <= this.DB_MAX;
+  );
+  
+  // Current amp lines.
+  gfx_r = gfx_g = gfx_b = 0.5;
+  
+  // Amplitude
+  ampDB = this.AMP_DB*log((this.ampEnvL_s+this.ampEnvR_s)*0.5);
+  ampX = min(max((ampDB-this.dbMin)/this.dbRange, 0.0), 1.0);
+  gfx_x = rangeL;
+  gfx_y = curY;
+  gfx_y += y_offset;
+  (ampX > 0.7) ? 
+  (
+    gfx_r = 1.0;
+    gfx_g = 0.0;
+   ):
+  (
+    gfx_r = 0.0;
+    gfx_g = 1.0;
+  );
+  gfx_b = 0.0;
+  
+  gfx_rectto(gfx_x+ampX*rangeW, gfx_y+3);
+  
+  ampDB = this.AMP_DB*log((this.ampEnvL+this.ampEnvR)*0.5);
+  ampX = min(max((ampDB-this.dbMin)/this.dbRange, 0.0), 1.0);
+  gfx_x = rangeL;
+  gfx_y = gfx_h_final-curY;
+  gfx_y += y_offset;
+  (ampX > 0.7) ? 
+  (
+    gfx_r = 1.0;
+    gfx_g = 0.0;
+   ):
+  (
+    gfx_r = 0.0;
+    gfx_g = 1.0;
+  );
+  gfx_b = 0.0;
+  gfx_rectto(gfx_x+ampX*rangeW, gfx_y-3);
+  
+  // Peak.
+//  this.mpeak_db   = dfloor(MSAMPLE2DBFS(max(this.peakL_val,   this.peakR_val)),1);
+//  this.mpeak_s_db = dfloor(MSAMPLE2DBFS(max(this.peakL_s_val, this.peakR_s_val)),1);
+
+  this.mpeak_db   = this.peakL_val;
+  this.mpeak_s_db = this.peakL_s_val;
+
+  gfx_r = gfx_g = gfx_b = 1.0;
+
+  peakX = min(max((this.mpeak_s_db-this.dbMin)/this.dbRange, 0.0), 1.0);
+  gfx_x = rangeL+peakX*rangeW;
+  gfx_y = peakY;
+  gfx_y += y_offset;
+  gfx_lineto(gfx_x-peakW/2, gfx_y-peakH, 1);
+  gfx_lineto(gfx_x+peakW, gfx_y, 0);
+  gfx_lineto(gfx_x-peakW/2, gfx_y+peakH, 1);
+  gfx_x += 5;
+  gfx_y -= 6;
+  gfx_r = gfx_g = gfx_b = gfx_a = 1.0;
+  gfx_drawnumber(this.mpeak_s_db,1);
+      
+  gfx_r = gfx_g = gfx_b = 1.0;
+  peakX = min(max((this.mpeak_db-this.dbMin)/this.dbRange, 0.0), 1.0);
+  gfx_x = rangeL+peakX*rangeW;
+  gfx_y = gfx_h_final-peakY;
+  gfx_y += y_offset;
+  gfx_lineto(gfx_x-peakW/2, gfx_y+peakH, 1);
+  gfx_lineto(gfx_x+peakW, gfx_y, 0);
+  gfx_lineto(gfx_x-peakW/2, gfx_y-peakH, 1);
+  gfx_x += 5;
+  gfx_y += 2;
+  gfx_r = gfx_g = gfx_b = gfx_a = 1.0;
+  gfx_drawnumber(this.mpeak_db,1);
+  
+  this.bufOK = 1;
+  (this.bufOK) ? 
+  (
+    // RMS_I
+//    this.mrms_db = dfloor(MSAMPLE2DBFS(sqrt(this.mrms_val)),1) + 3;
+//    this.mrms_s_db = dfloor(MSAMPLE2DBFS(sqrt(this.mrms_s_val)),1) + 3;
+
+    this.mrms_db = this.mrms_val;
+    this.mrms_s_db = this.mrms_s_val;
+
+    gfx_r = gfx_g = gfx_b = 1.0;
+  
+    sumX = min(max((this.mrms_s_db-this.dbMin)/this.dbRange, 0.0), 1.0);
+    gfx_x = rangeL+sumX*rangeW;
+    gfx_y = sumY;
+    gfx_y += y_offset;
+    gfx_lineto(gfx_x-sumW/2, gfx_y+sumH, 1);
+    gfx_lineto(gfx_x+sumW, gfx_y, 0);
+    gfx_lineto(gfx_x-sumW/2, gfx_y-sumH, 1);
+    gfx_x += 5;
+    gfx_y += 2;
+    gfx_drawnumber(this.mrms_s_db,1);
+    
+    sumX = min(max((this.mrms_db-this.dbMin)/this.dbRange, 0.0), 1.0);
+    gfx_x = rangeL+sumX*rangeW;
+    gfx_y = gfx_h_final-sumY;
+    gfx_y += y_offset;
+    gfx_lineto(gfx_x-sumW/2, gfx_y-sumH, 1);
+    gfx_lineto(gfx_x+sumW, gfx_y, 0);
+    gfx_lineto(gfx_x-sumW/2, gfx_y+sumH, 1);
+    gfx_x += 5;
+    gfx_y -= 6;
+    gfx_drawnumber(this.mrms_db,1);
+    
+    // RMS_M Density.
+    gfx_b = 0.0;
+    gfx_x = rangeL;
+    idx = 0;
+    loop(rangeW,
+      densityAtPxL = sqrt(this.densityBufL[idx]/this.maxDensityL);
+      densityAtPxR = sqrt(this.densityBufR[idx]/this.maxDensityR);
+      
+      gfx_r = max(2.0*(densityAtPxL-0.5), 0.0);
+      gfx_g = 1.0-abs(2.0*densityAtPxL-1.0);
+      gfx_y = rangeY;
+      gfx_y += y_offset;
+      gfx_lineto(gfx_x, gfx_y+rangeH, 0);
+  
+      gfx_r = max(2.0*(densityAtPxR-0.5), 0.0);
+      gfx_g = 1.0-abs(2.0*densityAtPxR-1.0);
+      gfx_y = gfx_h_final-rangeY;
+      gfx_y += y_offset;
+      gfx_lineto(gfx_x, gfx_y-rangeH, 0);
+      
+      gfx_x += 1;
+      idx += 1;
+    );
+   
+    // RMS_M.
+    gfx_r = gfx_g = gfx_b = 1.0;
+  
+    gfx_x = rangeL+this.dbRMSLX*rangeW;
+    gfx_y = rangeY-3;
+    gfx_y += y_offset;
+    gfx_lineto(gfx_x, gfx_y+rangeH+6, 0);
+  
+    gfx_x = rangeL+this.dbRMSRX*rangeW;
+    gfx_y = gfx_h_final-rangeY+3;
+    gfx_y += y_offset;
+    gfx_lineto(gfx_x, gfx_y-rangeH-6, 0);
+  );
+);
+
+function LDGFX_Reset()
+(
+  this.peakL_val = this.peakR_val = this.ampEnvL = this.ampEnvR = 0.0;
+     
+  memset(this.densityBufL, 0, this.densityBufN);
+  memset(this.densityBufR, 0, this.densityBufN);
+  this.maxDensityL = this.maxDensityR = 0.0;
+     
+  this.peakL_val = this.peakL_s_val = -144;
+  this.mrms_val = -144;
+
+  this.ampEnvL_s = this.ampEnvR_s = 0;
+  this.ampEnvL = this.ampEnvR = 0;
+);
+
+// EO@init

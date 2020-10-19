@@ -1,0 +1,1087 @@
+// Copyright 2014, tb-software.com
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without modification, are permitted 
+// provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this list of conditions 
+// and the following disclaimer. 
+//
+// Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+// and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+//
+// The name of tb-software.com may not be used to endorse or 
+// promote products derived from this software without specific prior written permission. 
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+// FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS 
+// BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+// THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// RMS/TP Measurement
+// by TB Pro Audio 2014 (www.tb-software.com)
+//
+
+desc: RMS/TP Measurement
+
+@init
+
+////////////////////////////////////////////////////////////////////////////
+// TP detection class based on Cubic Spline Interpolation
+
+// ISPD based on BSpline
+function ISPD_BSP_Reset()
+(
+  this.os_tp     = 0;
+  this.os_tp_max = 0;
+  this.os_x0 = this.os_x1 = this.os_x2 = this.os_x3 = 0.0;
+);
+
+function ISPD_BSP_Init(_os, _kappa)
+(
+  this.os_aasize = _os;
+  this.os_aasize_inv = 1.0/this.os_aasize;  
+  
+  this.t_kappa = this.t_kappa_ori = _kappa;     
+
+  this.ISPD_BSP_Reset();
+);
+
+// bspline Interpolation
+function ISPD_BSP_interpolate_bspline(v0, v1, v2, v3, u, t_kappa)
+local (DP21, DP10, DP32, __in1, __in2, out2, out1, vout1, vin1, vout2,vin2,p0,p1,p2,p3, ret, h1, h2, h3, h4)
+(
+  
+  DP21 = v2 - v1;
+  DP10 = v1 - v0;
+  out1 = t_kappa * 0.5;
+  __in1 = -out1;
+
+  DP32 = v3 - v2;
+  out2 = t_kappa * 0.5;
+  __in2 = -out2;
+
+  // Out tangent
+  vout1 = (DP21 + DP10) * out1;
+  // In tangent
+  vin1 = (DP21 + DP10) * __in1;
+
+  // Out tangent
+  vout2 = (DP32 + DP21) * out2;
+  // In tangent
+  vin2 = (DP32 + DP21) * __in2;
+
+  p0 = v1;
+  p1 = v1 + vout1;
+  p2 = v2 + vin2;
+  p3 = v2;  
+  
+  // swap some h values to meet data structure
+  h1 = -1*u*u*u + 3*u*u - 3*u + 1;
+  h3 =  3*u*u*u - 6*u*u + 3*u;
+  h4 = -3*u*u*u + 3*u*u ;
+  h2 =  1*u*u*u ;
+
+  ret = h1 * p0 + 
+        h2 * p3 +
+        h3 * p1 +
+        h4 * p2;
+);
+
+function ISPD_BSP_Process(_in0)
+local (os_sspos, os_xout) 
+(
+    // Truepeak detection, cubic spline
+    this.os_x0=_in0;
+    // Truepeak detection, cubic spline
+
+  this.os_tp = 0;
+    
+  os_sspos=0;
+  loop
+  (
+    this.os_aasize,
+       
+    os_xout = this.ISPD_BSP_interpolate_bspline(this.os_x0, this.os_x1, this.os_x2, this.os_x3, os_sspos, this.t_kappa);
+    this.os_tp = max(this.os_tp, abs(os_xout));
+
+    os_sspos += this.os_aasize_inv;
+  );
+
+  this.os_tp_max = max(this.os_tp_max, this.os_tp);
+  this.os_x3 = this.os_x2;
+  this.os_x2 = this.os_x1;
+  this.os_x1 = this.os_x0;
+);
+
+function ISPD_BSP_Get_TruePeakVal()
+(
+  this.os_tp;
+);
+
+function ISPD_BSP_Get_MaxTruePeakVal()
+(
+  this.os_tp_max;
+);
+
+
+///////////////////////////////////////////////////////////////
+// ISDP based on ITU OS + Filter
+function ISPD_ITU_Reset()
+(
+  memset(this.xv, 0, this.FILTER_ORDER);
+  this.truepeak_max_val = 0.0;
+  this.maxPeak = 0.0;
+  this.memIndex = 0;
+);
+
+function ISPD_ITU_Init(_srate)
+local(i)
+(
+  this.FILTER_ORDER = 49;
+  this.MAX_OS_LENGTH = 4;
+
+  this.NZEROS = this.FILTER_ORDER;
+  this.GAIN_48 = 3.991122427;
+  this.GAIN_44 = 3.968955297;
+
+  this.memIndex = 0;
+  this.maxPeak = 0.0;
+  this.sum = 0.0;
+    
+  this.stuffedInput = MM.MemMgr_Alloc(this.MAX_OS_LENGTH);
+  memset(this.stuffedInput, 0, this.MAX_OS_LENGTH);
+   
+  this.xv = MM.MemMgr_Alloc(this.FILTER_ORDER);
+  memset(this.xv, 0, this.FILTER_ORDER);
+  
+  this.xcoeffs_44 = MM.MemMgr_Alloc(this.FILTER_ORDER);
+  this.xcoeffs_48 = MM.MemMgr_Alloc(this.FILTER_ORDER);
+  
+    this.xcoeffs_44[0] = 0.0000000000;
+    this.xcoeffs_44[1] = -0.0113627589;
+    this.xcoeffs_44[2] = -0.0191044694;
+    this.xcoeffs_44[3] = -0.0159103563;
+    this.xcoeffs_44[4] = -0.0000000000;
+    this.xcoeffs_44[5] = 0.0215911641;
+    this.xcoeffs_44[6] = 0.0352705360;
+    this.xcoeffs_44[7] = 0.0286867231;
+    this.xcoeffs_44[8] = 0.0000000000;
+    this.xcoeffs_44[9] = -0.0376174666;
+    this.xcoeffs_44[10] = -0.0607635168;
+    this.xcoeffs_44[11] = -0.0490561018;
+    this.xcoeffs_44[12] = -0.0000000000;
+    this.xcoeffs_44[13] = 0.0641652807;
+    this.xcoeffs_44[14] = 0.1042508861;
+    this.xcoeffs_44[15] = 0.0851524187;
+    this.xcoeffs_44[16] = 0.0000000000;
+    this.xcoeffs_44[17] = -0.1167752969;
+    this.xcoeffs_44[18] = -0.1977195989;
+    this.xcoeffs_44[19] = -0.1714597373;
+    this.xcoeffs_44[20] = -0.0000000000;
+    this.xcoeffs_44[21] = 0.2948842718;
+    this.xcoeffs_44[22] = 0.6316796740;
+    this.xcoeffs_44[23] = 0.8985659968;
+    this.xcoeffs_44[24] = 1.0000000000;
+    this.xcoeffs_44[25] = 0.8985659968;
+    this.xcoeffs_44[26] = 0.6316796740;
+    this.xcoeffs_44[27] = 0.2948842718;
+    this.xcoeffs_44[28] = -0.0000000000;
+    this.xcoeffs_44[29] = -0.1714597373;
+    this.xcoeffs_44[30] = -0.1977195989;
+    this.xcoeffs_44[31] = -0.1167752969;
+    this.xcoeffs_44[32] = 0.0000000000;
+    this.xcoeffs_44[33] = 0.0851524187;
+    this.xcoeffs_44[34] = 0.1042508861;
+    this.xcoeffs_44[35] = 0.0641652807;
+    this.xcoeffs_44[36] = -0.0000000000;
+    this.xcoeffs_44[37] = -0.0490561018;
+    this.xcoeffs_44[38] = -0.0607635168;
+    this.xcoeffs_44[39] = -0.0376174666;
+    this.xcoeffs_44[40] = 0.0000000000;
+    this.xcoeffs_44[41] = 0.0286867231;
+    this.xcoeffs_44[42] = 0.0352705360;
+    this.xcoeffs_44[43] = 0.0215911641;
+    this.xcoeffs_44[44] = -0.0000000000;
+    this.xcoeffs_44[45] = -0.0159103563;
+    this.xcoeffs_44[46] = -0.0191044694;
+    this.xcoeffs_44[47] = -0.0113627589;
+    this.xcoeffs_44[48] = 0.0000000000;
+
+    this.xcoeffs_48[0] = -0.0000000000;
+    this.xcoeffs_48[1] = -0.0044868228;
+    this.xcoeffs_48[2] = -0.0088145895;
+    this.xcoeffs_48[3] = -0.0082805660;
+    this.xcoeffs_48[4] = 0.0000000000;
+    this.xcoeffs_48[5] = 0.0134174357;
+    this.xcoeffs_48[6] = 0.0234575469;
+    this.xcoeffs_48[7] = 0.0202222846;
+    this.xcoeffs_48[8] = 0.0000000000;
+    this.xcoeffs_48[9] = -0.0291478206;
+    this.xcoeffs_48[10] = -0.0489424837;
+    this.xcoeffs_48[11] = -0.0408855541;
+    this.xcoeffs_48[12] = 0.0000000000;
+    this.xcoeffs_48[13] = 0.0566018044;
+    this.xcoeffs_48[14] = 0.0941425797;
+    this.xcoeffs_48[15] = 0.0784917518;
+    this.xcoeffs_48[16] = -0.0000000000;
+    this.xcoeffs_48[17] = -0.1112852516;
+    this.xcoeffs_48[18] = -0.1909072646;
+    this.xcoeffs_48[19] = -0.1673657032;
+    this.xcoeffs_48[20] = 0.0000000000;
+    this.xcoeffs_48[21] = 0.2923568365;
+    this.xcoeffs_48[22] = 0.6292755496;
+    this.xcoeffs_48[23] = 0.8977114802;
+    this.xcoeffs_48[24] = 1.0000000000;
+    this.xcoeffs_48[25] = 0.8977114802;
+    this.xcoeffs_48[26] = 0.6292755496;
+    this.xcoeffs_48[27] = 0.2923568365;
+    this.xcoeffs_48[28] = 0.0000000000;
+    this.xcoeffs_48[29] = -0.1673657032;
+    this.xcoeffs_48[30] = -0.1909072646;
+    this.xcoeffs_48[31] = -0.1112852516;
+    this.xcoeffs_48[32] = -0.0000000000;
+    this.xcoeffs_48[33] = 0.0784917518;
+    this.xcoeffs_48[34] = 0.0941425797;
+    this.xcoeffs_48[35] = 0.0566018044;
+    this.xcoeffs_48[36] = 0.0000000000;
+    this.xcoeffs_48[37] = -0.0408855541;
+    this.xcoeffs_48[38] = -0.0489424837;
+    this.xcoeffs_48[39] = -0.0291478206;
+    this.xcoeffs_48[40] = 0.0000000000;
+    this.xcoeffs_48[41] = 0.0202222846;
+    this.xcoeffs_48[42] = 0.0234575469;
+    this.xcoeffs_48[43] = 0.0134174357;
+    this.xcoeffs_48[44] = 0.0000000000;
+    this.xcoeffs_48[45] = -0.0082805660;
+    this.xcoeffs_48[46] = -0.0088145895;
+    this.xcoeffs_48[47] = -0.0044868228;
+    this.xcoeffs_48[48] = -0.0000000000;
+
+    this.GAIN = this.GAIN_44;
+    this.xcoeffs = this.xcoeffs_44;  
+
+    ((_srate % 44100) == 0) ?
+    (
+      this.GAIN = this.GAIN_44;
+      this.xcoeffs = this.xcoeffs_44;
+    )
+    :
+    ((_srate % 48000) == 0) ?
+    (
+      this.GAIN = this.GAIN_48;
+      this.xcoeffs = this.xcoeffs_48;
+    )
+    :
+    (
+      this.GAIN = this.GAIN_44;
+      this.xcoeffs = this.xcoeffs_44;
+    );
+    
+    this.ISPD_ITU_Reset();
+);
+
+function ISPD_ITU_Process(_input)
+local(i,j)
+(
+    this.maxPeak = 0.0;
+//    this.stuffedInput[0] = _input;
+    this.stuffedInput[0] = this.MAX_OS_LENGTH*_input/this.GAIN;
+    i = 0;
+    loop
+    (
+      this.MAX_OS_LENGTH,
+      
+//      this.xv[this.memIndex] = this.MAX_OS_LENGTH*this.stuffedInput[i]/this.GAIN;
+      this.xv[this.memIndex] = this.stuffedInput[i];
+      this.sum = 0.0;
+    
+      j = (this.NZEROS-1) - i;
+      while(j >= 0)
+      (
+        this.sum += (this.xcoeffs[j]*this.xv[(this.memIndex + j + 1) % (this.NZEROS)]);
+        j -= this.MAX_OS_LENGTH;  
+      );
+    
+      this.memIndex = (this.memIndex + 1) % (this.NZEROS);
+/*
+      (abs(this.sum) > this.maxPeak) ? 
+      (
+        this.maxPeak = abs(this.sum);
+      );
+*/
+      this.maxPeak = max(this.maxPeak, abs(this.sum)); 
+      this.truepeak_max_val = max(this.truepeak_max_val, this.maxPeak);
+      
+      i += 1;
+  );
+);
+
+function ISPD_ITU_Get_MaxTruePeakVal()
+(
+  this.truepeak_max_val;
+);
+
+function ISPD_ITU_Get_TruePeakVal()
+(
+  this.maxPeak;
+);
+
+function ISPD_ITU_Get_TruePeakValMax_db()
+(
+	dround(MSAMPLE2DBFS(this.truepeak_max_val),1);
+);
+
+///////////////////////////////////////////////////////////////
+// ISP Detection Class based on sinc
+function sinc(_t)
+(
+	(_t == 0.0) ? 
+	(
+		1.0;
+	):
+	(
+		sin(_t * $PI) / (_t * $PI);
+	);
+);
+	
+function ISPD_SINC_Reset()
+(
+	memset(this.in_buffer, 0, this.nr_samples);
+	this.tp_max = 0;  
+);	
+	
+function ISPD_SINC_Init(_nr_samples)
+local(i, pt0, pt1, pt2, pt3, t0, t1, t2, t3, tmp_t0, tmp_t1, tmp_t2, tmp_t3, final_val0, final_val1, final_val2, final_val3)
+(
+	this.nr_samples = (2 * _nr_samples|0 + 1);
+	this.center = _nr_samples|0;
+	this.in_buffer = MM.MemMgr_Alloc(this.nr_samples);
+  
+	this.sinc_data0 = MM.MemMgr_Alloc(this.nr_samples);
+	this.sinc_data1 = MM.MemMgr_Alloc(this.nr_samples);
+	this.sinc_data2 = MM.MemMgr_Alloc(this.nr_samples);
+	this.sinc_data3 = MM.MemMgr_Alloc(this.nr_samples);
+
+	// original
+	pt0 = 0.0;
+	pt1 = 0.18362181817838;
+	pt2 = 0.5;
+	pt3 = 1.0;
+
+	t0 = pt0 + this.center;
+	t1 = pt1 + this.center;
+	t2 = pt2 + this.center;
+	t3 = pt3 + this.center;
+
+	i = 0;  
+	loop
+	(
+		this.nr_samples,
+		tmp_t0 = t0 - i;
+		tmp_t1 = t1 - i;
+		tmp_t2 = t2 - i;
+		tmp_t3 = t3 - i;
+
+		final_val0 = sinc(tmp_t0);
+		final_val1 = sinc(tmp_t1);
+		final_val2 = sinc(tmp_t2);
+		final_val3 = sinc(tmp_t3);
+
+		this.sinc_data0[i] = final_val0;
+		this.sinc_data1[i] = final_val1;
+		this.sinc_data2[i] = final_val2;
+		this.sinc_data3[i] = final_val3;
+		i += 1;
+	);
+  
+	this.ISPD_SINC_Reset();
+);
+
+function ISPD_SINC_Add(_val)
+local(i)
+(
+	memcpy(this.in_buffer,this.in_buffer+1,this.nr_samples - 1);
+	this.in_buffer[this.nr_samples - 1] = _val;
+);
+
+function ISPD_SINC_Get_TruePeakValFast(_t_time)
+local(i, final_val1)
+(
+// t_time = 0: t = 0.0;
+// t_time = 1: t = 0.18362181817838;
+// t_time = 2: t = 0.5;
+// t_time = 3: t = 1.0;
+
+	final_val1 = 0;
+	i = 0;
+
+	(_t_time == 0) ?
+	(
+		loop
+		(
+			this.nr_samples,
+			final_val1 += (this.sinc_data0[i] * this.in_buffer[i]);
+			i += 1;
+		);
+
+	):
+	(_t_time == 1) ?
+	(
+		loop
+		(
+			this.nr_samples,
+			final_val1 += (this.sinc_data1[i] * this.in_buffer[i]);
+			i += 1;
+		);
+
+	):
+	(_t_time == 2) ?
+	(
+		loop
+		(
+			this.nr_samples,
+			final_val1 += (this.sinc_data2[i] * this.in_buffer[i]);
+			i += 1;
+		);
+
+	):
+	(_t_time == 3) ?
+	(
+		loop
+		(
+			this.nr_samples,
+			final_val1 += (this.sinc_data3[i] * this.in_buffer[i]);
+			i += 1;
+		);
+	);
+
+	final_val1;
+);
+
+function ISPD_SINC_Calc_TruePeak()
+local(truepeak_max_val)
+(
+	truepeak_max_val = abs(this.ISPD_SINC_Get_TruePeakValFast(0));
+	truepeak_max_val = max(truepeak_max_val, abs(this.ISPD_SINC_Get_TruePeakValFast(1)));
+	truepeak_max_val = max(truepeak_max_val, abs(this.ISPD_SINC_Get_TruePeakValFast(2)));
+	truepeak_max_val = max(truepeak_max_val, abs(this.ISPD_SINC_Get_TruePeakValFast(3)));
+
+	truepeak_max_val;
+);
+
+function ISPD_SINC_Process(_in0)
+(
+	this.ISPD_SINC_Add(_in0);
+	this.tp = this.ISPD_SINC_Calc_TruePeak();
+	this.tp_max = max(this.tp_max, this.tp);
+);
+
+function ISPD_SINC_Get_TruePeakVal()
+(
+	this.tp;
+);
+
+function ISPD_SINC_Get_TruePeakVal_db()
+(
+	dround(MSAMPLE2DBFS(this.tp),1);
+);
+
+function ISPD_SINC_Get_TruePeakValMax()
+(
+	this.tp_max;   
+);
+	
+function ISPD_SINC_Get_TruePeakValMax_db()
+(
+	dround(MSAMPLE2DBFS(this.tp_max),1);
+);
+
+
+///////////////////////////////////////////////////////////////
+// RMS Measurement
+function AM_Reset()
+(
+	memset(this.rms_buffer , 0, this.rms_max_count);
+  
+	this.rms_bufIdx       = 0;
+	this.rms_bufOK        = 0;
+	this.rms_BlockReady   = 0;
+	this.rms_update_timer = 0;
+	  
+	this.rms_sum            = 0;
+	this.rms_prev_val       = 0;
+	this.rms_final_val      = 0;
+	this.rms_final_val_min  = 0;
+	this.rms_final_val_max  = 0;
+
+	this.rms_final_val_db       = -144;
+	this.rms_final_val_min_db   = -144;
+	this.rms_final_val_max_db   = -144;
+  
+	this.rms_int_sum       = 0;  
+	this.rms_int_count     = 0;
+	this.rmsi_final_val    = 0;
+	this.rmsi_final_val_db = -144;
+
+	this.peak_final_val 		= 0;  
+	this.peak_final_val_db 		= -144;
+	this.peak_final_val_max 	= 0;  
+	this.peak_final_val_max_db	= -144;
+  
+	// TruePeak
+	//this.TP_DET.TPDetAM_Reset();
+
+	this.TP_DET0.ISPD_ITU_Reset();
+	this.TP_DET1.ISPD_ITU_Reset();
+	this.TP_DET2.ISPD_ITU_Reset();
+	this.TP_DET3.ISPD_ITU_Reset();
+	this.TP_DET4.ISPD_ITU_Reset();
+	this.TP_DET5.ISPD_ITU_Reset();
+
+);
+
+// Audio Measurement Class
+function AM_Init(_rms_time_constantmin_ms, _rms_time_constantmax_ms, _rms_overlap_pct, _srate)
+(
+	this.srate = _srate;
+  // Set buffer to max time constant
+	this.rms_time_constantmin_ms = _rms_time_constantmin_ms;
+	this.rms_time_constantmax_ms = _rms_time_constantmax_ms;
+	this.rms_maxmax_count        = (0.001*this.rms_time_constantmax_ms*this.srate)|0;
+	this.rms_buffer              = MM.MemMgr_Alloc(this.rms_maxmax_count);
+
+	// Set working params to current time constant
+	this.rms_time_constant_ms = _rms_time_constantmin_ms;
+	this.rms_max_count        = (0.001*this.rms_time_constant_ms*this.srate)|0;
+	this.rms_overlap_pct      = _rms_overlap_pct;
+
+	this.TP_DET0.ISPD_ITU_Init(this.srate); 
+	this.TP_DET1.ISPD_ITU_Init(this.srate);
+	this.TP_DET2.ISPD_ITU_Init(this.srate);
+	this.TP_DET3.ISPD_ITU_Init(this.srate);
+	this.TP_DET4.ISPD_ITU_Init(this.srate);
+	this.TP_DET5.ISPD_ITU_Init(this.srate);
+
+	this.AM_Reset();
+
+/*
+	// RMS ShortTerm
+	memset(this.rms_buffer , 0, this.rms_max_count);
+  
+	this.rms_bufIdx       = 0;
+	this.rms_bufOK        = 0;
+	this.rms_BlockReady   = 0;
+	this.rms_update_timer = 0;
+  
+	this.rms_sum            = 0;
+	this.rms_prev_val       = 0;
+	this.rms_final_val      = 0;
+	this.rms_final_val_min  = 0;
+	this.rms_final_val_max  = 0;
+
+	this.rms_final_val_min_db   = -144;
+	this.rms_final_val_max_db   = -144;
+	this.rms_final_val_db       = -144;
+  
+	// RMS Integrated
+	this.rms_int_sum       = 0;  
+	this.rms_int_count     = 0;
+	this.rmsi_final_val    = 0;
+	this.rmsi_final_val_db = -144;
+
+  	// Peak
+	this.peak_final_val 		= 0;  
+	this.peak_final_val_db 		= -144;
+	this.peak_final_val_max 	= 0;  
+	this.peak_final_val_max_db 	= -144;
+*/
+);
+
+function AM_Set_RMSWindow(_rms_time_constantcurr_ms)
+(
+  (_rms_time_constantcurr_ms != this.rms_time_constant_ms) ?
+  (
+    (_rms_time_constantcurr_ms >= this.rms_time_constantmin_ms && _rms_time_constantcurr_ms <= this.rms_time_constantmax_ms) ?
+    (
+      // Set working params to current time constant
+      this.rms_time_constant_ms = _rms_time_constantcurr_ms;
+      this.rms_max_count        = (0.001*this.rms_time_constant_ms*this.srate)|0;
+      this.AM_Reset();
+    );
+  );
+);
+
+// Process
+function AM_Process(_in0, _in1, _tp_on)
+local(rms_ampL,rms_ampR,rms_amp2L,rms_amp2R)
+(
+	(_tp_on) ?
+	(
+		this.TP_DET0.ISPD_ITU_Process(_in0);
+		this.TP_DET1.ISPD_ITU_Process(_in1);
+	);
+
+	this.peak_final_val = max(abs(_in0), abs(_in1));
+	this.peak_final_val_max = max(this.peak_final_val_max, this.peak_final_val);
+
+	rms_ampL = abs(_in0);
+	rms_ampR = abs(_in1);
+
+	rms_amp2L = rms_ampL*rms_ampL;
+	rms_amp2R = rms_ampR*rms_ampR;
+    
+	this.rms_sum  += (rms_amp2L + rms_amp2R)/2.0;
+	this.rms_prev_val = this.rms_buffer [this.rms_bufIdx];
+	this.rms_buffer [this.rms_bufIdx] = (rms_amp2L + rms_amp2R)/2.0;
+
+	this.rms_int_sum += (rms_amp2L + rms_amp2R)/2.0;  
+	this.rms_int_count += 1;
+    
+    this.rms_bufIdx += 1;
+    this.rms_update_timer += 1;
+    
+    (this.rms_bufIdx == this.rms_max_count) ? 
+    (
+      this.rms_bufIdx = 0;
+      (this.rms_bufOK == 0) ? 
+      (
+        // Pre Set Min/Max values
+        this.rms_final_val_min = this.rms_final_val_max = this.rms_sum/this.rms_max_count;
+        this.rms_bufOK = 1;
+      );
+    );
+    
+    this.rms_BlockReady   = 0;
+
+    (this.rms_bufOK == 1) ? 
+    (
+      this.rms_sum  -= this.rms_prev_val;
+      (this.rms_sum < 0.0) ? this.rms_sum = 0.0;
+
+      // Overlap
+      (this.rms_update_timer > (this.rms_max_count*(1-this.rms_overlap_pct))) ?
+      (
+         this.rms_update_timer = 0;
+         this.rms_final_val        = this.rms_sum/this.rms_max_count;
+         this.rms_final_val_min    = min(this.rms_final_val_min, this.rms_final_val);
+         this.rms_final_val_max    = max(this.rms_final_val_max, this.rms_final_val);
+        
+       this.rms_BlockReady   = 1;
+      );
+      
+      this.rmsi_final_val    = this.rms_int_sum/this.rms_int_count;
+    );
+    
+    this.rms_BlockReady;
+);
+
+function AM_IsBlockReady()
+(
+ 	this.rms_BlockReady;
+);
+
+function AM_IsValueReady()
+(
+	this.rms_bufOK;
+);
+
+function AM_GetRMSSTVal()
+(
+	this.rms_final_val;
+);
+
+function AM_GetRMSSTVal_db()
+(
+	this.rms_final_val_db = dfloor(MSAMPLE2DBFS(sqrt(this.rms_final_val)),1) + 3;
+);
+
+function AM_GetRMSSTMinVal_db()
+(
+	this.rms_final_val_min_db = dfloor(MSAMPLE2DBFS(sqrt(this.rms_final_val_min)),1) + 3;
+);
+
+function AM_GetRMSSTMaxVal_db()
+(
+	this.rms_final_val_max_db = dfloor(MSAMPLE2DBFS(sqrt(this.rms_final_val_max)),1) + 3;
+);
+
+function AM_GetRMSSTValI_db()
+(
+	MSAMPLE2DBFS(sqrt(this.rms_sum/this.rms_max_count)) + 3;
+);
+
+function AM_GetRMSIVal_db()
+(
+	this.rmsi_final_val_db = dfloor(MSAMPLE2DBFS(sqrt(this.rmsi_final_val)),1) + 3;
+);
+
+function AM_GetRMSIVal()
+(
+	this.rmsi_final_val;
+);
+
+function AM_GetRMSIValI()
+(
+	this.rms_int_sum/this.rms_int_count;
+);
+
+function AM_GetPeakVal()
+(
+	this.peak_final_val;
+);
+
+function AM_GetPeakVal_db()
+(
+	this.peak_final_val_db = dfloor(MSAMPLE2DBFS(this.peak_final_val),1);
+);
+
+function AM_GetPeakValMax()
+(
+	this.peak_final_val_max;
+);
+
+function AM_GetPeakValMax_db()
+(
+	this.peak_final_val_max_db = dfloor(MSAMPLE2DBFS(this.peak_final_val_max),1);
+);
+
+function AM_GetTruePeakVal()
+(
+	//this.TP_DET.TPDetAM_GetValMax_db();
+	max(this.TP_DET0.ISPD_ITU_Get_TruePeakVal(), this.TP_DET1.ISPD_ITU_Get_TruePeakVal());
+);
+
+function AM_GetTruePeakValMax_db()
+(
+	//this.TP_DET.TPDetAM_GetValMax_db();
+	max(this.TP_DET0.ISPD_ITU_Get_TruePeakValMax_db(), this.TP_DET1.ISPD_ITU_Get_TruePeakValMax_db());
+);
+
+function AM_GetCrestVal_db()
+(
+	dfloor(MSAMPLE2DBFS(this.peak_final_val_max) - MSAMPLE2DBFS(sqrt(this.rmsi_final_val)) - 3,0);
+);
+
+///////////////////////////////////////////////////////////////
+// 6 CH RMS Measurement
+
+function AMMC6_Reset()
+(
+	memset(this.rms_buffer , 0, this.rms_max_count);
+  
+	this.rms_bufIdx       = 0;
+	this.rms_bufOK        = 0;
+	this.rms_BlockReady   = 0;
+	this.rms_update_timer = 0;
+	  
+	this.rms_sum            = 0;
+	this.rms_prev_val       = 0;
+	this.rms_final_val      = 0;
+	this.rms_final_val_min  = 0;
+	this.rms_final_val_max  = 0;
+
+	this.rms_final_val_db       = -144;
+	this.rms_final_val_min_db   = -144;
+	this.rms_final_val_max_db   = -144;
+  
+	this.rms_int_sum       = 0;  
+	this.rms_int_count     = 0;
+	this.rmsi_final_val    = 0;
+	this.rmsi_final_val_db = -144;
+
+	this.peak_final_val 		= 0;  
+	this.peak_final_val_db 		= -144;
+	this.peak_final_val_max 	= 0;  
+	this.peak_final_val_max_db	= -144;
+  
+	// TruePeak
+	//this.TP_DET.TPDetAM_Reset();
+
+	this.TP_DET0.ISPD_ITU_Reset();
+	this.TP_DET1.ISPD_ITU_Reset();
+	this.TP_DET2.ISPD_ITU_Reset();
+	this.TP_DET3.ISPD_ITU_Reset();
+	this.TP_DET4.ISPD_ITU_Reset();
+	this.TP_DET5.ISPD_ITU_Reset();
+
+);
+
+// Audio Measurement Class
+function AMMC6_Init(_rms_time_constantmin_ms, _rms_time_constantmax_ms, _rms_overlap_pct, _srate)
+(
+  // Set buffer to max time constant
+	this.srate = _srate;
+	this.rms_time_constantmin_ms = _rms_time_constantmin_ms;
+	this.rms_time_constantmax_ms = _rms_time_constantmax_ms;
+	this.rms_maxmax_count        = (0.001*this.rms_time_constantmax_ms*this.srate)|0;
+	this.rms_buffer              = MM.MemMgr_Alloc(this.rms_maxmax_count);
+
+	// Set working params to current time constant
+	this.rms_time_constant_ms = _rms_time_constantmin_ms;
+	this.rms_max_count        = (0.001*this.rms_time_constant_ms*this.srate)|0;
+	this.rms_overlap_pct      = _rms_overlap_pct;
+
+	this.TP_DET0.ISPD_ITU_Init(this.srate); 
+	this.TP_DET1.ISPD_ITU_Init(this.srate);
+	this.TP_DET2.ISPD_ITU_Init(this.srate);
+	this.TP_DET3.ISPD_ITU_Init(this.srate);
+	this.TP_DET4.ISPD_ITU_Init(this.srate);
+	this.TP_DET5.ISPD_ITU_Init(this.srate);
+
+	this.channel_config = 0;
+	this.db_rms_offset = 0;
+	this.db_peak_offset = 0;
+	this.db_kmeter_offset = 0;
+
+	this.AMMC6_Reset();
+);
+
+function AMMC6_Set_RMSWindow(_rms_time_constantcurr_ms)
+(
+  (_rms_time_constantcurr_ms != this.rms_time_constant_ms) ?
+  (
+    (_rms_time_constantcurr_ms >= this.rms_time_constantmin_ms && _rms_time_constantcurr_ms <= this.rms_time_constantmax_ms) ?
+    (
+      // Set working params to current time constant
+      this.rms_time_constant_ms = _rms_time_constantcurr_ms;
+      this.rms_max_count        = (0.001*this.rms_time_constant_ms*this.srate)|0;
+      this.AMMC6_Reset();
+    );
+  );
+);
+
+function AMMC6_Set_ChannelConfig(_channel_config)
+(
+	this.channel_config = _channel_config;
+	this.AMMC6_Reset();
+);
+
+function AMMC6_Set_MeterMode(_mode)
+(
+	this.db_rms_offset = 0;
+	this.db_peak_offset = 0;
+	this.db_kmeter_offset = 0;
+	(_mode == 0) ?
+	(
+		this.db_rms_offset = 0;
+		this.db_peak_offset = 0;
+		this.db_kmeter_offset = 0;
+	):
+	(_mode == 1) ?
+	(
+		this.db_rms_offset = 3;
+		this.db_peak_offset = 0;
+		this.db_kmeter_offset = 0;
+	);
+);
+
+
+// Process
+function AMMC6_Process(_in0, _in1, _in2, _in3, _in4, _in5, _tp_on)
+local(rms_amp2)
+(
+	// TruePeak
+	(_tp_on) ?
+	(
+		(this.channel_config == 0 || this.channel_config == 1 || this.channel_config == 3 || this.channel_config == 4) ? 
+			this.TP_DET0.ISPD_ITU_Process(_in0);
+		(this.channel_config == 0 || this.channel_config == 2 || this.channel_config == 3 || this.channel_config == 4) ? 
+			this.TP_DET1.ISPD_ITU_Process(_in1);
+		(this.channel_config == 3 || this.channel_config == 4) ? 
+			this.TP_DET2.ISPD_ITU_Process(_in2);
+		(this.channel_config == 3 || this.channel_config == 4) ? 
+			this.TP_DET3.ISPD_ITU_Process(_in3);
+		(this.channel_config == 4) ? 
+			this.TP_DET4.ISPD_ITU_Process(_in4);
+		(this.channel_config == 4) ? 
+			this.TP_DET5.ISPD_ITU_Process(_in5);
+	);
+
+	// Peak
+	this.peak_final_val = 0;
+	(this.channel_config == 0 || this.channel_config == 1 || this.channel_config == 3 || this.channel_config == 4) ? 
+		this.peak_final_val = max(this.peak_final_val, abs(_in0));
+	(this.channel_config == 0 || this.channel_config == 2 || this.channel_config == 3 || this.channel_config == 4) ? 
+		this.peak_final_val = max(this.peak_final_val, abs(_in1));
+	(this.channel_config == 3 || this.channel_config == 4) ? 
+		this.peak_final_val = max(this.peak_final_val, abs(_in2));
+	(this.channel_config == 3 || this.channel_config == 4) ? 
+		this.peak_final_val = max(this.peak_final_val, abs(_in3));
+	(this.channel_config == 4) ? 
+		this.peak_final_val = max(this.peak_final_val, abs(_in4));
+	(this.channel_config == 4) ? 
+		this.peak_final_val = max(this.peak_final_val, abs(_in5));
+	
+	// Max peak
+	this.peak_final_val_max = max(this.peak_final_val_max, this.peak_final_val);
+
+	rms_amp2 = 0;
+	(this.channel_config == 0 || this.channel_config == 1 || this.channel_config == 3 || this.channel_config == 4) ? 
+		rms_amp2 += abs(_in0)*abs(_in0);
+	(this.channel_config == 0 || this.channel_config == 2 || this.channel_config == 3 || this.channel_config == 4) ? 
+		rms_amp2 += abs(_in1)*abs(_in1);
+	(this.channel_config == 3 || this.channel_config == 4) ? 
+		rms_amp2 += abs(_in2)*abs(_in2);
+	(this.channel_config == 3 || this.channel_config == 4) ? 
+		rms_amp2 += abs(_in3)*abs(_in3);
+	(this.channel_config == 4) ? 
+		rms_amp2 += abs(_in4)*abs(_in4);
+	(this.channel_config == 4) ? 
+		rms_amp2 += abs(_in5)*abs(_in5);
+
+//    	rms_amp2 = abs(_in0)*abs(_in0) + abs(_in1)*abs(_in1) + abs(_in2)*abs(_in2) + abs(_in3)*abs(_in3) + abs(_in4)*abs(_in4) + abs(_in5)*abs(_in5);
+    
+	this.rms_sum  += rms_amp2;
+	this.rms_prev_val = this.rms_buffer [this.rms_bufIdx];
+	this.rms_buffer [this.rms_bufIdx] = rms_amp2;
+
+	this.rms_int_sum += rms_amp2;  
+	this.rms_int_count += 1;
+    
+    this.rms_bufIdx += 1;
+    this.rms_update_timer += 1;
+    
+    (this.rms_bufIdx == this.rms_max_count) ? 
+    (
+      this.rms_bufIdx = 0;
+      (this.rms_bufOK == 0) ? 
+      (
+        // Pre Set Min/Max values
+        this.rms_final_val_min = this.rms_final_val_max = this.rms_sum/this.rms_max_count;
+        this.rms_bufOK = 1;
+      );
+    );
+    
+    this.rms_BlockReady   = 0;
+
+    (this.rms_bufOK == 1) ? 
+    (
+      this.rms_sum  -= this.rms_prev_val;
+      (this.rms_sum < 0.0) ? this.rms_sum = 0.0;
+
+      // Overlap
+      (this.rms_update_timer > (this.rms_max_count*(1-this.rms_overlap_pct))) ?
+      (
+         this.rms_update_timer = 0;
+         this.rms_final_val        = this.rms_sum/this.rms_max_count;
+         this.rms_final_val_min    = min(this.rms_final_val_min, this.rms_final_val);
+         this.rms_final_val_max    = max(this.rms_final_val_max, this.rms_final_val);
+        
+       this.rms_BlockReady   = 1;
+      );
+      
+      this.rmsi_final_val    = this.rms_int_sum/this.rms_int_count;
+    );
+    
+    this.rms_BlockReady;
+);
+
+function AMMC6_IsBlockReady()
+(
+ 	this.rms_BlockReady;
+);
+
+function AMMC6_IsValueReady()
+(
+	this.rms_bufOK;
+);
+
+function AMMC6_GetRMSSTVal()
+(
+	this.rms_final_val;
+);
+
+function AMMC6_GetRMSSTVal_db()
+(
+	this.rms_final_val_db = dfloor(MSAMPLE2DBFS(sqrt(this.rms_final_val)),1) + this.db_rms_offset+this.db_kmeter_offset;
+);
+
+function AMMC6_GetRMSSTMinVal_db()
+(
+	this.rms_final_val_min_db = dfloor(MSAMPLE2DBFS(sqrt(this.rms_final_val_min)),1) + this.db_rms_offset+this.db_kmeter_offset;
+);
+
+function AMMC6_GetRMSSTMaxVal_db()
+(
+	this.rms_final_val_max_db = dfloor(MSAMPLE2DBFS(sqrt(this.rms_final_val_max)),1) + this.db_rms_offset+this.db_kmeter_offset;
+);
+
+function AMMC6_GetRMSSTValI_db()
+(
+	MSAMPLE2DBFS(sqrt(this.rms_sum/this.rms_max_count)) + this.db_rms_offset+this.db_kmeter_offset;
+);
+
+function AMMC6_GetRMSIVal_db()
+(
+	this.rmsi_final_val_db = dfloor(MSAMPLE2DBFS(sqrt(this.rmsi_final_val)),1) + this.db_rms_offset+this.db_kmeter_offset;
+);
+
+function AMMC6_GetRMSIVal()
+(
+	this.rmsi_final_val;
+);
+
+function AMMC6_GetRMSIValI()
+(
+	this.rms_int_sum/this.rms_int_count;
+);
+
+function AMMC6_GetPeakVal()
+(
+	this.peak_final_val;
+);
+
+function AMMC6_GetPeakVal_db()
+(
+	this.peak_final_val_db = dfloor(MSAMPLE2DBFS(this.peak_final_val),1);
+	this.peak_final_val_db+this.db_peak_offset;
+);
+
+function AMMC6_GetPeakValMax()
+(
+	this.peak_final_val_max;
+);
+
+function AMMC6_GetPeakValMax_db()
+(
+	this.peak_final_val_max_db = dfloor(MSAMPLE2DBFS(this.peak_final_val_max),1)+this.db_peak_offset;
+);
+
+function AMMC6_GetTruePeakVal()
+local(ret)
+(
+	ret = this.TP_DET0.ISPD_ITU_Get_TruePeakVal();
+	ret = max(ret, this.TP_DET1.ISPD_ITU_Get_TruePeakVal());
+	ret = max(ret, this.TP_DET2.ISPD_ITU_Get_TruePeakVal());
+	ret = max(ret, this.TP_DET3.ISPD_ITU_Get_TruePeakVal());
+	ret = max(ret, this.TP_DET4.ISPD_ITU_Get_TruePeakVal());
+	ret = max(ret, this.TP_DET5.ISPD_ITU_Get_TruePeakVal());
+
+	ret;
+);
+
+function AMMC6_GetTruePeakValMax_db()
+local(ret)
+(
+	ret = this.TP_DET0.ISPD_ITU_Get_TruePeakValMax_db();
+	ret = max(ret, this.TP_DET1.ISPD_ITU_Get_TruePeakValMax_db());
+	ret = max(ret, this.TP_DET2.ISPD_ITU_Get_TruePeakValMax_db());
+	ret = max(ret, this.TP_DET3.ISPD_ITU_Get_TruePeakValMax_db());
+	ret = max(ret, this.TP_DET4.ISPD_ITU_Get_TruePeakValMax_db());
+	ret = max(ret, this.TP_DET5.ISPD_ITU_Get_TruePeakValMax_db());
+	
+	(ret+this.db_peak_offset);
+);
+
+function AMMC6_GetCrestVal_db()
+(
+	this.AMMC6_GetPeakValMax_db() + this.db_kmeter_offset - this.AMMC6_GetRMSIVal_db();
+);
+
+
+// EO@init

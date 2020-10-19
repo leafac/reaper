@@ -1,0 +1,465 @@
+// Copyright 2015, tb-software.com
+// All rights reserved.
+//
+//Redistribution and use in source and binary forms, with or without modification, are permitted 
+//provided that the following conditions are met:
+//
+//Redistributions of source code must retain the above copyright notice, this list of conditions 
+//and the following disclaimer. 
+//
+//Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+//and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+//
+//The name of tb-software.com may not be used to endorse or 
+//promote products derived from this software without specific prior written permission. 
+//
+//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+//IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+//FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS 
+//BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+//(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+//PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
+//STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+//THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// Provide Automatic Gainstaging for e.g. Nebula Audio VST
+// 
+// by TBProAudio 2016 (www.tb-software.com)
+
+// Usage:
+// 0. Place AutoGainStage_src before plugins you want to gainstage and AutoGainStage_cntrl after 
+// 1. Setup Drive Reference Level, e.g. -18 for most Nebula custom programs (0dBVU = -18dBfs)
+// 2. Set Drive Control to "Analyse" in order to determine necessary gain to reach reference 
+//    level and then let the DAW play ...
+// 3. Set Drive Control to "Drive" in order to "drive" the following plugins with measured add. gain, 
+//    the add. gain will be compensated in the control plugin
+
+// Changelog
+// 1.0: first public release
+// 1.1: Rearrangement of includes
+// 1.2: Automatic PDC Calculation
+// 1.3: LinkID Bug Fixed, PDC extended t0 128k Smp
+// 1.4: LinkID as DropDown Menue, removed libs
+// 1.5: Small Fixes
+// 1.6: Removed TP measurement
+// 1.7: Small fixes
+// 1.8: Small fixes, R5 compatibility
+// 1.9: VU Metering Added
+
+desc:AutoGainStage Control JSFX V1.9 (TBProAudio)
+options:gmem=TBProAudio_AutoGain
+
+import memorymanager.jsfx-inc
+import tbproaudio_common.jsfx-inc
+import audiomeasurement.jsfx-inc
+
+slider1:0<0,31,1{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31}>LinkID
+slider2:0<0,1,1{Off,On}>Bypass
+slider3:300<10,1000,1>RMS window (ms)
+slider4:0<0,1,1{RMS,VU}>Meter Mode
+
+slider9:0<0,1,1{Drive,Analyse}>Drive Control
+slider10:0<-30,30,0.1>Drive (dB/VU)
+slider11:-18<-30,0,0.1>Drive Reference Level (dB/VU)
+
+slider20:-144<-144,6,0.1>*Source Avg (dB/VU)
+slider21:-144<-144,6,0.1>*Source Max (dB/VU)
+
+slider30:-144<-144,6,0.1>*Dest Avg (dB/VU)
+slider31:-144<-144,6,0.1>*Dest Max (dB/VU)
+
+slider50:0<0,128000,1>PDC (Smp)
+
+@init
+function RMSQ_Reset()
+(
+  this.runave   = 0.0;
+  this.runmax   = 0.0;
+);
+
+function RMSQ_Init(_rmswindow_s, _srate, _mode)
+(
+  this.rmscoef = pow(10,-1.0/(_rmswindow_s * _srate));
+  this.Amp2DBFS = 6.0/log(2.0);
+  this.mode = _mode;
+  
+  this.RMSQ_Reset();
+);
+
+function RMSQ_Process(_in0, _in1)
+(
+  this.maxspl = (_in0 * _in0 + _in1 * _in1);
+  (this.mode == 0)?
+    this.maxspl /= 2.0;  
+  this.runave = this.maxspl + this.rmscoef * (this.runave - this.maxspl);
+  this.runmax = max(this.runmax, this.runave);
+);
+
+function RMSQ_Get()
+(
+  sqrt(this.runave);
+);
+
+function RMSQ_Get_dB()
+(
+  dround(log(this.RMSQ_Get())*this.Amp2DBFS,1);
+);
+
+function RMSQ_GetMax()
+(
+  sqrt(this.runmax);
+);
+
+function RMSQ_GetMax_dB()
+(
+  dround(log(this.RMSQ_GetMax())*this.Amp2DBFS,1);
+);
+
+function VUMeter_Reset()
+(
+  this.runave = 0.0;
+  this.runmax   = 0.0;
+);
+
+function VUMeter_Init(_rmswindow_s, _srate)
+(
+  this.rmscoef = pow(10,-1.0/(_rmswindow_s * _srate));
+  this.vu_factor = $PI/4;
+  this.Amp2DBFS = 6.0/log(2.0);
+  this.VUMeter_Reset();
+);
+
+function VUMeter_Process(_in0, _in1)
+(
+  this.maxspl = abs(_in0) + abs(_in1);
+  this.runave = this.maxspl + this.rmscoef * (this.runave - this.maxspl);
+  this.runmax = max(this.runmax, this.runave);
+);
+
+function VUMeter_Get()
+(
+  this.runave*this.vu_factor;
+);
+
+function VUMeter_Get_dB()
+(
+  dround(log(this.VUMeter_Get())*this.Amp2DBFS,1);
+);
+
+function VUMeter_GetMax()
+(
+  this.runmax*this.vu_factor;
+);
+
+function VUMeter_GetMax_dB()
+(
+  dround(log(this.VUMeter_GetMax())*this.Amp2DBFS,1);
+);
+
+MM.MemMgr_Init(0);
+
+// @funtions
+
+// EO@funtions
+DEF_MAX_PDC = 128000;
+
+DelayLine.DL_Init(0, DEF_MAX_PDC, 0);
+
+AudioMeasure_Source0.RMSQ_Init(300/1000, srate, 1);
+AudioMeasure_SourceGainStage0.RMSQ_Init(300/1000, srate, 1);
+
+AudioMeasure_Source1.VUMeter_Init(300/1000, srate);
+AudioMeasure_SourceGainStage1.VUMeter_Init(300/1000, srate);
+
+// Auto PDC Calculation
+PDCM.PDC_Measure_Init(DEF_MAX_PDC+1000, 1, srate);
+PDCM.PDC_Measure_Stop();
+
+// Gain
+post_gain_val = 1.0;
+pre_gain_val = 1.0;
+
+// EO@init
+
+@slider
+  // LinkID
+  linkid   = slider1;
+  
+  AudioMeasure_Source0.RMSQ_Init(slider3/1000, srate, 1);
+  AudioMeasure_SourceGainStage0.RMSQ_Init(slider3/1000, srate, 1);  
+
+  AudioMeasure_Source1.VUMeter_Init(slider3/1000, srate);
+  AudioMeasure_SourceGainStage1.VUMeter_Init(slider3/1000, srate);  
+  
+  // PreGain
+  (slider9 == 0) ?
+  (
+    pre_gain_val = 10^(slider10/20);
+    post_gain_val = 1/pre_gain_val;  
+  );
+  
+  // Delay
+  slider50 = slider50|0;
+  DelayLine.DL_SetDelay(slider50);
+
+// EO@slider 
+
+@block
+  // Link with src plugin
+  PDCM.PDC_Measure_Block(linkid);
+  pre_gain_pos  = linkid*(2*samplesblock + 2) + 0;
+  globalmem_pos = linkid*(2*samplesblock + 2) + 2;
+
+  (play_state == 1) ? 
+  ( 
+    
+    (slider4 == 0) ?
+    (
+      slider20 = AudioMeasure_Source0.RMSQ_Get_dB();
+      slider21 = AudioMeasure_Source0.RMSQ_GetMax_dB();
+  
+      slider30 = AudioMeasure_SourceGainStage0.RMSQ_Get_dB();
+      slider31 = AudioMeasure_SourceGainStage0.RMSQ_GetMax_dB();
+    ):
+    (slider4 == 1) ?
+    (
+      slider20 = AudioMeasure_Source1.VUMeter_Get_dB()+18;
+      slider21 = AudioMeasure_Source1.VUMeter_GetMax_dB()+18;
+  
+      slider30 = AudioMeasure_SourceGainStage1.VUMeter_Get_dB()+18;
+      slider31 = AudioMeasure_SourceGainStage1.VUMeter_GetMax_dB()+18;
+    );    
+    
+    (slider9 == 1) ? 
+    (
+      slider10 = slider11- slider21;
+    );
+  );
+
+// EO@block
+ 
+@sample
+  // PDC Calc
+  PDCM.PDC_Measure_Process1(spl0, spl1);
+  (PDCM.PDC_Measure_DataReady()) ?
+  (
+    slider50 = PDCM.PDC_Measure_GetPDC()|0;
+    DelayLine.DL_SetDelay(slider50);
+  );
+
+  // Get source samples and put it to delay line
+  gmem[pre_gain_pos] = pre_gain_val;
+  DelayLine.DL_Put(gmem[globalmem_pos], gmem[globalmem_pos+1]);
+  DelayLine.DL_Get();
+  
+  (play_state == 1) ? 
+  (
+    in0 = DelayLine.out0;
+    in1 = DelayLine.out1;
+
+    (slider4 == 0)?
+    (
+      AudioMeasure_Source0.RMSQ_Process(in0, in1);
+    ):
+    (slider4 == 1)?
+    (
+      AudioMeasure_Source1.VUMeter_Process(in0, in1);
+    );
+    
+    in0 = DelayLine.out0*pre_gain_val;
+    in1 = DelayLine.out1*pre_gain_val;
+    
+    (slider4 == 0)?
+    (
+      AudioMeasure_SourceGainStage0.RMSQ_Process(in0, in1);
+    ):
+    (slider4 == 1)?
+    (  
+      AudioMeasure_SourceGainStage1.VUMeter_Process(in0, in1);
+    );  
+  );  
+  
+  (slider2 == 1) ?
+  (
+    spl0 = DelayLine.out0;
+    spl1 = DelayLine.out1;
+  ):
+  ( 
+    spl0 *= post_gain_val;  
+    spl1 *= post_gain_val;  
+  );
+
+  // next source sample 
+  globalmem_pos+=2;
+  
+// EO@sample
+
+@gfx 400 30
+
+  button_posY = 10;
+  
+  // Reset Button
+  gfx_r = gfx_g = gfx_b = gfx_a = 1.0;
+
+  resetx = 4*gfx_w/4-gfx_texth*7;
+  
+  gfx_x = resetx;
+  gfx_y = button_posY;
+  gfx_drawstr("RESET");
+  resetx2 = gfx_x;
+    
+  doreset = 0;
+  mouse_cap ?
+  (
+    mouse_x >= resetx  && 
+    mouse_x <= resetx2 && 
+    mouse_y >= button_posY && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doreset = 1;
+  );
+   
+  doreset ?
+  (
+    DelayLine.DL_Reset();
+    AudioMeasure_Source0.RMSQ_Reset();
+    AudioMeasure_SourceGainStage0.RMSQ_Reset();
+
+    AudioMeasure_Source1.VUMeter_Reset();
+    AudioMeasure_SourceGainStage1.VUMeter_Reset();
+
+    (slider4 == 0) ?
+    (
+      slider20 = AudioMeasure_Source0.RMSQ_Get_dB();
+      slider21 = AudioMeasure_Source0.RMSQ_GetMax_dB();
+  
+      slider30 = AudioMeasure_SourceGainStage0.RMSQ_Get_dB();
+      slider31 = AudioMeasure_SourceGainStage0.RMSQ_GetMax_dB();
+    ):
+    (slider4 == 1) ?
+    (
+      slider20 = AudioMeasure_Source1.VUMeter_Get_dB()+18;
+      slider21 = AudioMeasure_Source1.VUMeter_GetMax_dB()+18;
+  
+      slider30 = AudioMeasure_SourceGainStage1.VUMeter_Get_dB()+18;
+      slider31 = AudioMeasure_SourceGainStage1.VUMeter_GetMax_dB()+18;
+    );
+  );
+  
+  // AB Button
+  gfx_r = gfx_g = gfx_b = gfx_a = 1.0;
+  (slider2 == 1) ? 
+  (
+    gfx_r = 0.0;
+    gfx_g = 1.0;
+    gfx_b = 0.0;
+  );
+  SwitchAB_x1 = 0*gfx_w/3 + 20;
+  
+  gfx_x = SwitchAB_x1;
+  gfx_y = button_posY;
+  gfx_drawstr("BYPASS");
+  SwitchAB_x2 = gfx_x;
+  
+  doSwitchAB = 0;
+  (SwitchAB_cntr > 0) ? SwitchAB_cntr -= 1;
+  (mouse_cap && (SwitchAB_cntr == 0)) ?
+  (
+    mouse_x >= SwitchAB_x1 && 
+    mouse_x <= SwitchAB_x2 && 
+    mouse_y >= button_posY  && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doSwitchAB = 1;
+  );
+  
+  doSwitchAB ?
+  (
+    doSwitchAB = 0;
+    (slider2 == 0) ? slider2 = 1: slider2 = 0;
+    SwitchAB_cntr = 15;
+  );
+  
+  // Drive Control
+  SwitchDC_x1 = 1*gfx_w/3;
+  gfx_x = SwitchDC_x1;
+  gfx_y = button_posY;
+
+  (slider9 == 0) ? 
+  (
+    gfx_r = 0.0;
+    gfx_g = 0.0;
+    gfx_b = 1.0;
+    gfx_drawstr("DRIVE");
+  );
+  (slider9 == 1) ? 
+  (
+    gfx_r = 0.0;
+    gfx_g = 1.0;
+    gfx_b = 0.0;
+    gfx_drawstr("ANALYSE");
+  );
+  
+  SwitchDC_x2 = gfx_x;
+  
+  doSwitchDC = 0;
+  (SwitchDC_cntr > 0) ? SwitchDC_cntr -= 1;
+  (mouse_cap && (SwitchDC_cntr == 0)) ?
+  (
+    mouse_x >= SwitchDC_x1 && 
+    mouse_x <= SwitchDC_x2 && 
+    mouse_y >= button_posY  && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doSwitchDC = 1;
+  );
+  
+  doSwitchDC ?
+  (
+    doSwitchDC = 0;
+    (slider9 == 0) ? slider9 = 1: slider9 = 0;
+    SwitchDC_cntr = 15;
+  );
+  
+// Sync Button
+  Sync_x1 = 2*gfx_w/3-20;;
+  gfx_x = Sync_x1;
+  gfx_y = button_posY;
+  (PDCM.PDC_Measure_IsRunning()) ?
+  (
+    gfx_r = 1.0;
+    gfx_g = 0.0;
+    gfx_b = 0.0;
+    gfx_drawstr("SYNCING");
+  ):
+  (
+    gfx_r = 0.0;
+    gfx_g = 1.0;
+    gfx_b = 0.0;
+    gfx_drawstr("SYNC PDC");
+  );
+  Sync_x2 = gfx_x;
+  
+  doSync = 0;
+  (Sync_cntr > 0) ? Sync_cntr -= 1;
+  (mouse_cap && (Sync_cntr == 0)) ?
+  (
+    mouse_x >= Sync_x1 && 
+    mouse_x <= Sync_x2 && 
+    mouse_y >= button_posY  && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doSync = 1;
+  );
+  
+  doSync ?
+  (
+    doSync = 0;
+    Sync_cntr = 15;
+    (PDCM.PDC_Measure_IsRunning()) ? 
+    (
+      PDCM.PDC_Measure_StopStart();
+    ):
+    (
+      PDCM.PDC_Measure_Start();
+    );
+    slider2 = PDCM.PDC_Measure_GetPDC();
+  );    
+    
+// EOL@GFX

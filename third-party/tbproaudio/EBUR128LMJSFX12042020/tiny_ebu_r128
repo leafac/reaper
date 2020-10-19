@@ -1,0 +1,135 @@
+// Copyright 2019 , tb-software.com
+// All rights reserved.
+//
+//Redistribution and use in source and binary forms, with or without modification, are permitted 
+//provided that the following conditions are met:
+//
+//Redistributions of source code must retain the above copyright notice, this list of conditions 
+//and the following disclaimer. 
+//
+//Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+//and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+//
+//The name of tb-software.com may not be used to endorse or 
+//promote products derived from this software without specific prior written permission. 
+//
+//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+//IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+//FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS 
+//BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+//(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+//PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
+//STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+//THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// Tiny EBU R128
+// by TBProAudio 2019 (www.tb-software.com)
+
+// Changelog
+// 1.0: First public release
+// 1.1: slider removed
+// 1.2: GFX w/h adjusted, CPU reduced
+// 1.3: Reset removed, reset by clicking on the big number, small CPU opti
+// 1.4: Fixed DAW sync while recording
+
+desc:Tiny EBU R128 1.4 (TBProAudio)
+options: no_meter
+import memorymanager.jsfx-inc
+import ebur128.jsfx-inc
+
+////////////////////////////////////////
+
+slider9:0<0,3,{2.0 Stereo,4.0 Surround,4.1 Surround,5.1 Surround}>-Channel Config
+slider10:0<0,4,{ML,SL,IL,RLA,TP Max}>Mode
+
+@init
+
+ // Init our small mem manager, just to manage our own memory and align to foreign code/mem
+  MM.MemMgr_Init(0);
+
+  // EO@function
+
+  EBUR128LM.LM_EBUR128_Init_MultiCh(srate);
+  timer.EBU_Time_Init_Ms(100, srate);
+ 
+  ext_noinit = 1;
+  last_play_state = play_state;
+
+  no_meters = 0;
+// EO@init
+
+@slider
+  channelconfig = slider9;
+  metermode = slider10;
+// EO@slider 
+
+@block
+// EO@block
+ 
+@sample
+  
+  (play_state) ?
+  (
+    (last_play_state != play_state) ?
+      EBUR128LM.LM_EBUR128_Reset_MultiCh();
+  );
+  last_play_state = play_state;
+
+  play_state_tmp = (play_state == 1) || (play_state == 5);
+  EBUR128LM.LM_EBUR128_Process_MultiCh(spl0, spl1, spl2, spl3, spl4, spl5, channelconfig, (metermode == 4),(metermode == 3) && (play_state_tmp == 1));
+  
+// EO@sample  
+
+@gfx 400 240
+
+  ALIGN_CENTER_HORIZONTAL  = 1<<0;
+  ALIGN_JUSTIFY_RIGHT      = 1<<1;
+  ALIGN_CENTER_VERTICAL    = 1<<2;
+  ALIGN_JUSTIFY_BOTTOM     = 1<<3;
+  IGNORE_RIGHT_BOTTOM      = 1<<8;
+
+  gfx_texth_tmp = gfx_texth;
+
+  ////////////////////////////////////////////////////
+  gfx_r = 1.0;
+  gfx_g = 1.0;
+  gfx_b = 0.0;
+  gfx_a = 1.0;
+
+  text_size = gfx_w / 4 * 1.5;
+  gfx_setfont(2, "Arial", text_size, 'b');
+  gfx_measurestr("A", text_w, text_h);
+
+  val = 0.0;
+  mode_str = "ML";
+  label_str = "LUFS";
+
+  (metermode == 0) ? (val = EBUR128LM.LM_EBUR128_GetML_LUFS();  mode_str = "ML";    label_str = "LUFS";);
+  (metermode == 1) ? (val = EBUR128LM.LM_EBUR128_GetSL_LUFS();  mode_str = "SL";    label_str = "LUFS";);
+  (metermode == 2) ? (val = EBUR128LM.LM_EBUR128_GetIL_LUFS();  mode_str = "IL";    label_str = "LUFS";);
+  (metermode == 3) ? (val = EBUR128LM.LM_EBUR128_GetLRA_LU();   mode_str = "LRA";   label_str = "LU";);
+  (metermode == 4) ? (val = EBUR128LM.LM_EBUR128_GetTP_dbFS();  mode_str = "TP M."; label_str = "dBTP";);
+
+  gfx_x = 10;
+  gfx_y = 10;
+  sprintf(str, "%.1f", val); gfx_drawstr(str, ALIGN_JUSTIFY_RIGHT, gfx_w-10, gfx_h);
+ 
+  gfx_x = 10;
+  gfx_y += text_h;
+  sprintf(str, "%s", mode_str); gfx_drawstr(str, ALIGN_JUSTIFY_RIGHT, gfx_w-10, gfx_h);
+
+  gfx_x = 10;
+  gfx_y += text_h;
+  sprintf(str, "%s", label_str); gfx_drawstr(str, ALIGN_JUSTIFY_RIGHT, gfx_w-10, gfx_h);
+
+  // Reset
+  doreset = 0;
+  mouse_cap ?
+  (
+    doreset = 1; 
+  );
+  doreset ?
+  (
+      EBUR128LM.LM_EBUR128_Reset_MultiCh();
+  );
+// EOL@GFX

@@ -1,0 +1,701 @@
+// Copyright 2015, tb-software.com
+// All rights reserved.
+//
+//Redistribution and use in source and binary forms, with or without modification, are permitted 
+//provided that the following conditions are met:
+//
+//Redistributions of source code must retain the above copyright notice, this list of conditions 
+//and the following disclaimer. 
+//
+//Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+//and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+//
+//The name of tb-software.com may not be used to endorse or 
+//promote products derived from this software without specific prior written permission. 
+//
+//THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+//IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+//FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS 
+//BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+//(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+//PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
+//STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+//THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Processes audio data from AB Master source plugin
+// by TBProAudio 2018 (www.tb-software.com)
+
+// Changelog
+// see AB Level Matching Control
+
+desc:AB Level Matching Control JSFX V3.3 Lite (TBProAudio)
+options:gmem=TBProAudio_AB_LM
+
+import memorymanager.jsfx-inc
+import tbproaudio_common.jsfx-inc
+import ebur128.jsfx-inc
+import audiomeasurement.jsfx-inc
+import gfx.jsfx-inc
+
+slider1:0<0,127,1>LinkID
+//slider1:0<0,31,1{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31}>LinkID
+slider2:1<0,1,1{Pre FX,Post FX}>Monitor
+slider3:300<10,10000,1>RMS window ms
+slider4:0<0,1,1{None,ITU-R BS.1770-2}>-PreFilter
+slider5:0<0,2,1{Off,On}>Delta Monitor
+
+slider10:0<-15,15,0.1>Source Gain dB
+
+slider20:-144<-144,6,0.1>Source RMS Avg dB
+slider21:-144<-144,6,0.1>-Source RMS Max dB
+slider22:-144<-144,6,0.1>-Source Peak dB
+slider23:0<0,30,0.1>-Source Crest dB
+slider24:-144<-144,6,0.1>-Source True Peak dB
+
+slider30:-144<-144,6,0.1>Final RMS Avg dB
+slider31:-144<-144,6,0.1>-Final RMS Max dB
+slider32:-144<-144,6,0.1>-Final Peak dB
+slider33:0<0,30,0.1>-Final Crest dB
+slider34:-144<-144,6,0.1>-Final True Peak dB
+
+slider40:0<-15,15,0.1>-Diff RMS Avg dB
+slider41:1<0,2,1{Off,On,Bypass}>-Autogain RMS 
+slider42:0<-15,15,0.1>Post Gain dB
+//slider43:0<-15,15,0.1>Post Gain Limit dB
+slider44:0<0,1,1{Off,On}>-Autogain Peak 
+slider45:0<0,1,1{Off,On}>-Hold 
+
+slider50:0<0,128000,1>PDC (Smp)
+slider51:0<0,1,1{Off,On}>-TP Measurement
+
+slider60:0<0,1,1{Off,On}>Reset 
+
+@init
+function Update()
+local(slider40_t, slider42_t)
+(
+  (play_state == 1) ? 
+  ( 
+    //slider20 = AudioMeasure_Source.AM_GetRMSIVal_db();
+    //slider20 = AudioMeasure_Source.AM_GetRMSSTVal_db();
+    slider20 = dround(AudioMeasure_Source.AM_GetRMSSTValI_db(),1);
+    slider21 = AudioMeasure_Source.AM_GetRMSSTMaxVal_db();
+    slider22 = AudioMeasure_Source.AM_GetPeakValMax_db();
+    slider23 = AudioMeasure_Source.AM_GetCrestVal_db();
+    slider24 = AudioMeasure_Source.AM_GetTruePeakValMax_db();
+  
+    //slider30 = AudioMeasure_Final.AM_GetRMSIVal_db();
+    slider30 = dround(AudioMeasure_Final.AM_GetRMSSTValI_db(),1);
+    slider31 = AudioMeasure_Final.AM_GetRMSSTMaxVal_db();
+    slider32 = AudioMeasure_Final.AM_GetPeakValMax_db();
+    slider33 = AudioMeasure_Final.AM_GetCrestVal_db();
+    slider34 = AudioMeasure_Final.AM_GetTruePeakValMax_db();
+
+    // Post Gain Stage
+    slider40_t = AudioMeasure_Final.AM_GetRMSSTValI_db() - AudioMeasure_Source.AM_GetRMSSTValI_db();
+    slider40 = dround(slider40_t, 1);
+    //SGain.SParam_Set(slider40);   
+    (slider41 == 1) ?
+    (
+    
+      (PG_CountDown.CountDown_Check()) ?
+      (
+        slider42_t = -slider40_t;
+        slider42 = dround(slider42_t, 1);
+        //slider42 = -dround(SGain.SParam_Get(),1);
+        
+        post_gain = 10^(slider42_t/20);
+      );
+
+    );
+        
+    // Peak Gain Stage
+    (slider32 > 0.0) ? post_gain_peak = 10^(-slider32/20);
+  );
+
+  (play_state == 0) ? 
+  (
+    (slider41 == 1) ?
+    (
+      slider40 = 0;
+      slider42 = 0;
+      post_gain = 10^(slider42/20);
+    );
+    
+    (slider44 == 1) ?
+    (
+      post_gain_peak = 1.0;
+    );
+  );
+
+);
+
+// ext_noinit = 1;
+
+MM.MemMgr_Init(0);
+
+// EO@funtions
+
+DEF_MAX_PDC = 128000;
+
+DelayLine.DL_Init(0, DEF_MAX_PDC, 0);
+
+AudioMeasure_Source.AM_Init(10, 10000, 0.75, srate);
+AudioMeasure_Final.AM_Init(10, 10000, 0.75, srate);
+
+ITU_Filter_HS.ITU_Filter_Init(1681.97445095553190,1.25872093023256,1.0,1.58486470113086,0.70717523695542, srate);
+ITU_Filter_LC.ITU_Filter_Init(38.13547087611304,0.0,0.0,1.00499489871469,0.50032703732504, srate);
+
+ITU_Filter_HS_s.ITU_Filter_Init(1681.97445095553190,1.25872093023256,1.0,1.58486470113086,0.70717523695542, srate);
+ITU_Filter_LC_s.ITU_Filter_Init(38.13547087611304,0.0,0.0,1.00499489871469,0.50032703732504, srate);  
+
+LDGFX.LDGFX_Init();
+
+// Auto PDC Calculation
+PDCM.PDC_Measure_Init(DEF_MAX_PDC+1000, 1, srate);
+PDCM.PDC_Measure_Stop();
+
+// Postgain
+count_down_ms = 2000;
+PG_CountDown.CountDown_Init_ms(count_down_ms, srate);
+
+post_gain = 1.0;
+
+// Smooth Gain
+SGain.SParam_Init_smp(20,0);
+
+// GainLimit
+postgain_limit = slider43;
+
+// EO@init
+
+@slider
+  // LinkID
+  linkid   = slider1;
+  
+  // Measurement
+  AudioMeasure_Source.AM_Set_RMSWindow(slider3);
+  AudioMeasure_Final.AM_Set_RMSWindow(slider3);
+  
+  // PreGain
+  pre_gain_val = 10^(slider10/20);    // Source Gain
+  
+  // Delay
+  DelayLine.DL_SetDelay(slider50);
+  
+  // Post Gain
+  //PG_CountDown.CountDown_Init_ms(count_down_ms, srate);
+  PG_CountDown.CountDown_Init_Smp(slider50);
+  post_gain = 10^(slider42/20);  
+    
+  // Post Peak Gain
+  post_gain_peak = 1.0;
+  
+  // GainLimit
+  postgain_limit = slider43;  
+  
+  // Reset
+  (slider60)?
+  (
+    slider60 = 0;
+    
+    DelayLine.DL_Reset();
+    AudioMeasure_Source.AM_Reset();
+    AudioMeasure_Final.AM_Reset();
+    
+    ITU_Filter_HS.ITU_Filter_Reset();
+    ITU_Filter_LC.ITU_Filter_Reset();
+
+    ITU_Filter_HS_s.ITU_Filter_Reset();
+    ITU_Filter_LC_s.ITU_Filter_Reset();
+    
+    slider20 = dround(AudioMeasure_Source.AM_GetRMSSTValI_db(),1);
+    slider21 = AudioMeasure_Source.AM_GetRMSSTMaxVal_db();
+    slider22 = AudioMeasure_Source.AM_GetPeakValMax_db();
+    slider23 = AudioMeasure_Source.AM_GetCrestVal_db();
+    slider24 = AudioMeasure_Source.AM_GetTruePeakValMax_db();
+  
+    slider30 = dround(AudioMeasure_Final.AM_GetRMSSTValI_db(),1);
+    slider31 = AudioMeasure_Final.AM_GetRMSSTMaxVal_db();
+    slider32 = AudioMeasure_Final.AM_GetPeakValMax_db();
+    slider33 = AudioMeasure_Final.AM_GetCrestVal_db();
+    slider34 = AudioMeasure_Final.AM_GetTruePeakValMax_db();
+        
+    slider40 = 0;
+    slider42 = 0;
+    post_gain_peak = 1.0;
+    
+    LDGFX.LDGFX_Reset();
+    
+    PG_CountDown.CountDown_Reset();
+    
+  );  
+  
+// EO@slider 
+
+@block
+  // Link with src plugin
+  PDCM.PDC_Measure_Block(linkid);
+  
+  pre_gain_pos  = linkid*(2*samplesblock + 2) + 0;
+  globalmem_pos = linkid*(2*samplesblock + 2) + 2;
+  
+// EO@block
+ 
+@sample
+
+  Update();
+
+  // Post Gain Delay
+  (play_state == 1) ?
+    PG_CountDown.CountDown_Count();
+
+  // PDC Calc
+  PDCM.PDC_Measure_Process1(spl0, spl1);
+  (PDCM.PDC_Measure_DataReady()) ?
+  (
+    slider50 = PDCM.PDC_Measure_GetPDC()|0;
+    DelayLine.DL_SetDelay(slider50);
+    PG_CountDown.CountDown_Init_ms(count_down_ms, srate);
+  );
+
+  // Get source samples and put it to delay line
+  gmem[pre_gain_pos] = pre_gain_val;
+  DelayLine.DL_Put(gmem[globalmem_pos], gmem[globalmem_pos+1]);
+  DelayLine.DL_Get();
+  
+  (play_state == 1 && slider45 == 0) ? 
+  (
+  
+    in0 = DelayLine.out0;
+    in1 = DelayLine.out1;
+
+    (slider4 == 1) ? 
+    (
+      ITU_Filter_HS_s.ITU_Filter_Process(in0, in1);
+      in0 = ITU_Filter_HS_s.out0;
+      in1 = ITU_Filter_HS_s.out1;
+      ITU_Filter_LC_s.ITU_Filter_Process(in0, in1);    
+      in0 = ITU_Filter_LC_s.out0;
+      in1 = ITU_Filter_LC_s.out1;  
+    );
+      
+    AudioMeasure_Source.AM_Process(in0, in1,slider51); 
+    
+    in0 = spl0;
+    in1 = spl1;
+    
+    (slider4 == 1) ? 
+    (
+      ITU_Filter_HS.ITU_Filter_Process(in0, in1);
+      in0 = ITU_Filter_HS.out0;
+      in1 = ITU_Filter_HS.out1;
+      ITU_Filter_LC.ITU_Filter_Process(in0, in1);    
+      in0 = ITU_Filter_LC.out0;
+      in1 = ITU_Filter_LC.out1;  
+    );
+    
+    AudioMeasure_Final.AM_Process(in0, in1,slider51);
+        
+    LDGFX.LDGFX_Process(DelayLine.out0,DelayLine.out1, spl0, spl1,
+                      AudioMeasure_Source.AM_GetPeakValMax_db(), AudioMeasure_Final.AM_GetPeakValMax_db(), 
+                      AudioMeasure_Source.AM_GetRMSSTValI_db(), AudioMeasure_Final.AM_GetRMSSTValI_db(), 
+                      AudioMeasure_Source.AM_GetRMSSTValI_db(),  AudioMeasure_Final.AM_GetRMSSTValI_db());
+  );
+      
+
+  (slider5 == 0) ?    // No Delta Monitoring
+  (
+    (slider2 == 0) ?  // Pre
+    (
+  
+        spl0 = DelayLine.out0;
+        spl1 = DelayLine.out1;
+    ):                
+    (slider2 == 1) ?  // Post
+    ( 
+      (slider41 == 2) ? 
+      (
+        spl0 = spl0;
+        spl1 = spl1;
+      ) : 
+      (
+        spl0 *= post_gain;  
+        spl1 *= post_gain;  
+      );
+      
+      (slider44 == 0) ? 
+      (
+        spl0 = spl0;
+        spl1 = spl1;
+      ) : 
+      (
+        spl0 *= post_gain_peak;  
+        spl1 *= post_gain_peak;  
+      )
+    );
+  ):
+  (slider5 == 1) ?  // Delta Monitoring
+  (
+    spl0 = DelayLine.out0-spl0;
+    spl1 = DelayLine.out1-spl1;
+  );
+    
+  // next source sample 
+  globalmem_pos+=2;
+  
+// EO@sample
+
+@gfx 500 30
+
+  // Draw Loudness Distribution
+//  LDGFX.LDGFX_GFX(gfx_w, gfx_h*0.9, 20);
+
+  button_posY = 10;
+  
+  // Reset Button
+  gfx_r = gfx_g = gfx_b = gfx_a = 1.0;
+
+  resetx = gfx_w-gfx_texth*7;
+  
+  gfx_x = resetx;
+  gfx_y = button_posY;
+  gfx_drawchar($'R');
+  gfx_drawchar($'E');
+  gfx_drawchar($'S');
+  gfx_drawchar($'E');
+  gfx_drawchar($'T');
+  resetx2 = gfx_x;
+    
+  doreset = 0;
+  mouse_cap ?
+  (
+    mouse_x >= resetx && 
+    mouse_x <= resetx2 && 
+    mouse_y >= button_posY && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doreset = 1;
+  );
+   
+  doreset ?
+  (
+    DelayLine.DL_Reset();
+    AudioMeasure_Source.AM_Reset();
+    AudioMeasure_Final.AM_Reset();
+    
+    ITU_Filter_HS.ITU_Filter_Reset();
+    ITU_Filter_LC.ITU_Filter_Reset();
+
+    ITU_Filter_HS_s.ITU_Filter_Reset();
+    ITU_Filter_LC_s.ITU_Filter_Reset();
+    
+    slider20 = dround(AudioMeasure_Source.AM_GetRMSSTValI_db(),1);
+    slider21 = AudioMeasure_Source.AM_GetRMSSTMaxVal_db();
+    slider22 = AudioMeasure_Source.AM_GetPeakValMax_db();
+    slider23 = AudioMeasure_Source.AM_GetCrestVal_db();
+    slider24 = AudioMeasure_Source.AM_GetTruePeakValMax_db();
+  
+    slider30 = dround(AudioMeasure_Final.AM_GetRMSSTValI_db(),1);
+    slider31 = AudioMeasure_Final.AM_GetRMSSTMaxVal_db();
+    slider32 = AudioMeasure_Final.AM_GetPeakValMax_db();
+    slider33 = AudioMeasure_Final.AM_GetCrestVal_db();
+    slider34 = AudioMeasure_Final.AM_GetTruePeakValMax_db();
+        
+    slider40 = 0;
+    slider42 = 0;
+    post_gain_peak = 1.0;
+    
+    LDGFX.LDGFX_Reset();
+    
+    PG_CountDown.CountDown_Reset();
+  );
+
+  // AB Button
+  SwitchAB_x1 = 20;
+  
+  gfx_x = SwitchAB_x1;
+  gfx_y = button_posY;
+
+  (slider2 == 0) ? 
+  (
+    gfx_r = 0.3;
+    gfx_g = 0.3;
+    gfx_b = 0.3;
+    gfx_drawchar($'P');
+    gfx_drawchar($'R');
+    gfx_drawchar($'E');
+    gfx_drawchar($' ');
+    gfx_drawchar($'F');  
+    gfx_drawchar($'X');  
+  ):
+  (slider2 == 1) ?
+  (
+    gfx_r = 0.0; 
+    gfx_g = 1.0;
+    gfx_b = 0.0;
+    gfx_drawchar($'P');
+    gfx_drawchar($'O');
+    gfx_drawchar($'S');
+    gfx_drawchar($'T');
+    gfx_drawchar($' ');
+    gfx_drawchar($'F');  
+    gfx_drawchar($'X');  
+  );
+  
+  SwitchAB_x2 = gfx_x;
+  
+  doSwitchAB = 0;
+  (SwitchAB_cntr > 0) ? SwitchAB_cntr -= 1;
+  (mouse_cap && (SwitchAB_cntr == 0)) ?
+  (
+    mouse_x >= SwitchAB_x1 && 
+    mouse_x <= SwitchAB_x2 && 
+    mouse_y >= button_posY  && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doSwitchAB = 1;
+  );
+  
+  doSwitchAB ?
+  (
+    doSwitchAB = 0;
+   (slider2 == 0) ?
+   ( 
+      slider2 = 1;
+   ):
+   (slider2 == 1) ?
+   ( 
+     slider2 = 0;
+   );
+   SwitchAB_cntr = 5;
+  );
+    
+  // Delta Button
+  gfx_a = 1.0;
+  gfx_r = 0.3;
+  gfx_g = 0.3;
+  gfx_b = 0.3;
+  (slider5 == 1) ? 
+  (
+    gfx_r = 0.0;
+    gfx_g = 0.2;
+    gfx_b = 0.8;
+  );
+  
+  SwitchDelta_x1 = gfx_w/5-10;
+  
+  gfx_x = SwitchDelta_x1;
+  gfx_y = button_posY;
+  gfx_drawchar($'D');
+  gfx_drawchar($'e');
+  gfx_drawchar($'l');
+  gfx_drawchar($'t');
+  gfx_drawchar($'a');
+  SwitchDelta_x2 = gfx_x;
+  
+  doSwitchDelta = 0;
+  (SwitchDelta_cntr > 0) ? SwitchDelta_cntr -= 1;
+  (mouse_cap && (SwitchDelta_cntr == 0)) ?
+  (
+    mouse_x >= SwitchDelta_x1 && 
+    mouse_x <= SwitchDelta_x2 && 
+    mouse_y >= button_posY  && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doSwitchDelta = 1;
+  );
+  
+  doSwitchDelta ?
+  (
+    doSwitchDelta = 0;
+    (slider5 == 0) ? slider5 = 1: slider5 = 0;
+    SwitchDelta_cntr = 5;
+  );
+  
+    // Autogain Button
+  gfx_r = gfx_g = gfx_b = gfx_a = 1.0;
+  SwitchAutogain_x1 = 2*gfx_w/5-50;
+  gfx_x = SwitchAutogain_x1;
+  gfx_y = button_posY;
+
+  (slider41 == 0) ? 
+  (
+    gfx_r = 1.0;
+    gfx_g = 1.0;
+    gfx_b = 1.0;
+    gfx_drawchar($'A');
+    gfx_drawchar($'U');
+    gfx_drawchar($'T');
+    gfx_drawchar($'O');
+    gfx_drawchar($'G');
+    gfx_drawchar($'A');
+    gfx_drawchar($'I');
+    gfx_drawchar($'N');
+    gfx_drawchar($' ');
+    gfx_drawchar($'O');
+    gfx_drawchar($'F');
+    gfx_drawchar($'F');
+  );
+  (slider41 == 1) ? 
+  (
+    gfx_r = 0.0;
+    gfx_g = 1.0;
+    gfx_b = 0.0;
+    gfx_drawchar($'A');
+    gfx_drawchar($'U');
+    gfx_drawchar($'T');
+    gfx_drawchar($'O');
+    gfx_drawchar($'G');
+    gfx_drawchar($'A');
+    gfx_drawchar($'I');
+    gfx_drawchar($'N');
+    gfx_drawchar($' ');
+    gfx_drawchar($'O');
+    gfx_drawchar($'N');
+  );  
+  (slider41 == 2) ? 
+  (
+    gfx_r = 0.0;
+    gfx_g = 0.0;
+    gfx_b = 1.0;
+    gfx_drawchar($'A');
+    gfx_drawchar($'U');
+    gfx_drawchar($'T');
+    gfx_drawchar($'O');
+    gfx_drawchar($'G');
+    gfx_drawchar($'A');
+    gfx_drawchar($'I');
+    gfx_drawchar($'N');
+    gfx_drawchar($' ');
+    gfx_drawchar($'B');
+    gfx_drawchar($'Y');
+    gfx_drawchar($'P');
+    gfx_drawchar($'A');
+    gfx_drawchar($'S');
+    gfx_drawchar($'S');
+  );  
+  SwitchAutogain_x2 = gfx_x;
+  
+  doSwitchAutogain = 0;
+  (SwitchAutogain_cntr > 0) ? SwitchAutogain_cntr -= 1;
+  (mouse_cap && (SwitchAutogain_cntr == 0)) ?
+  (
+    mouse_x >= SwitchAutogain_x1 && 
+    mouse_x <= SwitchAutogain_x2 && 
+    mouse_y >= button_posY  && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doSwitchAutogain = 1;
+  );
+  
+  doSwitchAutogain ?
+  (
+    doSwitchAutogain = 0;
+    (mouse_cap == 1) ?
+    (
+      slider41 += 1;
+      (slider41 > 2) ? slider41 = 0;
+    );
+    (mouse_cap == 2) ?
+    (
+      slider41 -= 1;
+      (slider41 < 0) ? slider41 = 2;
+    );
+    SwitchAutogain_cntr = 5;
+  );
+
+     
+// Prefilter Button
+  gfx_r = 1.0;
+  gfx_g = 1.0;
+  gfx_b = 1.0;
+  (slider4 == 1) ?
+  (
+    gfx_r = 0.0;
+    gfx_g = 1.0;
+    gfx_b = 0.0;
+  );
+  PF_x1 = 3*gfx_w/5-30;
+  
+  gfx_x = PF_x1;
+  gfx_y = button_posY;
+  gfx_drawchar($'P');
+  gfx_drawchar($'R');
+  gfx_drawchar($'E');
+  gfx_drawchar($'F');
+  gfx_drawchar($'I');
+  gfx_drawchar($'L');
+  gfx_drawchar($'T');
+  gfx_drawchar($'E');
+  gfx_drawchar($'R');
+  
+  PF_x2 = gfx_x;
+  
+  doPF = 0;
+  (PF_cntr > 0) ? PF_cntr -= 1;
+  (mouse_cap && (PF_cntr == 0)) ?
+  (
+    mouse_x >= PF_x1 && 
+    mouse_x <= PF_x2 && 
+    mouse_y >= button_posY  && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doPF = 1;
+  );
+  
+  doPF ?
+  (
+    doPF = 0;
+    PF_cntr = 5;
+    (slider4 == 0) ? slider4 = 1: slider4 = 0;
+  );        
+  
+// Sync Button
+  gfx_r = 0.0;
+  gfx_g = 1.0;
+  gfx_b = 0.0;
+  (PDCM.PDC_Measure_IsRunning()) ?
+  (
+    gfx_r = 1.0;
+    gfx_g = 0.0;
+    gfx_b = 0.0;
+  );
+  Sync_x1 = 4*gfx_w/5-35;
+  
+  gfx_x = Sync_x1;
+  gfx_y = button_posY;
+  gfx_drawchar($'S');
+  gfx_drawchar($'Y');
+  gfx_drawchar($'N');
+  gfx_drawchar($'C');
+  gfx_drawchar($' ');
+  gfx_drawchar($'P');
+  gfx_drawchar($'D');
+  gfx_drawchar($'C');
+  
+  Sync_x2 = gfx_x;
+  
+  doSync = 0;
+  (Sync_cntr > 0) ? Sync_cntr -= 1;
+  (mouse_cap && (Sync_cntr == 0)) ?
+  (
+    mouse_x >= Sync_x1 && 
+    mouse_x <= Sync_x2 && 
+    mouse_y >= button_posY  && 
+    mouse_y <= button_posY+gfx_texth 
+    ? doSync = 1;
+  );
+  
+  doSync ?
+  (
+    doSync = 0;
+    Sync_cntr = 5;
+    (PDCM.PDC_Measure_IsRunning()) ? 
+    (
+      PDCM.PDC_Measure_StopStart();
+    ):
+    (
+      PDCM.PDC_Measure_Start();
+    );
+    slider50 = PDCM.PDC_Measure_GetPDC();
+  );   
+ 
+        
+// EOL@GFX
+

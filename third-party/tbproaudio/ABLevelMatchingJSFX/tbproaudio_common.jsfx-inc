@@ -1,0 +1,1693 @@
+// Copyright 2014, tb-software.com
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without modification, are permitted 
+// provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this list of conditions 
+// and the following disclaimer. 
+//
+// Redistributions in binary form must reproduce the above copyright notice, this list of conditions 
+// and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+//
+// The name of tb-software.com may not be used to endorse or 
+// promote products derived from this software without specific prior written permission. 
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR 
+// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
+// FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS 
+// BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
+// THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// common classes for audio processing
+// by TB Pro Audio 2014 (www.tb-software.com)
+//
+// Classes & Functions
+// 
+// dround: rounds numbers to certain precision
+// dfloor: cuts numbers to certain precision
+// mlog: log to very natrual number
+// dbound: bound a value to min/max
+
+// MSAMPLE2DBFS: smp to dbfs conversion
+// MDBFS2SAMPLE: dbfs to smp conversion
+// class DL: simple stereo delay line
+// class DL1: simple signle signal delay line
+// class Time: counts continously and gives signal if max is reached
+// class CountDown: counts down and gives signal if max is reached
+// SParam: universal parameter smoother
+// class PDC_Measure: Measures Smp delay accross certain plugins chain, needs src and ctrl scripts and uses gmem
+// class RBJ: Standard RBJ Filter LP/HP/PEQ/HS/LS/AP including types which balance near nyquist
+// class ITU: ITU filter
+// class MB: Multiband Splitter Class, 2-5 Bands, 24-96dB/Oct, Linkwitz-Riley, Butterworth
+// class MF_RBJ: RBJ filter with slope
+
+//
+// Change log
+// V1.0: First public release
+// V1.1: Optimized PDC calculation, Stop PDC Calc after 3 tries
+// V1.2: Bugfix in PDC measurement, CountDown class
+// V1.3: Bugfix in DelayLine class
+// V1.4: RBJ Filter class, set only when parameter changed
+// V1.5: MultiBand Splitter Class, Linkwitz-Riley Filters for clean crossover, and optimized Butterworth q settings
+// V1.6: Some small fixes
+// V1.7: New and better parameter smooth
+// V1.8: Small fixes
+
+
+desc: TBProAudio Common Audio Classes V1.8
+
+@init
+//////////////////////////////////////////////////////////////////////////////
+function m_log(_val, _base)
+(
+  log10(_val)/log10(_base);
+);
+
+
+function dbound(x, _min, _max)
+local (scale)
+(
+  max(_min, min(x, _max));
+); 
+
+function dround(x, n)
+local (scale)
+(
+  scale = pow(10.0, n);
+  floor(x * scale + 0.5) / scale;
+); 
+
+// Helper functions
+function dfloor(x, n)
+local (scale)
+(
+  scale = pow(10.0, n);
+  floor(x * scale) / scale;
+); 
+
+function MSAMPLE2DBFS(x)
+local (ret)
+(
+//  (x == 0) ? ret = -144 : ret = log(x) * 8.6858896380650365530225783783321; 
+  (abs(x) > 0.00000007) ? ret = log(abs(x)) * 8.6858896380650365530225783783321 : ret = -144; 
+  ret;
+);
+
+function MDBFS2SAMPLE(x)
+local (ret)
+(
+//  (x == 0) ? ret = 1 : ret = exp(x * 0.11512925464970228420089957273422);
+  (x < -144) ? ret = 0.0 : ret = exp(x * 0.11512925464970228420089957273422);
+  ret;
+);
+
+function MSAMPLE2DBFS_n(_in)
+(
+  log(abs(_in)) * 8.6858896380650365530225783783321;   
+);
+
+function MDBFS2SAMPLE_n(_in)
+(
+  exp(_in * 0.11512925464970228420089957273422);   
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// Stereo Delay
+function DL_Reset()
+(
+  memset(this.delaybuf, 0, this.delaylen_max * 4);
+);
+
+function DL_Init(minnr_samples, maxnr_samples, nr_samples)
+(
+  this.delaylen_min = (minnr_samples)|0;
+  this.delaylen_max = (maxnr_samples)|0;
+
+  this.delaybuf = MM.MemMgr_Alloc(this.delaylen_max * 4);
+
+  this.delaybuf_bpos = this.delaybuf;
+  this.delaylen      = nr_samples|0;
+  this.delaybuf_size = this.delaylen * 4;
+
+  this.delaybuf_bpos_min = this.delaybuf;
+  this.delaybuf_bpos_max = this.delaybuf+this.delaybuf_size;
+
+  this.DL_Reset();
+);
+
+function DL_SetDelay(nr_samples)
+(
+  nr_samples = nr_samples|0;
+
+  (nr_samples != this.delaylen) ?
+  (
+    (nr_samples >= this.delaylen_min && nr_samples <= this.delaylen_max) ?
+    (
+      this.delaybuf_bpos = this.delaybuf;
+      this.delaylen     = (nr_samples)|0;
+      this.delaybuf_size = this.delaylen * 4;
+      
+      this.delaybuf_bpos_min = this.delaybuf;
+      this.delaybuf_bpos_max = this.delaybuf+this.delaybuf_size;
+
+      this.DL_Reset();      
+    );
+  );
+);
+
+function DL_Put(_s0, _s1)
+(
+  this.delaybuf_bpos[0]=_s0;
+  this.delaybuf_bpos[1]=_s1;
+);
+
+function DL_Get()
+(
+  this.delaybuf_rdpos = this.delaybuf_bpos-this.delaylen*2;
+  (this.delaybuf_rdpos < this.delaybuf_bpos_min) ? 
+  (
+    this.delaybuf_rdpos += this.delaybuf_size;
+  );
+
+  this.delaybuf_bpos+=2;
+  
+  (this.delaybuf_bpos >= this.delaybuf_bpos_max) ? 
+  this.delaybuf_bpos=this.delaybuf_bpos_min;
+
+  this.out0 = this.delaybuf_rdpos[0];
+  this.out1 = this.delaybuf_rdpos[1];
+);
+
+function DL_GetSize()
+(
+  this.delaylen;
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// Single Delay
+function DL1_Reset()
+(
+  memset(this.mBuffer, 0, this.delaylen_max);
+  // tt = 0;
+);
+
+function DL1_Init(maxnr_samples)
+(
+    this.delaylen_max = this.delaylen = maxnr_samples;
+    this.mBuffer = MM.MemMgr_Alloc(this.delaylen_max);
+    this.mWriteAddress = 0;
+
+    this.DL1_Reset();
+);
+
+function DL1_SetDelay(nr_samples)
+(
+  (nr_samples != this.delaylen ) ?
+  (
+    this.delaylen = min(this.delaylen_max, nr_samples);
+       (nr_samples > this.delaylen ) ?
+       (
+        (this.mWriteAddress >= this.delaylen) ? 
+          this.mWriteAddress = 0;
+        //this.DL1_Reset();
+     );
+  );
+);
+
+function DL1_Process(_in)
+local(out)
+(
+  (this.delaylen == 0) ?
+  (
+    out = _in;
+  ):
+  (
+    out = this.mBuffer[this.mWriteAddress];
+    this.mBuffer[this.mWriteAddress] = _in;
+  
+    this.mWriteAddress += 1;
+    // this.mWriteAddress %= this.delaylen;
+    (this.mWriteAddress >= this.delaylen) ? this.mWriteAddress = 0;
+  );
+  
+  out;
+);
+
+function DL1_GetSize()
+(
+    this.delaylen;
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// Timer
+function Time_Init_Ms(t_ms,_srate)
+(
+  this.time_max = (0.001*t_ms*_srate)|0;
+  this.time_cnt = 0;
+);
+
+function Time_Init_Smp(t_s)
+(
+  this.time_max = t_s|0;
+  this.time_cnt = 0;
+);
+
+function Time_Reset()
+(
+  this.time_cnt = 0;
+);
+
+function Time_Count()
+local (ret)
+(
+  ret = 0;
+  this.time_cnt += 1;
+  (this.time_cnt >= this.time_max) ?
+  (
+    this.time_cnt = 0;
+    ret = 1;
+  );
+  ret;
+);
+
+function Time_Count1(_cnt)
+local (ret)
+(
+  ret = 0;
+  this.time_cnt += _cnt;
+  (this.time_cnt >= this.time_max) ?
+  (
+    this.time_cnt = 0;
+    ret = 1;
+  );
+  ret;
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// CountDown
+function CountDown_Init_Ms(t_ms, _srate)
+(
+  this.time_max = (0.001*t_ms*_srate)|0;
+  this.time_cnt = 0;
+);
+
+function CountDown_Init_Smp(t_s)
+(
+  this.time_max = t_s|0;
+  this.time_cnt = 0;
+);
+
+function Count_GetMaxSmp()
+(
+  this.time_max;
+);
+
+function Count_GetSmp()
+(
+  this.time_cnt;
+);
+
+function CountDown_Reset()
+(
+  this.time_cnt = 0;
+);
+
+function CountDown_Count()
+local (ret)
+(
+  ret = 0;
+
+  (this.time_cnt == this.time_max) ?
+  (
+//    this.time_cnt = 0;
+    ret = 1;
+  ):
+  (
+    this.time_cnt += 1;
+  );
+  ret;
+);
+
+function CountDown_Check()
+local (ret)
+(
+  ret = 0;
+  (this.time_cnt == this.time_max) ?
+  (
+//    this.time_cnt = 0;
+    ret = 1;
+  );
+  ret;
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// Param Smoother
+function SParam_Reset(_init_val)
+(
+  this.runave   = _init_val;
+);
+
+function SParam_Init(_init_val, _min_step)
+(
+  this.SParam_Reset(_init_val);
+  this.min_step = _min_step;
+);
+
+function SParam_Set(_time_s, _srate)
+(
+  this.coef = pow(10,-1.0/(_time_s * _srate));
+);
+
+function SParam_Process(_in0)
+(
+  this.maxspl = _in0;
+  (abs(this.runave - this.maxspl) > this.min_step) ?
+  (
+    this.runave = this.maxspl + this.coef * (this.runave - this.maxspl);
+  ):
+  (
+    this.runave = this.maxspl; 
+  );
+  
+  this.runave;
+);
+
+function SParam_Get()
+(
+  this.runave;
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// PD calculation in order to provide sample exact PDC settings:
+// Idea: src plugin sends DIRAC through plugin chain and cntrl plugin 
+// measures the time from sending to receive the signal
+// ctrl plugin blocks output during measurement
+// signal should run freely from src and cntrl plugin 
+// Measurment: continously max signal compared to reference level, 
+// if reference level is reached delay can be calculated
+// After 1. timeout. reference level will be set close to reference level, 
+// next time reference level should be reached and measurement finished 
+
+function PDC_Measure_Init(timeout_smp, _gmem_control_pos, _srate)
+(
+  this.Timer.Time_Init_Smp(timeout_smp);  // Timeout, max delay
+  this.Timer1.Time_Init_Ms(1000, _srate);  // wait after measurement (avoid clicks)
+  this.Timer2.Time_Init_Smp(3);      // 3 shots
+
+  this.current_level_db = 0;
+
+  this.gmem_control_pos = _gmem_control_pos;
+
+  this.trigger_measure = 0;
+);
+
+function PDC_Measure_Start()
+(
+  this.sample_count = 0;
+  this.trigger_measure = 2;
+  this.m_pdc = 0;
+  this.current_level_db = 0;
+
+  this.is_running = 1;
+  this.latch = 0;
+
+  this.Timer.Time_Reset();
+  this.Timer1.Time_Reset();
+  this.Timer2.Time_Reset();
+
+  this.spl_avg_max = 0;
+);
+
+function PDC_Measure_Stop()
+(
+  this.trigger_measure = 0;
+  this.is_running = 0;
+);
+
+function PDC_Measure_StopStart()
+(
+//  this.trigger_measure = 0;
+  this.latch = 1;
+  this.is_running = 0;
+);
+
+function PDC_Measure_Block(_linkid)
+(
+  this.data2_pos     = _linkid*(2*samplesblock + 2) + this.gmem_control_pos;
+
+  (this.trigger_measure == 2) ? this.sample_count = 0;
+  gmem[this.data2_pos] = this.trigger_measure;
+
+  (this.is_running) ?
+  (
+    this.trigger_measure = 1;
+    ):
+  (
+    this.trigger_measure = 0;
+  );
+);
+
+function PDC_Measure_DataReady()
+(
+  this.latch;
+);
+
+function PDC_Measure_Process(_spl0, _spl1)
+local (spl_avg)
+(
+  (this.is_running) ?
+  (
+    spl_avg = (abs(_spl0) + abs(_spl1)) * 0.5;
+    this.spl_avg_max = max(this.spl_avg_max,spl_avg);
+    (spl_avg > MDBFS2SAMPLE(this.current_level_db)) ?
+    (
+      this.m_pdc = this.sample_count-samplesblock;
+      (this.m_pdc == 0) ? this.is_running = 0;
+      (this.m_pdc < 0) ? this.m_pdc = 0;
+      this.trigger_measure = 2;
+      this.Timer.Time_Reset();
+    );
+
+    (this.Timer.Time_Count()) ? 
+    (
+      (this.Timer2.Time_Count() == 0) ?
+      (
+        this.trigger_measure = 2;
+        this.current_level_db = MSAMPLE2DBFS(this.spl_avg_max) - 0.001;
+      ):
+      (
+        this.is_running = 0;
+      );
+    );
+
+    (this.m_pdc > 0) ? 
+    (  
+      this.is_running = 0;
+    );
+
+    this.sample_count += 1; 
+  );
+);
+
+function PDC_Measure_GetPDC()
+(
+  this.m_pdc;
+);
+
+function PDC_Measure_GetLevel_db()
+(
+  this.current_level_db;
+);
+
+function PDC_Measure_IsRunning()
+(
+  this.is_running;
+);
+
+function PDC_Measure_Process1(_spl0, _spl1)
+(
+  (this.PDC_Measure_IsRunning()) ? 
+  (
+    this.PDC_Measure_Process(_spl0, _spl1);    
+//    mute output
+    spl0 = 0;
+    spl1 = 0;
+    this.latch = 1;
+  ):
+  (
+    (this.latch) ? 
+    (
+//      this.PDC_Measure_Stop();
+      this.trigger_measure = 0;
+      (this.Timer1.Time_Count()) ?
+      (
+        this.latch = 0;
+      ):
+      (
+//         mute output
+        spl0 = 0;
+        spl1 = 0;
+      );
+    );
+  );
+);
+
+function PDC_Measure_Init_Src(_gmem_control_pos)
+(
+  this.gmem_control_pos = _gmem_control_pos;
+  this.trigger_measure = 0;
+);
+
+function PDC_Measure_Block_Src(_linkid)
+(
+  this.data2_pos     = _linkid*(2*samplesblock + 2) + this.gmem_control_pos;
+  this.trigger_measure = gmem[this.data2_pos];
+);
+
+function PDC_Measure_Process_Src()
+(
+  (this.trigger_measure == 1) ?
+  (
+    spl0 = 0;
+    spl1 = 0;
+  );
+
+  (this.trigger_measure == 2) ?
+  (
+    spl0 = 1;
+    spl1 = 1;
+    this.trigger_measure = 1;
+  );
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// RBJ Filter Class
+function RBJ_Init(_srate)
+(
+  this.BiQuadCoeffs = MM.MemMgr_Alloc(6);  
+  memset(this.BiQuadCoeffs,0,6);
+  this.x0nm1  = 0.0;
+  this.x0nm2  = 0.0;
+  this.x0n    = 0.0;
+  this.y0nm1  = 0.0;
+  this.y0nm2  = 0.0;
+  this.y0n    = 0.0;
+  this.srate = _srate;
+  this.RBJ_Os = 0;
+
+    this.denorm = 0.00000000000000001;
+    //this.denorm = 0.00000000000000000;
+);
+
+function RBJ_bwtoq(bw)
+  local(x)
+(
+  // q = 1/(2 * sinh(log(2) / 2 * bw))
+  x = exp(0.5*log(2) * bw);
+  1/(x - 1/x);
+);
+
+function RBJ_qtobw(q)
+  local(x)
+(
+  // bw = 2 * asinh(1/(2 * q)) / log(2)
+  x = 0.5 / q;
+  2/log(2) * log(x + sqrt(sqr(x) + 1));
+);
+
+
+function RBJ_Set_Ext(_ftype, _f, _g, _q)
+local(samplerate_hz,M_PI,A,omega,alpha,w0, b0,b1,b2,a0,a1,a2,test,tsin,tcos,delta,den,DW,F00,F01,F11,G00,G0_db,G01,G1,G11,GB_db,G_db,Ma,Mb,MC,MD,MF,num,TDw,TDw_sin,TDw_sin_corr,TG,TG0,TGB,Tw0,W2)
+(
+  samplerate_hz = this.srate;
+  M_PI = $pi;
+
+
+//  ((this.ftype != _ftype) || (this.f != _f) || (this.g != _g) || (this.q != _q)) ?
+  (
+
+    this.ftype = _ftype;
+    this.f = _f;
+    this.g = _g;
+    this.q = _q;
+
+    A = 0;
+    omega = 0;
+    alpha = 0;
+
+    this.RBJ_Os = 0;
+
+    w0 = 0;
+    b0 = b1 = b2 = a0 = a1 = a2 = 0;
+
+    omega  = w0 = (2.0 * M_PI * this.f) / samplerate_hz;
+    alpha  = sin(omega) / (2.0 * this.q);
+    
+    // peakingEQ
+    (this.ftype == 0) ? 
+    (
+      A  = pow(10.0,this.g/40.0);
+
+      b0 =   1.0 + alpha*A;
+      b1 =  -2.0 * cos(w0);
+      b2 =   1.0 - alpha*A;
+      a0 =   1.0 + alpha/A;
+      a1 =  -2.0 * cos(w0);
+      a2 =   1.0 - alpha/A;  
+    ) : 
+    // HPF aka LC
+    (this.ftype == 1) ? 
+    (
+      A  = sqrt( pow(10.0,(this.g/20.0) ));
+
+      b0 =  (1.0 + cos(w0))/2.0;
+      b1 = -(1.0 + cos(w0));
+      b2 =  (1.0 + cos(w0))/2.0;
+      a0 =   1.0 + alpha;
+      a1 =  -2.0 * cos(w0);
+      a2 =   1.0 - alpha;
+    ) :
+    // LPF ala HC 
+    (this.ftype == 2) ? 
+    (
+      A  = sqrt( pow(10.0,(this.g/20.0) ));
+
+      b0 =  (1.0 - cos(w0))/2.0;
+      b1 =   1.0 - cos(w0);
+      b2 =  (1.0 - cos(w0))/2.0;
+      a0 =   1.0 + alpha;
+      a1 =  -2.0 * cos(w0);
+      a2 =   1.0 - alpha;
+    ) :
+    // highShelf 
+    (this.ftype == 3) ? 
+    (
+      A    = pow(10.0,this.g/40.0);
+
+      // Cookbook formulae for audio EQ biquad filter coefficients, by Robert Bristow-Johnson 
+      b0 =      A*( (A+1.0) + (A-1.0)*cos(w0) + 2.0*sqrt(A)*alpha );
+      b1 = -2.0*A*( (A-1.0) + (A+1.0)*cos(w0)                      );
+      b2 =      A*( (A+1.0) + (A-1.0)*cos(w0) - 2.0*sqrt(A)*alpha );
+      a0 =          (A+1.0) - (A-1.0)*cos(w0) + 2.0*sqrt(A)*alpha;
+      a1 =    2.0*( (A-1.0) - (A+1.0)*cos(w0)                      );
+      a2 =          (A+1.0) - (A-1.0)*cos(w0) - 2.0*sqrt(A)*alpha;
+    ) : 
+    // lowShelf 
+    (this.ftype == 4) ? 
+    (
+      A    = pow(10.0,this.g/40.0);
+
+      // Cookbook formulae for audio EQ biquad filter coefficients, by Robert Bristow-Johnson 
+      b0 =      A*( (A+1.0) - (A-1.0)*cos(w0) + 2.0*sqrt(A)*alpha );
+      b1 =  2.0*A*( (A-1.0) - (A+1.0)*cos(w0)                      );
+      b2 =      A*( (A+1.0) - (A-1.0)*cos(w0) - 2.0*sqrt(A)*alpha );
+      a0 =          (A+1.0) + (A-1.0)*cos(w0) + 2.0*sqrt(A)*alpha;
+      a1 =   -2.0*( (A-1.0) + (A+1.0)*cos(w0)                      );
+      a2 =          (A+1.0) + (A-1.0)*cos(w0) - 2.0*sqrt(A)*alpha;
+    ) :
+    // BandPass CSG 
+    (this.ftype == 5) ? 
+    (
+     tsin = sin(w0);
+        tcos = cos(w0);
+
+        b0 = tsin/2.0;
+        b1 = 0.0;
+        b2 = -tsin/2;
+        a0 = 1.0+alpha;
+        a1 = -2.0*tcos;
+        a2 = 1.0-alpha;
+    ) :
+    // BandPass CZPG 
+    (this.ftype == 6) ? 
+    (
+      tsin = sin(w0);
+      tcos = cos(w0);
+
+      b0 = alpha;
+      b1 = 0.0;
+      b2 = -alpha;
+      a0 = 1.0+alpha;
+      a1 = -2.0*tcos;
+      a2 = 1.0-alpha;
+    ) :
+    // Notch 
+    (this.ftype == 7) ? 
+    (
+      tsin = sin(w0);
+      tcos = cos(w0);
+
+      b0 = 1.0;
+      b1 = -2.0*tcos;
+      b2 = 1.0;
+      a0 = 1.0+alpha;
+      a1 = -2.0*tcos;
+      a2 = 1.0-alpha;
+    ) :
+    // AllPass 
+    (this.ftype == 8) ? 
+    (
+      A    = pow(10.0,this.g/40.0);
+
+      // Cookbook formulae for audio EQ biquad filter coefficients, by Robert Bristow-Johnson 
+      b0 =   1.0 - alpha;
+                b1 =  -2.0 * cos(w0);
+                b2 =   1.0 + alpha;
+                a0 =   1.0 + alpha;
+                a1 =  -2.0 * cos(w0);
+                a2 =   1.0 - alpha;
+    ) :
+    // New peakingEQ, EQ with matching gain at Nyquist frequency
+    (this.ftype == 9) ? // Peak EQ P
+    (
+      (abs(this.g) < 0.001) ? this.g = 0.001;
+
+    
+        G0_db  = 0.0;
+        G_db   = this.g;
+      GB_db   = G_db/2.0;
+          TG0 = 10.0^(G0_db/20.0);
+          TG  = 10.0^(G_db/20.0);
+          TGB = 10.0^(GB_db/20.0);
+
+          Tw0 = (M_PI * 2.0 * this.f/samplerate_hz);
+
+//      TDw = 0.2* M_PI;
+//      TDw = (Tw0) / this.q;   // 15000
+
+          // Calculate Q
+    TDw = atan(sin(Tw0/2) / (this.q))*2;
+
+          MF  = abs(TG^2  - TGB^2);
+          (MF < 0.001) ? MF = 1;
+          G00 = abs(TG^2  - TG0^2);
+          F00 = abs(TGB^2 - TG0^2);
+
+      num = TG0^2 * (Tw0^2 - M_PI^2)^2 + TG^2 * F00 * M_PI^2 * TDw^2 / MF;
+      den = (Tw0^2 - M_PI^2)^2 + F00 * M_PI^2 * TDw^2 / MF;
+
+      G1 = sqrt(num/den);
+
+      G01 = abs(TG^2  - TG0*G1);
+      G11 = abs(TG^2  - G1^2);
+      F01 = abs(TGB^2 - TG0*G1);
+      F11 = abs(TGB^2 - G1^2);
+
+      W2 = sqrt(G11 / G00) * tan(Tw0/2)^2;
+      DW = (1 + sqrt(F00 / F11) * W2) * tan(TDw/2);
+
+      MC = F11 * DW^2 - 2 * W2 * (F01 - sqrt(F00 * F11));
+      MD = 2 * W2 * (G01 - sqrt(G00 * G11));
+
+      MA = sqrt((MC + MD) / MF);
+      MB = sqrt((TG^2 * MC + TGB^2 * MD) / MF);
+
+
+      // Cookbook formulae for audio EQ biquad filter coefficients, by Robert Bristow-Johnson 
+      delta = (1 + W2 + MA);
+
+      b0 =  (G1 + TG0*W2 + MB)/delta;
+      b1 =  -2*(G1 - TG0*W2)/delta;
+      b2 =  (G1 - MB + TG0*W2)/delta;
+      a0 =  1.0;
+      a1 =  -2*(1 - W2)/delta;
+      a2 =  (1 + W2 - MA)/delta;
+    ) :
+    // New peakingEQ, EQ with matching gain at Nyquist frequency, BandPass CZPG A
+    (this.ftype == 10) ? 
+    (
+/*
+           G0_db  = 0.0;
+         G_db   = this.g;
+          GB_db   = G_db/2.0;
+
+          TG0 = 10.0^(G0_db/20.0);
+          TG  = 10.0^(G_db/20.0);
+          TGB = 10.0^(GB_db/20.0);
+*/
+          TG0 = 0.0;
+          TG  = 1.0;
+          TGB = sqrt(0.5);
+
+          Tw0 = (M_PI * 2.0 * this.f/samplerate_hz);
+
+//      TDw = 0.2* M_PI;
+//      TDw = (Tw0) / this.q;   // 15000
+
+          // Calculate Q
+    TDw = atan(sin(Tw0/2) / (this.q))*2;
+
+          MF  = abs(TG^2  - TGB^2);
+          (MF < 0.001) ? MF = 1;
+          G00 = abs(TG^2  - TG0^2);
+          F00 = abs(TGB^2 - TG0^2);
+
+      num = TG0^2 * (Tw0^2 - M_PI^2)^2 + TG^2 * F00 * M_PI^2 * TDw^2 / MF;
+      den = (Tw0^2 - M_PI^2)^2 + F00 * M_PI^2 * TDw^2 / MF;
+
+      G1 = sqrt(num/den);
+
+      G01 = abs(TG^2  - TG0*G1);
+      G11 = abs(TG^2  - G1^2);
+      F01 = abs(TGB^2 - TG0*G1);
+      F11 = abs(TGB^2 - G1^2);
+
+      W2 = sqrt(G11 / G00) * tan(Tw0/2)^2;
+      DW = (1 + sqrt(F00 / F11) * W2) * tan(TDw/2);
+
+      MC = F11 * DW^2 - 2 * W2 * (F01 - sqrt(F00 * F11));
+      MD = 2 * W2 * (G01 - sqrt(G00 * G11));
+
+      MA = sqrt((MC + MD) / MF);
+      MB = sqrt((TG^2 * MC + TGB^2 * MD) / MF);
+
+
+      // Cookbook formulae for audio EQ biquad filter coefficients, by Robert Bristow-Johnson 
+      delta = (1 + W2 + MA);
+
+    b0 =  (G1 + TG0*W2 + MB)/delta;
+    b1 =  -2*(G1 - TG0*W2)/delta;
+    b2 =  (G1 - MB + TG0*W2)/delta;
+    a0 =  1.0;
+    a1 =  -2*(1 - W2)/delta;
+    a2 =  (1 + W2 - MA)/delta;
+    ) :
+    // New peakingEQ, EQ with matching gain at Nyquist frequency, Notch A
+    (this.ftype == 11) ? 
+    (
+/*
+           G0_db  = 0.0;
+         G_db   = this.g;
+          GB_db   = G_db/2.0;
+
+          TG0 = 10.0^(G0_db/20.0);
+          TG  = 10.0^(G_db/20.0);
+          TGB = 10.0^(GB_db/20.0);
+*/
+          TG0 = 1.0;
+          TG  = 0.0;
+          TGB = sqrt(0.5);
+
+          Tw0 = (M_PI * 2.0 * this.f/samplerate_hz);
+
+//      TDw = 0.2* M_PI;
+//      TDw = (Tw0) / this.q;   // 15000
+
+          // Calculate Q
+    TDw = atan(sin(Tw0/2) / (this.q))*2;
+
+          MF  = abs(TG^2  - TGB^2);
+          (MF < 0.001) ? MF = 1;
+          G00 = abs(TG^2  - TG0^2);
+          F00 = abs(TGB^2 - TG0^2);
+
+      num = TG0^2 * (Tw0^2 - M_PI^2)^2 + TG^2 * F00 * M_PI^2 * TDw^2 / MF;
+      den = (Tw0^2 - M_PI^2)^2 + F00 * M_PI^2 * TDw^2 / MF;
+
+      G1 = sqrt(num/den);
+
+      G01 = abs(TG^2  - TG0*G1);
+      G11 = abs(TG^2  - G1^2);
+      F01 = abs(TGB^2 - TG0*G1);
+      F11 = abs(TGB^2 - G1^2);
+
+      W2 = sqrt(G11 / G00) * tan(Tw0/2)^2;
+      DW = (1 + sqrt(F00 / F11) * W2) * tan(TDw/2);
+
+      MC = F11 * DW^2 - 2 * W2 * (F01 - sqrt(F00 * F11));
+      MD = 2 * W2 * (G01 - sqrt(G00 * G11));
+
+      MA = sqrt((MC + MD) / MF);
+      MB = sqrt((TG^2 * MC + TGB^2 * MD) / MF);
+
+
+      // Cookbook formulae for audio EQ biquad filter coefficients, by Robert Bristow-Johnson 
+      delta = (1 + W2 + MA);
+
+      b0 =  (G1 + TG0*W2 + MB)/delta;
+      b1 =  -2*(G1 - TG0*W2)/delta;
+      b2 =  (G1 - MB + TG0*W2)/delta;
+      a0 =  1.0;
+      a1 =  -2*(1 - W2)/delta;
+      a2 =  (1 + W2 - MA)/delta;
+    ) :
+    // OS LowPass A
+    (this.ftype == 12) ? 
+    (
+      omega  = w0 = (2.0 * M_PI * this.f) / samplerate_hz/2.0;
+      alpha  = sin(omega) / (2.0 * this.q);
+      this.RBJ_Os = 1;
+          
+      b0 =  (1.0 - cos(w0))/2.0;
+      b1 =   1.0 - cos(w0);
+      b2 =  (1.0 - cos(w0))/2.0;
+      a0 =   1.0 + alpha;
+      a1 =  -2.0 * cos(w0);
+      a2 =   1.0 - alpha;
+    ) :
+    ( 
+      A = 0;
+    );
+  );
+  
+  this.BiQuadCoeffs[0] =  b0;
+  this.BiQuadCoeffs[1] =  b1;
+  this.BiQuadCoeffs[2] =  b2;
+  this.BiQuadCoeffs[3] =  a0;
+  this.BiQuadCoeffs[4] =  a1;
+  this.BiQuadCoeffs[5] =  a2;
+);  
+
+function RBJ_Set_Direct(b0,b1,b2,a0,a1,a2)
+(
+  this.BiQuadCoeffs[0] =  b0;
+  this.BiQuadCoeffs[1] =  b1;
+  this.BiQuadCoeffs[2] =  b2;
+  this.BiQuadCoeffs[3] =  a0;
+  this.BiQuadCoeffs[4] =  a1;
+  this.BiQuadCoeffs[5] =  a2;
+); 
+
+function RBJ_Reset()
+(
+  this.x0nm1  = 0.0;
+  this.x0nm2  = 0.0;
+  this.x0n    = 0.0;
+  this.y0nm1  = 0.0;
+  this.y0nm2  = 0.0;
+  this.y0n    = 0.0;
+);
+
+function RBJ_Set(_ftype, _f, _g, _q)
+(
+  this.RBJ_Set_Ext(_ftype, _f, _g, _q);
+);
+
+function RBJ_Process1(_in0)
+(
+  this.x0n = _in0;
+  this.x0n += this.denorm;
+    
+  this.y0n =  (this.BiQuadCoeffs[0]*this.x0n 
+      + this.BiQuadCoeffs[1]*this.x0nm1 
+      + this.BiQuadCoeffs[2]*this.x0nm2 
+      - this.BiQuadCoeffs[4]*this.y0nm1 
+      - this.BiQuadCoeffs[5]*this.y0nm2)/this.BiQuadCoeffs[3];
+
+  this.y0n += this.denorm;
+
+  this.x0nm2 = this.x0nm1;
+  this.x0nm1 = this.x0n;
+    
+  this.y0nm2 = this.y0nm1;
+  this.y0nm1 = this.y0n;
+
+  this.x0n   = this.y0n;
+
+  this.out0  = this.y0n;
+);
+
+function RBJ_Process(_in0)
+local(ret)
+(
+  (this.RBJ_Os == 0) ?
+  (
+    ret = this.RBJ_Process1(_in0);  
+  ):
+  (this.RBJ_Os == 1) ?
+  (
+//  ret = this.RBJ_Process1(_in0);  
+//  this.RBJ_Process1(0.0);
+//    ret *= 2;  
+  ret = this.RBJ_Process1(_in0);  
+  ret = this.RBJ_Process1(_in0);
+    ret *= 1;  
+  );
+  ret;  
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// Class ITU Filter
+// Init(_FC _VB _VL _VH _Q):
+// Process(in0 in1): out0, out1
+
+function ITUF_Init(_FC, _VB, _VL, _VH, _Q, _srate)
+(
+  // Init Buffer
+  this.x0nm1  = 0.0;
+  this.x0nm2  = 0.0;
+  this.x0n    = 0.0;
+  this.y0nm1  = 0.0;
+  this.y0nm2  = 0.0;
+  this.y0n    = 0.0;
+  
+  this.fs = _srate;
+  this.fc = _FC; 
+  this.vb = _VB; 
+  this.vl = _VL; 
+  this.vh = _VH; 
+  this.q =  _Q;
+
+  this.omega = tan($pi*this.fc/this.fs);
+  this.osq = this.omega*this.omega;
+  this.div = this.osq+(this.omega/this.q)+1.0;
+
+  // Final Params
+  this.a0 = 1.0;
+  this.a1 = (2.0*(this.osq-1.0)) /this.div; 
+  this.a2 = (this.osq-(this.omega / this.q)+1.0) / this.div;
+  this.b0 = (this.vl * this.osq+this.vb*(this.omega/this.q)+this.vh) / this.div; 
+  this.b1 = (2.0*( this.vl * this.osq-this.vh)) / this.div; 
+  this.b2 = (this.vl * this.osq-this.vb * (this.omega/this.q)+this.vh) / this.div;      
+);
+
+function ITUF_Init_HS(_srate)
+(
+  this.ITUF_Init(1681.97445095553190,1.25872093023256,1.0,1.58486470113086,0.70717523695542,_srate);
+);
+
+function ITUF_Init_LC(_srate)
+(
+  this.ITUF_Init(38.13547087611304,0.0,0.0,1.00499489871469,0.50032703732504,_srate);
+);
+
+function ITUF_Reset()
+(
+  // Init Buffer
+  this.x0nm1  = 0.0;
+  this.x0nm2  = 0.0;
+  this.x0n    = 0.0;
+  this.y0nm1  = 0.0;
+  this.y0nm2  = 0.0;
+  this.y0n    = 0.0;
+);
+
+function ITUF_Process(_in0)
+(
+  // Simple BiQuad Filtering
+  // Left Channel
+  this.x0n = _in0;
+      
+  this.y0n = (this.b0*this.x0n 
+             + this.b1*this.x0nm1 
+            + this.b2*this.x0nm2 
+            - this.a1*this.y0nm1 
+            - this.a2*this.y0nm2)/this.a0;
+  
+  this.x0nm2 = this.x0nm1;
+  this.x0nm1 = this.x0n;
+  
+  this.y0nm2 = this.y0nm1;
+  this.y0nm1 = this.y0n;
+  
+  this.out0  = this.y0n;
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// (Old) Smooth Parameter change
+
+function SParam_Init(_decay_ms, _init_val, _srate)
+(
+  (this.decay_ms != _decay_ms) ?
+  (
+
+    this.decay_ms = _decay_ms;
+    (this.decay_ms > 0) ? 
+    (
+      this.decay_smp = (0.001*this.decay_ms*_srate)|0;
+    ) :
+    (
+      this.decay_smp = 1;  
+    );
+
+    this.decay = 1.0/this.decay_smp;
+    this.val = this.start_val = this.end_val = _init_val;
+
+    this.smp_counter = 0;
+  );
+);
+
+function SParam_Init_smp(_decay_smp, _init_val)
+(
+  
+  (this.decay != _decay_smp) ?
+  (
+    this.decay_smp = _decay_smp;  
+    this.decay = 1.0/_decay_smp;
+    this.val = this.start_val = this.end_val = _init_val;
+
+    this.smp_counter = 0;
+  );
+);
+
+function SParam_SetDecay_smp(_decay_smp)
+(
+  
+  (this.decay != _decay_smp) ?
+  (
+    this.decay_smp = _decay_smp;  
+    this.decay = 1.0/_decay_smp;
+    this.smp_counter = 0;
+  );
+);
+
+function SParam_Get()
+(
+  this.val = this.val + this.decay * (this.end_val - this.start_val);
+
+  // Keep smooth value change within start/end range
+  this.smp_counter += 1;
+  (this.smp_counter > this.decay_smp) ? 
+  (
+    this.val = this.end_val;
+    this.smp_counter = this.decay_smp;
+  );
+  
+  this.val; 
+);
+
+function SParam_Set(_new_val)
+(
+  (this.end_val != _new_val) ? 
+    (
+    this.start_val = this.val;
+    this.end_val = _new_val;
+    this.smp_counter = 0;
+    );
+); 
+
+
+//////////////////////////////////////////////////////////////////////////////
+// 2-5 Multiband Mixer, gain adjustable per band, 24dB/Oct - 192dB/Oct
+// Linkwitz-Riley Filters for clean crossover: http://www.amusesmile.com/?p=527
+// Butterworth Filter Denominator Factors for filter slope: http://compgroups.net/comp.dsp/how-to-combine-multiple-biquad-lp-hp-stages-to-get-3/1181885
+// and here: http://www.claysturner.com/dsp/Butterworth%20Filter%20Formulae.pdf
+
+function MF_Init(_srate)
+(
+  // 4xLinkwitz-Riley, each Linkwitz-Riley consists 2xButtherworth RBJ filter
+  this.f0.RBJ_Init(_srate);
+  this.f1.RBJ_Init(_srate);
+  this.f2.RBJ_Init(_srate);
+  this.f3.RBJ_Init(_srate);
+  this.f4.RBJ_Init(_srate);
+  this.f5.RBJ_Init(_srate);
+  this.f6.RBJ_Init(_srate);
+  this.f7.RBJ_Init(_srate);
+  this.f8.RBJ_Init(_srate);
+  this.f9.RBJ_Init(_srate);
+  this.f10.RBJ_Init(_srate);
+  this.f11.RBJ_Init(_srate);
+  this.f12.RBJ_Init(_srate);
+  this.f13.RBJ_Init(_srate);
+  this.f14.RBJ_Init(_srate);
+  this.f15.RBJ_Init(_srate);
+);
+
+// Denominators for any orders of Butterworth Filters
+// q(n,k) = 1/(2*COS((k*2+1)*PI()/((n+1)*4)))
+// Ref: http://www.claysturner.com/dsp/Butterworth%20Filter%20Formulae.pdf
+
+function MF_Calc_Denominator_Butterworth(_order, _k)
+(
+  1.0/(2.0*cos((_k*2+1)*$pi/((_order+1)*4)));
+); 
+
+function MF_Set(_type, _freq, slope_factor)
+local (q0, q1, q2, q3, q4, q5, q6, q7,_gain)
+(
+  q0 = q1 = q2 = q3 = q4 = q5 = q6 = q7 = sqrt(2.0)/2.0;
+
+  (slope_factor == 0) ?
+  (
+    // Normal Butterworh 2x6dB Filter
+//    q0 = sqrt(2.0)/2.0;
+    q0 = MF_Calc_Denominator_Butterworth(0,0);
+  );
+
+  (slope_factor == 1) ?
+  (
+//    q0 = 0.54120;
+//    q1 = 1.30657;
+    q0 = MF_Calc_Denominator_Butterworth(1,0);
+    q1 = MF_Calc_Denominator_Butterworth(1,1);
+  );
+
+  (slope_factor == 2) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(2,0);
+    q1 = MF_Calc_Denominator_Butterworth(2,1);
+    q2 = MF_Calc_Denominator_Butterworth(2,2);
+  );
+
+  (slope_factor == 3) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(3,0);
+    q1 = MF_Calc_Denominator_Butterworth(3,1);
+    q2 = MF_Calc_Denominator_Butterworth(3,2);
+    q3 = MF_Calc_Denominator_Butterworth(3,3);
+  );
+
+  (slope_factor == 4) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(4,0);
+    q1 = MF_Calc_Denominator_Butterworth(4,1);
+    q2 = MF_Calc_Denominator_Butterworth(4,2);
+    q3 = MF_Calc_Denominator_Butterworth(4,3);
+    q4 = MF_Calc_Denominator_Butterworth(4,4);
+  );
+
+  (slope_factor == 5) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(5,0);
+    q1 = MF_Calc_Denominator_Butterworth(5,1);
+    q2 = MF_Calc_Denominator_Butterworth(5,2);
+    q3 = MF_Calc_Denominator_Butterworth(5,3);
+    q4 = MF_Calc_Denominator_Butterworth(5,4);
+    q5 = MF_Calc_Denominator_Butterworth(5,5);
+  );
+  (slope_factor == 6) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(6,0);
+    q1 = MF_Calc_Denominator_Butterworth(6,1);
+    q2 = MF_Calc_Denominator_Butterworth(6,2);
+    q3 = MF_Calc_Denominator_Butterworth(6,3);
+    q4 = MF_Calc_Denominator_Butterworth(6,4);
+    q5 = MF_Calc_Denominator_Butterworth(6,5);
+    q6 = MF_Calc_Denominator_Butterworth(6,6);
+  );
+  (slope_factor == 7) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(7,0);
+    q1 = MF_Calc_Denominator_Butterworth(7,1);
+    q2 = MF_Calc_Denominator_Butterworth(7,2);
+    q3 = MF_Calc_Denominator_Butterworth(7,3);
+    q4 = MF_Calc_Denominator_Butterworth(7,4);
+    q5 = MF_Calc_Denominator_Butterworth(7,5);
+    q6 = MF_Calc_Denominator_Butterworth(7,6);
+    q7 = MF_Calc_Denominator_Butterworth(7,7);
+  );
+
+  _gain = 0; // no gain for RBJ LP/HP Filter
+  this.f0.RBJ_Set(_type, _freq, _gain, q0);
+  this.f1.RBJ_Set(_type, _freq, _gain, q0);
+
+  this.f2.RBJ_Set(_type, _freq, _gain, q1);
+  this.f3.RBJ_Set(_type, _freq, _gain, q1);
+
+  this.f4.RBJ_Set(_type, _freq, _gain, q2);
+  this.f5.RBJ_Set(_type, _freq, _gain, q2);
+
+  this.f6.RBJ_Set(_type, _freq, _gain, q3);
+  this.f7.RBJ_Set(_type, _freq, _gain, q3);
+
+  this.f8.RBJ_Set(_type, _freq, _gain, q4);
+  this.f9.RBJ_Set(_type, _freq, _gain, q4);
+
+  this.f10.RBJ_Set(_type, _freq, _gain, q5);
+  this.f11.RBJ_Set(_type, _freq, _gain, q5);
+
+  this.f12.RBJ_Set(_type, _freq, _gain, q6);
+  this.f13.RBJ_Set(_type, _freq, _gain, q6);
+
+  this.f14.RBJ_Set(_type, _freq, _gain, q7);
+  this.f15.RBJ_Set(_type, _freq, _gain, q7);
+);
+
+function MF_Process(_in0, _count)
+(
+  this.smp = _in0;
+
+  this.smp = this.f0.RBJ_Process(this.smp);
+  this.smp = this.f1.RBJ_Process(this.smp);
+  (_count > 0) ? 
+  (
+    this.smp = this.f2.RBJ_Process(this.smp);
+    this.smp = this.f3.RBJ_Process(this.smp);  
+  );
+  (_count > 1) ? 
+  (
+    this.smp = this.f4.RBJ_Process(this.smp);
+    this.smp = this.f5.RBJ_Process(this.smp);
+  );
+  (_count > 2) ? 
+  (
+    this.smp = this.f6.RBJ_Process(this.smp);
+    this.smp = this.f7.RBJ_Process(this.smp);
+  );
+  (_count > 3) ? 
+  (
+    this.smp = this.f8.RBJ_Process(this.smp);
+    this.smp = this.f9.RBJ_Process(this.smp);
+  );
+  (_count > 4) ? 
+  (
+    this.smp = this.f10.RBJ_Process(this.smp);
+    this.smp = this.f11.RBJ_Process(this.smp);
+  );
+  (_count > 5) ? 
+  (
+    this.smp = this.f12.RBJ_Process(this.smp);
+    this.smp = this.f13.RBJ_Process(this.smp);
+  );
+  (_count > 6) ? 
+  (
+    this.smp = this.f14.RBJ_Process(this.smp);
+    this.smp = this.f15.RBJ_Process(this.smp);
+  );
+
+  this.smp;
+);
+
+// AllPass Functions
+function MAF_Init(_srate)
+(
+  this.HPFAD0_0.MF_Init(_srate);  // LP Filter
+  this.LPFAD0_0.MF_Init(_srate);  // HP Filter
+);
+
+function MAF_Set(_freq, slope_factor)
+(
+  this.LPFAD0_0.MF_Set(2, _freq, slope_factor);
+  this.HPFAD0_0.MF_Set(1, _freq, slope_factor);
+);
+
+function MAF_Process(_in0, _count)
+local(tmp_l0, tmp_h0)
+(
+  tmp_l0 = this.LPFAD0_0.MF_Process(_in0, _count);
+  tmp_h0 = this.HPFAD0_0.MF_Process(_in0, _count);
+  tmp_l0 + tmp_h0;
+);
+
+function MB_Init(_srate)
+(
+  // LP/HP Filter
+  this.HPFA0_0.MF_Init(_srate);
+  this.LPFA0_0.MF_Init(_srate);
+
+  this.HPFB0_0.MF_Init(_srate);
+  this.LPFB0_0.MF_Init(_srate);
+
+  this.HPFC0_0.MF_Init(_srate);
+  this.LPFC0_0.MF_Init(_srate);
+
+  this.HPFD0_0.MF_Init(_srate);
+  this.LPFD0_0.MF_Init(_srate);
+
+  // AllPass
+  this.APFAD0_0.MAF_Init(_srate);
+
+  this.APFAD0_1.MAF_Init(_srate);
+
+  this.APFAD0_2.MAF_Init(_srate);
+
+  this.APFAD0_3.MAF_Init(_srate);
+
+  this.APFAD0_4.MAF_Init(_srate);
+);
+
+function MB_Set(f0, f1, f2, f3, slope_factor)
+(
+  this.LPFA0_0.MF_Set(2, f0, slope_factor);
+  this.HPFA0_0.MF_Set(1, f0, slope_factor);
+
+  this.LPFB0_0.MF_Set(2, f1, slope_factor);
+  this.HPFB0_0.MF_Set(1, f1, slope_factor);
+
+  this.LPFC0_0.MF_Set(2, f2, slope_factor);
+  this.HPFC0_0.MF_Set(1, f2, slope_factor);
+
+  this.LPFD0_0.MF_Set(2, f3, slope_factor);
+  this.HPFD0_0.MF_Set(1, f3, slope_factor);
+
+  // AllPass Config
+  this.APFAD0_0.MAF_Set(f1, slope_factor);
+
+  this.APFAD0_1.MAF_Set(f2, slope_factor);
+
+  this.APFAD0_2.MAF_Set(f0, slope_factor);
+
+  this.APFAD0_3.MAF_Set(f3, slope_factor);
+
+  this.APFAD0_4.MAF_Set(f3, slope_factor);
+);
+
+function MB_Process(_in0, slope_factor, nr_bands)
+local(band_tmp_l0, band_tmp_h0, band_tmp_m0)   
+(
+  this.count = slope_factor;
+
+  this.band0 = 0.0;
+  this.band1 = 0.0;
+  this.band2 = 0.0;
+  this.band3 = 0.0;
+  this.band4 = 0.0;
+  
+  (nr_bands == 2) ?
+  (
+    /*
+      band0: in -> LP F0
+      band1: in -> HP F0
+    */
+    // Split Low Part
+    // Band 0
+    this.band0 = this.LPFA0_0.MF_Process(_in0, this.count);
+
+    // Split High Part
+    // Band 1
+    this.band1 = this.HPFA0_0.MF_Process(_in0, this.count);
+  ):
+  (nr_bands == 3) ?
+  (
+    /*
+      band0: in -> LP F0 -> AP F1
+      band1: in -> HP F0 -> LP F1
+      band2: in -> HP F0 -> HP F1
+    */
+
+    // Split Low Part
+    // Band 0
+    this.band0 = this.LPFA0_0.MF_Process(_in0, this.count);
+    // AllPass F1
+    this.band0 = this.APFAD0_0.MAF_Process(this.band0, this.count);
+    
+    ////////////////////////////////////////////////////////////////
+    // Split High Part
+    band_tmp_h0 = this.HPFA0_0.MF_Process(_in0, this.count);
+    
+    // Band1
+    this.band1 = this.LPFB0_0.MF_Process(band_tmp_h0, this.count);
+    // Band2
+    this.band2 = this.HPFB0_0.MF_Process(band_tmp_h0, this.count);
+  ):
+  (nr_bands == 4) ?
+  (
+    /*
+      band0: in -> LP F1 -> AP F2 -> LP F0
+      band1: in -> LP F1 -> AP F2 -> HP F0
+      band2: in -> LP F1 -> AP F0 -> LP F2
+      band3: in -> LP F1 -> AP F0 -> HP F2
+    */  
+
+    // Split Low Part
+    band_tmp_l0 = this.LPFB0_0.MF_Process(_in0, this.count);
+    // AllPass F2
+    band_tmp_l0 = this.APFAD0_1.MAF_Process(band_tmp_l0, this.count);
+
+    // Band 0
+    this.band0 = this.LPFA0_0.MF_Process(band_tmp_l0, this.count);
+    // Band 1
+    this.band1 = this.HPFA0_0.MF_Process(band_tmp_l0, this.count);
+
+    //////////////////////////////////////
+    // Split High Part
+    band_tmp_h0 = this.HPFB0_0.MF_Process(_in0, this.count);
+    // AllPass F0
+    band_tmp_h0 = this.APFAD0_2.MAF_Process(band_tmp_h0, this.count);
+            
+    // Band 3
+    this.band2 = this.LPFC0_0.MF_Process(band_tmp_h0, this.count);
+    // Band 4
+    this.band3 = this.HPFC0_0.MF_Process(band_tmp_h0, this.count);
+  ):
+  (nr_bands == 5) ?
+  (
+    /*
+      band0: in -> LP F1 -> AP F2 -> AP F3 -> LP F0
+      band1: in -> LP F1 -> AP F2 -> AP F3 -> HP F0
+      band2: in -> HP F1 -> AP F0 -> LP F2 -> AP F3
+      band3: in -> HP F1 -> AP F0 -> HP F2 -> LP F3
+      band4: in -> HP F1 -> AP F0 -> HP F2 -> HP F3
+    */  
+
+    // Split Low Part
+    band_tmp_l0 = this.LPFB0_0.MF_Process(_in0, this.count);
+    // AllPass F2
+    band_tmp_l0 = this.APFAD0_1.MAF_Process(band_tmp_l0, this.count);
+    // AllPass F3
+    band_tmp_l0 = this.APFAD0_3.MAF_Process(band_tmp_l0, this.count);
+
+    // Band 0
+    this.band0 = this.LPFA0_0.MF_Process(band_tmp_l0, this.count);
+    // Band 1
+    this.band1 = this.HPFA0_0.MF_Process(band_tmp_l0, this.count);
+
+    //////////////////////////////////////
+    // Split Mid Part
+    band_tmp_m0 = this.HPFB0_0.MF_Process(_in0, this.count);
+    // AllPass F0
+    band_tmp_m0 = this.APFAD0_2.MAF_Process(band_tmp_m0, this.count);
+
+    // Band 2
+    this.band2 = this.LPFC0_0.MF_Process(band_tmp_m0, this.count);
+    // AllPass F3
+    this.band2 = this.APFAD0_4.MAF_Process(this.band2, this.count);
+
+    //////////////////////////////////////
+    // Split High Part
+    band_tmp_h0 = this.HPFC0_0.MF_Process(band_tmp_m0, this.count);
+
+    // Band 3
+    this.band3 = this.LPFD0_0.MF_Process(band_tmp_h0, this.count);
+    // Band 4
+    this.band4 = this.HPFD0_0.MF_Process(band_tmp_h0, this.count);
+  );
+);
+
+//////////////////////////////////////////////////////////////////////////////
+// Simple Multi LP/HP RBJ Filter 24dB/Oct - 192dB/Oct
+function MF_RBJ_Init(_srate)
+(
+  this.f0.RBJ_Init(_srate);
+  this.f1.RBJ_Init(_srate);
+  this.f2.RBJ_Init(_srate);
+  this.f3.RBJ_Init(_srate);
+  this.f4.RBJ_Init(_srate);
+  this.f5.RBJ_Init(_srate);
+  this.f6.RBJ_Init(_srate);
+  this.f7.RBJ_Init(_srate);
+  this.f8.RBJ_Init(_srate);
+  this.f9.RBJ_Init(_srate);
+  this.f10.RBJ_Init(_srate);
+  this.f11.RBJ_Init(_srate);
+  this.f12.RBJ_Init(_srate);
+  this.f13.RBJ_Init(_srate);
+  this.f14.RBJ_Init(_srate);
+  this.f15.RBJ_Init(_srate);
+);
+
+function MF_RBJ_Reset()
+(
+  this.f0.RBJ_Reset();
+  this.f1.RBJ_Reset();
+  this.f2.RBJ_Reset();
+  this.f3.RBJ_Reset();
+  this.f4.RBJ_Reset();
+  this.f5.RBJ_Reset();
+  this.f6.RBJ_Reset();
+  this.f7.RBJ_Reset();
+  this.f8.RBJ_Reset();
+  this.f9.RBJ_Reset();
+  this.f10.RBJ_Reset();
+  this.f11.RBJ_Reset();
+  this.f12.RBJ_Reset();
+  this.f13.RBJ_Reset();
+  this.f14.RBJ_Reset();
+  this.f15.RBJ_Reset();
+);
+
+function MF_RBJ_Set(_type, _f, slope_factor)
+local (q0, q1, q2, q3, q4, q5, q6, q7)
+(
+  q0 = q1 = q2 = q3 = q4 = q5 = q6 = q7 = sqrt(2.0)/2.0;
+
+  (slope_factor < 2) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(0,0);
+  ):  
+  (slope_factor < 4) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(1,0);
+    q1 = MF_Calc_Denominator_Butterworth(1,1);
+  ):  
+  (slope_factor < 6) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(2,0);
+    q1 = MF_Calc_Denominator_Butterworth(2,1);
+    q2 = MF_Calc_Denominator_Butterworth(2,2);
+  ):  
+  (slope_factor < 8) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(3,0);
+    q1 = MF_Calc_Denominator_Butterworth(3,1);
+    q2 = MF_Calc_Denominator_Butterworth(3,2);
+    q3 = MF_Calc_Denominator_Butterworth(3,3);
+  ):  
+  (slope_factor < 10) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(4,0);
+    q1 = MF_Calc_Denominator_Butterworth(4,1);
+    q2 = MF_Calc_Denominator_Butterworth(4,2);
+    q3 = MF_Calc_Denominator_Butterworth(4,3);
+    q4 = MF_Calc_Denominator_Butterworth(4,4);
+  ):  
+  (slope_factor < 12) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(5,0);
+    q1 = MF_Calc_Denominator_Butterworth(5,1);
+    q2 = MF_Calc_Denominator_Butterworth(5,2);
+    q3 = MF_Calc_Denominator_Butterworth(5,3);
+    q4 = MF_Calc_Denominator_Butterworth(5,4);
+    q5 = MF_Calc_Denominator_Butterworth(5,5);
+  ):  
+  (slope_factor < 14) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(6,0);
+    q1 = MF_Calc_Denominator_Butterworth(6,1);
+    q2 = MF_Calc_Denominator_Butterworth(6,2);
+    q3 = MF_Calc_Denominator_Butterworth(6,3);
+    q4 = MF_Calc_Denominator_Butterworth(6,4);
+    q5 = MF_Calc_Denominator_Butterworth(6,5);
+    q6 = MF_Calc_Denominator_Butterworth(6,6);
+  ):  
+  (slope_factor < 16) ?
+  (
+    q0 = MF_Calc_Denominator_Butterworth(7,0);
+    q1 = MF_Calc_Denominator_Butterworth(7,1);
+    q2 = MF_Calc_Denominator_Butterworth(7,2);
+    q3 = MF_Calc_Denominator_Butterworth(7,3);
+    q4 = MF_Calc_Denominator_Butterworth(7,4);
+    q5 = MF_Calc_Denominator_Butterworth(7,5);
+    q6 = MF_Calc_Denominator_Butterworth(7,6);
+    q7 = MF_Calc_Denominator_Butterworth(7,7);
+  );  
+
+  this.f0.RBJ_Set(_type, _f, 0, q0);
+  this.f1.RBJ_Set(_type, _f, 0, q0);
+  this.f2.RBJ_Set(_type, _f, 0, q1);
+  this.f3.RBJ_Set(_type, _f, 0, q1);
+  this.f4.RBJ_Set(_type, _f, 0, q2);
+  this.f5.RBJ_Set(_type, _f, 0, q2);
+  this.f6.RBJ_Set(_type, _f, 0, q3);
+  this.f7.RBJ_Set(_type, _f, 0, q3);
+  this.f8.RBJ_Set(_type, _f, 0, q4);
+  this.f9.RBJ_Set(_type, _f, 0, q4);
+  this.f10.RBJ_Set(_type, _f, 0, q5);
+  this.f11.RBJ_Set(_type, _f, 0, q5);
+  this.f12.RBJ_Set(_type, _f, 0, q6);
+  this.f13.RBJ_Set(_type, _f, 0, q6);
+  this.f14.RBJ_Set(_type, _f, 0, q7);
+  this.f15.RBJ_Set(_type, _f, 0, q7);
+);
+
+function MF_RBJ_Process(_in0, _nr)
+local(ret)
+(
+  ret = _in0;
+  
+  ret = this.f0.RBJ_Process(ret);
+  (_nr >= 1) ? ret = this.f1.RBJ_Process(ret);
+  (_nr >= 2) ? ret = this.f2.RBJ_Process(ret);
+  (_nr >= 3) ? ret = this.f3.RBJ_Process(ret);
+  (_nr >= 4) ? ret = this.f4.RBJ_Process(ret);
+  (_nr >= 5) ? ret = this.f5.RBJ_Process(ret);
+  (_nr >= 6) ? ret = this.f6.RBJ_Process(ret);
+  (_nr >= 7) ? ret = this.f7.RBJ_Process(ret);
+  (_nr >= 8) ? ret = this.f8.RBJ_Process(ret);
+  (_nr >= 9) ? ret = this.f9.RBJ_Process(ret);
+  (_nr >= 10) ? ret = this.f10.RBJ_Process(ret);
+  (_nr >= 11) ? ret = this.f11.RBJ_Process(ret);
+  (_nr >= 12) ? ret = this.f12.RBJ_Process(ret);
+  (_nr >= 13) ? ret = this.f13.RBJ_Process(ret);
+  (_nr >= 14) ? ret = this.f14.RBJ_Process(ret);
+  (_nr >= 15) ? ret = this.f15.RBJ_Process(ret);
+  
+  ret;
+);
+
+// EO@init
