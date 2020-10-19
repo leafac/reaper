@@ -12,7 +12,7 @@ If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in pa
 
 ## Automixer
 
-<h3 align="center"><a href="https://youtu.be/qi1jQcIaOxo">Watch the video with a demonstration and instructions</a></h3>
+<h3 align="center"><a href="https://youtu.be/qi1jQcIaOxo">Watch a video with a demonstration and instructions</a></h3>
 
 [Example project](leafac_Automixer%20Example.zip)
 
