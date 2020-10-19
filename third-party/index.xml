@@ -34,13 +34,13 @@
         <source file="ABLevelMatching/tbproaudio_common.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/tbproaudio_common.jsfx-inc</source>
       </version>
     </reapack>
-    <reapack name="ABLevelMatching" type="effect">
+    <reapack name="AutoGainStaging" type="effect">
       <version name="1.9">
-        <source file="ABLevelMatching/AutoGainStage_cntrl">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/AutoGainStage_cntrl</source>
-        <source file="ABLevelMatching/AutoGainStage_src">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/AutoGainStage_src</source>
-        <source file="ABLevelMatching/audiomeasurement.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/audiomeasurement.jsfx-inc</source>
-        <source file="ABLevelMatching/memorymanager.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/memorymanager.jsfx-inc</source>
-        <source file="ABLevelMatching/tbproaudio_common.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/tbproaudio_common.jsfx-inc</source>
+        <source file="AutoGainStagingJSFX/AutoGainStage_cntrl">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/AutoGainStage_cntrl</source>
+        <source file="AutoGainStagingJSFX/AutoGainStage_src">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/AutoGainStage_src</source>
+        <source file="AutoGainStagingJSFX/audiomeasurement.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/audiomeasurement.jsfx-inc</source>
+        <source file="AutoGainStagingJSFX/memorymanager.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/memorymanager.jsfx-inc</source>
+        <source file="AutoGainStagingJSFX/tbproaudio_common.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/tbproaudio_common.jsfx-inc</source>
       </version>
     </reapack>
     <reapack name="EBUR128LM" type="effect">
