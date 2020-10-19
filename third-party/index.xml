@@ -3,52 +3,52 @@
   <category name="SWS">
     <reapack name="SWS" type="extension">
       <version name="2.10.0.1">
-        <source file="reaper_sws_extension.dylib" platform="darwin">https://github.com/leafac/reaper/raw/11753ec7cd96cdf093e46a9dbd65895c2833f434/third-party/sws/reaper_sws_extension.dylib</source>
+        <source file="SWS/reaper_sws_extension.dylib" platform="darwin">https://github.com/leafac/reaper/raw/11753ec7cd96cdf093e46a9dbd65895c2833f434/third-party/sws/reaper_sws_extension.dylib</source>
       </version>
     </reapack>
   </category>
   <category name="Filter">
     <reapack name="ReEQ and ReSpectrum" type="effect">
       <version name="1.0.11">
-        <source file="ReEQ.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/ReEQ.jsfx</source>
-        <source file="ReSpectrum.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/ReSpectrum.jsfx</source>
-        <source file="firhalfband.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/firhalfband.jsfx-inc</source>
-        <source file="rbj_filter.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/rbj_filter.jsfx-inc</source>
-        <source file="spectrum.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/spectrum.jsfx-inc</source>
-        <source file="svf_filter.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/svf_filter.jsfx-inc</source>
-        <source file="textinput.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/textinput.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/ReEQ.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/ReEQ.jsfx</source>
+        <source file="ReEQ and ReSpectrum/ReSpectrum.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/ReSpectrum.jsfx</source>
+        <source file="ReEQ and ReSpectrum/firhalfband.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/firhalfband.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/rbj_filter.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/rbj_filter.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/spectrum.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/spectrum.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/svf_filter.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/svf_filter.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/textinput.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/textinput.jsfx-inc</source>
       </version>
     </reapack>
   </category>
   <category name="Utility">
     <reapack name="ABLevelMatching" type="effect">
       <version name="3.3">
-        <source file="AB_LMLT_cntrl">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/AB_LMLT_cntrl</source>
-        <source file="AB_LM_cntrl">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/AB_LM_cntrl</source>
-        <source file="AB_LM_src">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/AB_LM_src</source>
-        <source file="audiomeasurement.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/audiomeasurement.jsfx-inc</source>
-        <source file="ebur128.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/ebur128.jsfx-inc</source>
-        <source file="gfx.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/gfx.jsfx-inc</source>
-        <source file="manual.pdf" type="data">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/manual.pdf</source>
-        <source file="memorymanager.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/memorymanager.jsfx-inc</source>
-        <source file="tbproaudio_common.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/tbproaudio_common.jsfx-inc</source>
+        <source file="ABLevelMatching/AB_LMLT_cntrl">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/AB_LMLT_cntrl</source>
+        <source file="ABLevelMatching/AB_LM_cntrl">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/AB_LM_cntrl</source>
+        <source file="ABLevelMatching/AB_LM_src">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/AB_LM_src</source>
+        <source file="ABLevelMatching/audiomeasurement.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/audiomeasurement.jsfx-inc</source>
+        <source file="ABLevelMatching/ebur128.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/ebur128.jsfx-inc</source>
+        <source file="ABLevelMatching/gfx.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/gfx.jsfx-inc</source>
+        <source file="ABLevelMatching/manual.pdf" type="data">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/manual.pdf</source>
+        <source file="ABLevelMatching/memorymanager.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/memorymanager.jsfx-inc</source>
+        <source file="ABLevelMatching/tbproaudio_common.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/ABLevelMatchingJSFX/tbproaudio_common.jsfx-inc</source>
       </version>
     </reapack>
     <reapack name="ABLevelMatching" type="effect">
       <version name="1.9">
-        <source file="AutoGainStage_cntrl">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/AutoGainStage_cntrl</source>
-        <source file="AutoGainStage_src">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/AutoGainStage_src</source>
-        <source file="audiomeasurement.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/audiomeasurement.jsfx-inc</source>
-        <source file="memorymanager.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/memorymanager.jsfx-inc</source>
-        <source file="tbproaudio_common.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/tbproaudio_common.jsfx-inc</source>
+        <source file="ABLevelMatching/AutoGainStage_cntrl">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/AutoGainStage_cntrl</source>
+        <source file="ABLevelMatching/AutoGainStage_src">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/AutoGainStage_src</source>
+        <source file="ABLevelMatching/audiomeasurement.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/audiomeasurement.jsfx-inc</source>
+        <source file="ABLevelMatching/memorymanager.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/memorymanager.jsfx-inc</source>
+        <source file="ABLevelMatching/tbproaudio_common.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/AutoGainStagingJSFX/tbproaudio_common.jsfx-inc</source>
       </version>
     </reapack>
     <reapack name="EBUR128LM" type="effect">
       <version name="2.11">
-        <source file="ebur128.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/EBUR128LMJSFX12042020/ebur128.jsfx-inc</source>
-        <source file="ebur128_analysis">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/EBUR128LMJSFX12042020/ebur128_analysis</source>
-        <source file="memorymanager.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/EBUR128LMJSFX12042020/memorymanager.jsfx-inc</source>
-        <source file="tiny_ebu_r128">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/EBUR128LMJSFX12042020/tiny_ebu_r128</source>
+        <source file="EBUR128LM/ebur128.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/EBUR128LMJSFX12042020/ebur128.jsfx-inc</source>
+        <source file="EBUR128LM/ebur128_analysis">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/EBUR128LMJSFX12042020/ebur128_analysis</source>
+        <source file="EBUR128LM/memorymanager.jsfx-inc">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/EBUR128LMJSFX12042020/memorymanager.jsfx-inc</source>
+        <source file="EBUR128LM/tiny_ebu_r128">https://github.com/leafac/reaper/raw/e389453f91167713399b91a8d036fdd0a7aba23c/third-party/tbproaudio/EBUR128LMJSFX12042020/tiny_ebu_r128</source>
       </version>
     </reapack>
   </category>
