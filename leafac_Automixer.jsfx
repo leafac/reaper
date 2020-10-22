@@ -67,7 +67,7 @@ track = -1; loop(tracks_maximum, track += 1;
 
 @sample
 
-rms_sample_counter = (rms_sample_counter + 1) % rms_size_samples;
+rms_sample_counter += 1; rms_sample_counter == rms_size_samples ? rms_sample_counter -= rms_size_samples;
 
 sum_of_tracks_rmss = 0;
 track = -1; loop(tracks, track += 1;
@@ -114,7 +114,7 @@ track = -1; loop(tracks, track += 1;
 
 @serialize
 
-version = 100;
+version = 101;
 file_var(0, version);
 
 @gfx 530 180
