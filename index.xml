@@ -2,8 +2,11 @@
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
     <reapack name="leafac_Automixer.jsfx" type="effect">
-      <version name="1.0.0">
+      <version name="1.0.1">
         <source>https://github.com/leafac/reaper/raw/033be7f4edb2df22fe8d849ef9781467f682d23c/leafac_Automixer.jsfx</source>
+      </version>
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/3f93ca06387d419e045790279f18c8600e8971fe/leafac_Automixer.jsfx</source>
       </version>
     </reapack>
   </category>
