@@ -19,5 +19,10 @@
         <source>https://github.com/leafac/reaper/raw/28298145774caca6cad932c54486db8a2b9b2782/leafac_Oscilloscope.jsfx</source>
       </version>
     </reapack>
+    <reapack name="leafac_Gain.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/b0c6e0832e84caacbd39768f5329f36cc55934a2/leafac_Gain.jsfx</source>
+      </version>
+    </reapack>
   </category>
 </index>
