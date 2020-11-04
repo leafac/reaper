@@ -24,5 +24,15 @@
         <source>https://github.com/leafac/reaper/raw/b0c6e0832e84caacbd39768f5329f36cc55934a2/leafac_Gain.jsfx</source>
       </version>
     </reapack>
+    <reapack name="leafac_White Noise.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_White%20noise.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Burn-in speakers.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_Burn-in%20speakers.jsfx</source>
+      </version>
+    </reapack>
   </category>
 </index>
