@@ -9,19 +9,10 @@
         <source>https://github.com/leafac/reaper/raw/3f93ca06387d419e045790279f18c8600e8971fe/leafac_Automixer.jsfx</source>
       </version>
     </reapack>
-    <reapack name="leafac_Bit crusher.jsfx" type="effect">
+
+    <reapack name="leafac_Burn-in speakers.jsfx" type="effect">
       <version name="1.0.0">
-        <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_Bit%20crusher.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="leafac_Oscilloscope.jsfx" type="effect">
-      <version name="1.0.0">
-        <source>https://github.com/leafac/reaper/raw/28298145774caca6cad932c54486db8a2b9b2782/leafac_Oscilloscope.jsfx</source>
-      </version>
-    </reapack>
-    <reapack name="leafac_Gain.jsfx" type="effect">
-      <version name="1.0.0">
-        <source>https://github.com/leafac/reaper/raw/b0c6e0832e84caacbd39768f5329f36cc55934a2/leafac_Gain.jsfx</source>
+        <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_Burn-in%20speakers.jsfx</source>
       </version>
     </reapack>
     <reapack name="leafac_White noise.jsfx" type="effect">
@@ -29,9 +20,25 @@
         <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_White%20noise.jsfx</source>
       </version>
     </reapack>
-    <reapack name="leafac_Burn-in speakers.jsfx" type="effect">
+    <reapack name="leafac_Gain.jsfx" type="effect">
+      <version name="1.0.1">
+        <source>https://github.com/leafac/reaper/raw/a0ed4520c0690dff2162a3cc2545a3e6838debbd/effects/leafac_Gain.jsfx</source>
+      </version>
       <version name="1.0.0">
-        <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_Burn-in%20speakers.jsfx</source>
+        <source>https://github.com/leafac/reaper/raw/b0c6e0832e84caacbd39768f5329f36cc55934a2/leafac_Gain.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Oscilloscope.jsfx" type="effect">
+      <version name="1.0.1">
+        <source>https://github.com/leafac/reaper/raw/a0ed4520c0690dff2162a3cc2545a3e6838debbd/effects/leafac_Oscilloscope.jsfx</source>
+      </version>
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/28298145774caca6cad932c54486db8a2b9b2782/leafac_Oscilloscope.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Bit crusher.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_Bit%20crusher.jsfx</source>
       </version>
     </reapack>
   </category>
