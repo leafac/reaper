@@ -8,11 +8,11 @@ gain_amplitude = 10^(gain_dB / 20);
 
 @sample
 
-// dB = 20*log(abs(amplitude)     (/ MAXIMUM_AMPLITUDE));
+// dB = 20*log10(abs(amplitude)     (/ MAXIMUM_AMPLITUDE));
 // amplitude = 10^(dB/20);
 
 // signal_dB - constant_in_dB
-// log(signal_amplitude) - log(constant_in_amplitude)
+// log10(signal_amplitude) - log10(constant_in_amplitude)
 // signal_amplitude / constant_in_amplitude
 
 // amplitude -> dB -> do some computation -> amplitude

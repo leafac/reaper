@@ -2,30 +2,31 @@
 
 options:no_meter
 
-slider1:hold=0<0,1,1{Off,On}>Hold
+slider1:is_paused=0<0,1,1{Play,Pause}> 
 
-slider3:gfx_samples_size=144000<10,144000,1>Zoom horizontally (Number of samples)
-slider4:amplitude_multiplication_factor=1<0,2,.01>Zoom vertically (Amplitude multiplication factor)
+slider3:gfx_samples_size=144000<144000,10,1>Zoom horizontally (Number of samples)
+slider4:amplitude_multiplication_factor=1<0,20,.01>Zoom vertically (Amplitude multiplication factor)
 
-slider6:gfx_samples_offset=0<0,143990,1>Move horizontally (Number of samples)
+slider6:gfx_samples_offset=0<144000,0,1>Move horizontally (Number of samples)
 slider7:move_vertically_factor=0<-1,1,.01>Move vertically (Amplitude multiplication factor)
 
 @init
 
 samples = 0;
-samples_size = 48000 * 3;
+samples_size = 48000 * 3 * 2;
+freembuf(samples_size + 1);
 
 samples_counter = -1;
 
-old_hold = hold;
+old_is_paused = is_paused;
 
 @slider
 
-old_hold != hold && hold == 0 ? memset(samples, 0, samples_size); old_hold = hold;
+old_is_paused == 1 && is_paused == 0 ? memset(samples, 0, samples_size); old_is_paused = is_paused;
 
 @sample
 
-!hold ? (
+!is_paused ? (
   samples_counter += 1; samples_counter == samples_size ? samples_counter -= samples_size;
 
   // FIXME: Maybe look at all the channels.
@@ -34,17 +35,18 @@ old_hold != hold && hold == 0 ? memset(samples, 0, samples_size); old_hold = hol
 
 @gfx
 
+gfx_h_middle = gfx_h/2;
+
 gfx_set(0.5);
-gfx_line(0, gfx_h/2 - gfx_h/2 * move_vertically_factor, gfx_w, gfx_h/2 - gfx_h/2 * move_vertically_factor);
+gfx_line(0, gfx_h_middle - gfx_h_middle * move_vertically_factor, gfx_w, gfx_h_middle - gfx_h_middle * move_vertically_factor);
 
 gfx_set(1);
 gfx_x = gfx_w;
-gfx_samples_counter = samples_counter - floor(gfx_samples_offset); gfx_samples_counter == -1 ? gfx_samples_counter += samples_size;
-gfx_y = gfx_h/2 - gfx_h/2 * move_vertically_factor - samples[gfx_samples_counter] * gfx_h/2 * amplitude_multiplication_factor;
+gfx_samples_counter = samples_counter - gfx_samples_offset; gfx_samples_counter <= -1 ? gfx_samples_counter += samples_size;
 loop(gfx_samples_size, gfx_samples_counter -= 1; gfx_samples_counter == -1 ? gfx_samples_counter += samples_size;
   gfx_lineto(
     gfx_x - gfx_w / gfx_samples_size,
-    gfx_h/2 - gfx_h/2 * move_vertically_factor - samples[gfx_samples_counter] * gfx_h/2 * amplitude_multiplication_factor
+    gfx_h_middle - gfx_h_middle * move_vertically_factor - samples[gfx_samples_counter] * gfx_h_middle * amplitude_multiplication_factor
   );
 );
 
