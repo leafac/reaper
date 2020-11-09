@@ -2,11 +2,23 @@ desc:leafac_Automixer
 
 // https://github.com/leafac/reaper
 
+/*
+Video processor:
+
+// Automixer video editor
+//@gmem=leafac_Automixer
+
+gfx_blit(input_track(gmem[0]));
+*/
+
 slider1:bypassed=0<0,1,1{Enabled,Bypassed}> 
 
 slider3:channels_per_track=2<2,32,2>Channels per track
 slider4:rms_size_ms=300<0,1000,.1>Reaction time (RMS size in ms)
 slider5:strength=1<0,5,.01>Strength
+
+slider20:track_gain_maximum_difference_db=-20<-60,0,.1>-Track gain maximum difference (dB)
+slider21:track_gain_maximum_debounce_ms=350<0,1000,.1>-Track gain maximum reaction time (ms)
 
 slider33:1<0,10,0.1>Track 1 priority
 slider34:1<0,10,0.1>Track 2 priority
@@ -41,7 +53,7 @@ slider62:1<0,10,0.1>-Track 30 priority
 slider63:1<0,10,0.1>-Track 31 priority
 slider64:1<0,10,0.1>-Track 32 priority
 
-options:no_meter
+options:no_meter gmem=leafac_Automixer
 
 @slider
 
@@ -49,6 +61,8 @@ tracks_maximum = 64 / 2;
 tracks = num_ch / channels_per_track;
 rms_size_samples = max(1, ceil(srate * rms_size_ms / 1000));
 rms_sample_counter = -1;
+track_gain_maximum_difference_amplitude = 10^(track_gain_maximum_difference_db / 20);
+track_gain_maximum_debounce_samples = max(1, ceil(srate * track_gain_maximum_debounce_ms / 1000));
 
 memtop = 0;
 tracks_priorities = memtop; memtop += tracks_maximum;
@@ -97,6 +111,8 @@ track = -1; loop(tracks, track += 1;
   sum_of_tracks_gains_unnormalized += track_gain_unnormalized;
 );
 
+track_gain_maximum_track = -1;
+track_gain_maximum_gain = -1;
 track = -1; loop(tracks, track += 1;
   track_gain = tracks_gains_unnormalized[track] / sum_of_tracks_gains_unnormalized;
   bypassed ? track_gain = 1;
@@ -106,15 +122,26 @@ track = -1; loop(tracks, track += 1;
   tracks_rmss_gained[track] = track_rms_gained;
 
   channel = -1; loop(channels_per_track, channel += 1;
-    sample = spl(track * channels_per_track + channel);
+    sample_gained = spl(track * channels_per_track + channel) * track_gain;
     spl(track * channels_per_track + channel) = 0;
-    spl(channel) += sample * track_gain;
+    spl(channel) += sample_gained;
   );
+
+  track_gain_maximum_gain < track_gain ? (
+    track_gain_maximum_track = track;
+    track_gain_maximum_gain = track_gain;
+  );
+);
+abs(track_gain_maximum_gain - tracks_gains[gmem[0]]) < track_gain_maximum_difference_amplitude ? (
+  track_gain_maximum_debounce = track_gain_maximum_debounce_samples;
+) : (
+  track_gain_maximum_debounce -= 1;
+  track_gain_maximum_debounce == 0 ? gmem[0] = track_gain_maximum_track;
 );
 
 @serialize
 
-version = 101;
+version = 110;
 file_var(0, version);
 
 @gfx 530 180
@@ -132,6 +159,9 @@ title_height = 30;
 track_width = meter_width * 5;
 track_height = meter_height + title_height;
 track_padding = 30;
+
+legend_padding_left = 10;
+legend_padding_bottom = 15;
 
 columns = max(1, floor((gfx_w - track_padding) / (track_width + track_padding)));
 
@@ -172,6 +202,12 @@ track_gfx = -1; loop(tracks, track_gfx += 1;
   gfx_x = track_left;
   gfx_y = track_meters_bottom;
   sprintf(#title, "%d", track_gfx + 1);
+  track_gfx == gmem[0] ? gfx_g = gfx_b = 0;
   gfx_drawstr(#title, gfx_center_horizontally | gfx_center_vertically, track_right, track_bottom);
+  gfx_g = gfx_b = 1;
 );
 
+gfx_g = gfx_b = 0;
+gfx_x = legend_padding_left;
+gfx_y = gfx_h - legend_padding_bottom;
+gfx_drawstr("Video track");
