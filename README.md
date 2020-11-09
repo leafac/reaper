@@ -14,7 +14,7 @@ If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in pa
 
 <h3 align="center"><a href="https://youtu.be/qi1jQcIaOxo">Watch a video with a demonstration and instructions</a></h3>
 
-[Example project](leafac_Automixer%20Example.zip)
+[Example project](https://archive.org/download/leafac/leafac_Automixer%20Examples.zip)
 
 More information:
 
