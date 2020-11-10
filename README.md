@@ -16,6 +16,8 @@ If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in pa
 
 [Example project](https://archive.org/download/leafac/leafac_Automixer%20Examples.zip)
 
+[Automixer video editor FX Chain](effects/leafac_Automixer video editor.RfxChain)
+
 More information:
 
 - Alternatives:
