@@ -12,7 +12,51 @@
         <source>https://github.com/leafac/reaper/raw/3f93ca06387d419e045790279f18c8600e8971fe/leafac_Automixer.jsfx</source>
       </version>
     </reapack>
-
+    <reapack name="leafac_Broken white noise.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/f930c3ef159c897ef175bdaeb9931c6381f5c48d/effects/leafac_Broken%20white%20noise.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Copy channel to all channels.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/f930c3ef159c897ef175bdaeb9931c6381f5c48d/effects/leafac_Copy%20channel%20to%20all%20channels.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Copy left to right.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/f930c3ef159c897ef175bdaeb9931c6381f5c48d/effects/leafac_Copy%20left%20to%20right.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Copy right to left.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/f930c3ef159c897ef175bdaeb9931c6381f5c48d/effects/leafac_Copy%20right%20to%20left.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_DC offset.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/f930c3ef159c897ef175bdaeb9931c6381f5c48d/effects/leafac_DC%20offset.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Invert left and right.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/f930c3ef159c897ef175bdaeb9931c6381f5c48d/effects/leafac_Invert%20left%20and%20right.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Mixdown to mono.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/f930c3ef159c897ef175bdaeb9931c6381f5c48d/effects/leafac_Mixdown%20to%20mono.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Null tester.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/f930c3ef159c897ef175bdaeb9931c6381f5c48d/effects/leafac_Null%20tester.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Stereo mixer.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/f930c3ef159c897ef175bdaeb9931c6381f5c48d/effects/leafac_Stereo%20mixer.jsfx</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Burn-in speakers.jsfx" type="effect">
       <version name="1.0.0">
         <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_Burn-in%20speakers.jsfx</source>
