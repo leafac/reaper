@@ -1,0 +1,14 @@
+// https://youtu.be/Cs0J-quWiBg
+
+@sample
+
+channel_in_signal_1 = -1;
+channel_in_signal_2 = num_ch / 2 - 1;
+loop(num_ch / 2,
+  channel_in_signal_1 += 1;
+  channel_in_signal_2 += 1;
+
+  spl(channel_in_signal_1) -= spl(channel_in_signal_2);
+  spl(channel_in_signal_2) = 0;
+);
+

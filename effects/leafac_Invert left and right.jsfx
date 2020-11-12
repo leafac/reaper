@@ -1,0 +1,9 @@
+// https://youtu.be/Cs0J-quWiBg
+
+@sample
+
+left = spl0;
+right = spl1;
+
+spl0 = right;
+spl1 = left;
