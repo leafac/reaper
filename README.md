@@ -16,10 +16,13 @@ If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in pa
 
 - [Main features](https://youtu.be/qi1jQcIaOxo).
 - [Automixer video editor](https://youtu.be/aEvO3ufOqvY).
+
+See also:
+
 - [Example project](https://archive.org/download/leafac/leafac_Automixer%20Examples.zip).
 - [Automixer video editor FX Chain](effects/leafac_Automixer%20video%20editor.RfxChain).
 
-More information:
+Even more information:
 
 - Alternatives:
   - [The original REAPER JSFX extension on which this is based](https://forum.cockos.com/showthread.php?t=173289). It doesn’t have as many features (for example, track priorities), and is more prone to bugs because it relies on inter-plugin communication. But it’s easier to setup for simple cases and it supports projects with massive numbers of tracks, while this modification is limited by the 64 channels per track that REAPER offers.
