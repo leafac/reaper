@@ -12,11 +12,12 @@ If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in pa
 
 ## Automixer
 
-<h3 align="center"><a href="https://youtu.be/qi1jQcIaOxo">Watch a video with a demonstration and instructions</a></h3>
+<h3 align="center">Watch the videos with demonstration and instructions:</h3>
 
-[Example project](https://archive.org/download/leafac/leafac_Automixer%20Examples.zip)
-
-[Automixer video editor FX Chain](effects/leafac_Automixer%20video%20editor.RfxChain)
+- [Main features](https://youtu.be/qi1jQcIaOxo).
+- [Automixer video editor](https://youtu.be/aEvO3ufOqvY).
+- [Example project](https://archive.org/download/leafac/leafac_Automixer%20Examples.zip).
+- [Automixer video editor FX Chain](effects/leafac_Automixer%20video%20editor.RfxChain).
 
 More information:
 
