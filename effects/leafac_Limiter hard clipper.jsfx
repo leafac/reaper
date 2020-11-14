@@ -1,0 +1,14 @@
+// https://youtu.be/0M_aDx874NU
+
+slider1:limit_db=0<-60,6,.1>Limit (dB)
+
+@slider
+
+limit_amplitude = 10^(limit_db / 20);
+
+@sample
+
+channel = -1; loop(num_ch, channel += 1;
+  spl(channel) =
+    max(-limit_amplitude, min(limit_amplitude, spl(channel)));
+);
