@@ -19,7 +19,7 @@ If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in pa
 
 See also:
 
-- [Example project](https://archive.org/download/leafac/leafac_Automixer%20Examples.zip).
+- [Example projects](https://archive.org/download/leafac/leafac_Automixer%20Examples.zip).
 - [Automixer video editor FX Chain](effects/leafac_Automixer%20video%20editor.RfxChain).
 
 Even more information:
