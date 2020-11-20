@@ -1,0 +1,34 @@
+// https://youtu.be/mnr3udsFZO0
+
+slider1:window_size_ms=300<0,1000,.1>Window size (ms)
+
+slider3:rms_db=0<-62,6,.1>RMS (dB)
+
+@slider
+
+window = 0;
+window_pointer = -1;
+
+window_size_samples = srate * window_size_ms / 1000;
+
+freembuf(window_size_samples + 1);
+
+@sample
+
+window_pointer += 1; window_pointer == window_size_samples ? window_pointer -= window_size_samples;
+// FIXME: Look at all the channels.
+window[window_pointer] = spl0;
+
+@gfx
+
+// RMS: Root Mean Square
+
+// SUM(window[window_pointer]) / SIZE(window)
+window_sum_squares = 0;
+window_sum_squares_index = -1; loop(window_size_samples, window_sum_squares_index += 1;
+  window_sum_squares += sqr(window[window_sum_squares_index]);
+);
+rms_amplitude = sqrt(window_sum_squares / window_size_samples);
+
+rms_db = 20 * log10(rms_amplitude);
+sliderchange(slider3);
