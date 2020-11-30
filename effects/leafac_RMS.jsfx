@@ -1,34 +1,47 @@
 // https://youtu.be/mnr3udsFZO0
+// https://youtu.be/IhFqOe29X90
 
 slider1:window_size_ms=300<0,1000,.1>Window size (ms)
 
-slider3:rms_db=0<-62,6,.1>RMS (dB)
+slider3:rms_db_definitional=0<-62,6,.1>RMS Definitional (dB)
+slider4:rms_db_optimized=0<-62,6,.1>RMS Optimized (dB)
 
 @slider
 
-window = 0;
+window_size_samples = max(1, srate * window_size_ms / 1000);
+
+window_definitional = 0;
+
+window_optimized = window_size_samples;
+window_sum_optimized = 0;
+
+freembuf(window_size_samples * 2 + 1);
+
 window_pointer = -1;
-
-window_size_samples = srate * window_size_ms / 1000;
-
-freembuf(window_size_samples + 1);
 
 @sample
 
 window_pointer += 1; window_pointer == window_size_samples ? window_pointer -= window_size_samples;
+
 // FIXME: Look at all the channels.
-window[window_pointer] = spl0;
+
+// Definitional
+window_definitional[window_pointer] = spl0;
+
+// Optimized
+window_sum_optimized -= window_optimized[window_pointer];
+window_sum_optimized += window_optimized[window_pointer] = sqr(spl0);
+rms_amplitude_optimized = sqrt(window_sum_optimized / window_size_samples);
+rms_db_optimized = 20 * log10(rms_amplitude_optimized);
+sliderchange(slider4);
 
 @gfx
 
-// RMS: Root Mean Square
-
-// SUM(window[window_pointer]) / SIZE(window)
-window_sum_squares = 0;
-window_sum_squares_index = -1; loop(window_size_samples, window_sum_squares_index += 1;
-  window_sum_squares += sqr(window[window_sum_squares_index]);
+// Definitional
+window_sum_definitional = 0;
+window_index_definitional = -1; loop(window_size_samples, window_index_definitional += 1;
+  window_sum_definitional += sqr(window_definitional[window_index_definitional]);
 );
-rms_amplitude = sqrt(window_sum_squares / window_size_samples);
-
-rms_db = 20 * log10(rms_amplitude);
+rms_amplitude_definitional = sqrt(window_sum_definitional / window_size_samples);
+rms_db_definitional = 20 * log10(rms_amplitude_definitional);
 sliderchange(slider3);
