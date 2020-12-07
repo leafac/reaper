@@ -1,6 +1,7 @@
 // https://youtu.be/mnr3udsFZO0
 // https://youtu.be/IhFqOe29X90
 // https://youtu.be/f12dXQ6Rx_8
+// https://youtu.be/H-yOsOZKC-k
 
 slider1:window_size_ms=300<0,1000,.1>Window size (ms)
 
@@ -8,20 +9,29 @@ slider3:rms_db_definitional=0<-62,6,.1>RMS Definitional (dB)
 slider4:rms_db_optimized=0<-62,6,.1>RMS Optimized (dB)
 slider5:rms_db_approximated=0<-62,6,.1>RMS Approximated (dB)
 
+@serialize
+
+1;
+
 @slider
 
 window_size_samples = max(1, srate * window_size_ms / 1000);
 
 window_pointer = -1;
 
+free_address = 0;
+
 // Definitional
-window_definitional = 0;
+windows_definitional = free_address; free_address += num_ch;
+channel = -1; loop(num_ch, channel += 1;
+  windows_definitional[channel] = free_address; free_address += window_size_samples;
+);
 
 // Optimized
-window_optimized = window_size_samples;
+window_optimized = free_address; free_address += window_size_samples;
 window_sum_optimized = 0;
 
-freembuf(window_size_samples * 2 + 1);
+freembuf(free_address + 1);
 
 // Approximated
 moving_average_approximated = 0;
@@ -31,20 +41,27 @@ moving_average_coefficient_approximated = 1 - exp(-1/window_size_samples);
 
 window_pointer += 1; window_pointer == window_size_samples ? window_pointer -= window_size_samples;
 
-// FIXME: Look at all the channels.
+// Mean squares channels
+mean_squares_channels = 0;
+channel = -1; loop(num_ch, channel += 1;
+  mean_squares_channels += sqr(spl(channel));
+);
+mean_squares_channels /= num_ch;
 
 // Definitional
-window_definitional[window_pointer] = spl0;
+channel = -1; loop(num_ch, channel += 1;
+  windows_definitional[channel][window_pointer] = spl(channel);
+);
 
 // Optimized
 window_sum_optimized -= window_optimized[window_pointer];
-window_sum_optimized += window_optimized[window_pointer] = sqr(spl0);
+window_sum_optimized += window_optimized[window_pointer] = mean_squares_channels;
 rms_amplitude_optimized = sqrt(window_sum_optimized / window_size_samples);
 rms_db_optimized = 20 * log10(rms_amplitude_optimized);
 sliderchange(slider4);
 
 // Approximated
-moving_average_approximated += moving_average_coefficient_approximated * (sqr(spl0) - moving_average_approximated);
+moving_average_approximated += moving_average_coefficient_approximated * (mean_squares_channels - moving_average_approximated);
 rms_amplitude_approximated = sqrt(moving_average_approximated);
 rms_db_approximated = 20 * log10(rms_amplitude_approximated);
 sliderchange(slider5);
@@ -52,10 +69,12 @@ sliderchange(slider5);
 @gfx
 
 // Definitional
-window_sum_definitional = 0;
-window_index_definitional = -1; loop(window_size_samples, window_index_definitional += 1;
-  window_sum_definitional += sqr(window_definitional[window_index_definitional]);
+windows_sum_definitional = 0;
+gfx_channel = -1; loop(num_ch, gfx_channel += 1;
+  window_index_definitional = -1; loop(window_size_samples, window_index_definitional += 1;
+    windows_sum_definitional += sqr(windows_definitional[gfx_channel][window_index_definitional]);
+  );
 );
-rms_amplitude_definitional = sqrt(window_sum_definitional / window_size_samples);
+rms_amplitude_definitional = sqrt(windows_sum_definitional / window_size_samples / num_ch);
 rms_db_definitional = 20 * log10(rms_amplitude_definitional);
 sliderchange(slider3);
