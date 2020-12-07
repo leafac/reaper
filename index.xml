@@ -59,6 +59,9 @@
   </category>
   <category name="Programming Audio Effects">
     <reapack name="leafac_RMS.jsfx" type="effect">
+      <version name="4.0.0">
+        <source>https://github.com/leafac/reaper/raw/beb2c12f2dccf421b4b159a0181dc1b955bc462d/effects/leafac_RMS.jsfx</source>
+      </version>
       <version name="3.0.0">
         <source>https://github.com/leafac/reaper/raw/d57fe39eaae7125bc4cbb19ba92e3ce3a3773319/effects/leafac_RMS.jsfx</source>
       </version>
