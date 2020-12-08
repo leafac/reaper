@@ -1,0 +1,14 @@
+BYPASS 0 0
+<VIDEO_EFFECT "Video processor" ""
+  <CODE
+    |// Multicam - Selector
+    |
+    |input_get_name(input_next_item(-1), #selected_camera_string);
+    |match("%d", #selected_camera_string, selected_camera_number);
+    |selected_camera_number = max(1, selected_camera_number);
+    |
+    |gfx_blit(input_track(selected_camera_number - 1));
+  >
+  CODEPARM 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000
+>
+WAK 0 0

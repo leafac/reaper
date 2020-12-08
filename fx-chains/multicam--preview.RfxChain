@@ -1,0 +1,33 @@
+BYPASS 0 0
+<VIDEO_EFFECT "Video processor" ""
+  <CODE
+    |// Multicam - Preview
+    |
+    |input_get_name(input_next_item(0), #selected_camera_string);
+    |match("%d", #selected_camera_string, selected_camera_number);
+    |selected_camera_number = max(1, selected_camera_number);
+    |
+    |gfx_fillrect(0, 0, project_w, project_h);
+    |cameras = input_track_count() - 1;
+    |grid_size = ceil(sqrt(cameras));
+    |preview_w = project_w / 2 / grid_size;
+    |preview_h = project_h / grid_size;
+    |camera_number = 0; loop(cameras, camera_number += 1;
+    |  preview_x_index = (camera_number - 1) % grid_size;
+    |  preview_y_index = floor((camera_number - 1) / grid_size);
+    |  preview_x = preview_x_index * preview_w;
+    |  preview_y = preview_y_index * preview_h;
+    |  gfx_blit(input_track(camera_number), 1, preview_x, preview_y, preview_w, preview_h);
+    |  sprintf(#camera_string, "%d", camera_number);
+    |  gfx_str_measure(#camera_string, label_w, label_h);
+    |  gfx_fillrect(preview_x, preview_y, label_w, label_h);
+    |  camera_number == selected_camera_number ? gfx_set(1, 0, 0) : gfx_set(1);
+    |  gfx_str_draw(#camera_string, preview_x, preview_y);
+    |  gfx_set(0);
+    |);
+    |
+    |gfx_blit(input_track(0), 1, project_w / 2, 0, project_w / 2, project_h);
+  >
+  CODEPARM 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000
+>
+WAK 0 0
