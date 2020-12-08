@@ -14,7 +14,7 @@
     </reapack>
     <reapack name="leafac_Render project to disk… (warn if playrate is not 100%).lua" type="script">
       <version name="1.0.0">
-        <source main="main" file="leafac_Render project to disk… (warn if playrate is not 100%).lua">https://github.com/leafac/reaper/raw/d03686f1468caf380a28062784bf6c37e2ce0d6b/scripts/leafac_Render%20project%20to%20disk…%20(warn%20if%20playrate%20is%20not%20100%25).lua</source>
+        <source main="main" file="leafac_Render project to disk... (warn if playrate is not 100%).lua">https://github.com/leafac/reaper/raw/153597449f5fd3c9845b17dd0dd7d49219c3f9ee/scripts/leafac_Render%20project%20to%20disk...%20(warn%20if%20playrate%20is%20not%20100%25).lua</source>
       </version>
     </reapack>
     <reapack name="leafac_Multicam.lua" type="script">
