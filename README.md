@@ -10,9 +10,17 @@ https://github.com/leafac/reaper/raw/master/index.xml
 
 If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in particular, 11:26).
 
+## Multicam Editing
+
+<h3 align="center"><a href="https://youtu.be/1BvuRgKNnqc">Watch the video with demonstration and instructions!</a></h3>
+
+Install the FX Chains from [`fx-chains`](fx-chains/):
+- [`fx-chains/multicam--preview.RfxChain`](fx-chains/multicam--preview.RfxChain)
+- [`fx-chains/multicam--selector.RfxChain`](fx-chains/multicam--selector.RfxChain)
+
 ## Automixer
 
-<h3 align="center">Watch the videos with demonstration and instructions:</h3>
+<h3 align="center">Watch the videos with demonstration and instructions!</h3>
 
 - [Main features](https://youtu.be/qi1jQcIaOxo).
 - [Automixer video editor](https://youtu.be/aEvO3ufOqvY).
