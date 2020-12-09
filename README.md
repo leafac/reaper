@@ -12,7 +12,7 @@ If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in pa
 
 ## Multicam Editing
 
-<h3 align="center"><a href="https://youtu.be/1BvuRgKNnqc">Watch the video with the demonstration and instructions!</a></h3>
+<h3 align="center"><a href="https://youtu.be/1BvuRgKNnqc">Watch the video with a demonstration and instructions!</a></h3>
 
 Install the FX Chains from [`fx-chains`](fx-chains/):
 - [`fx-chains/multicam--preview.RfxChain`](fx-chains/multicam--preview.RfxChain)
