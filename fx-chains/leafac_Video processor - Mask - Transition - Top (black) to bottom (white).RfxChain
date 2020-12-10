@@ -1,9 +1,7 @@
 BYPASS 0 0
 <VIDEO_EFFECT "Video processor" ""
   <CODE
-    |// Mask and compose example
-    |
-    |size = 1/4;
+    |// Mask - Transition - Top (black) to bottom (white)
     |
     |gfx_mode_normal = 0;
     |gfx_mode_multiply = 3;
@@ -11,25 +9,19 @@ BYPASS 0 0
     |
     |colorspace = "RGBA";
     |
-    |gfx_dest = camera_with_rounded_corners = gfx_img_alloc(project_w, project_h);
+    |gfx_dest = white = gfx_img_alloc(project_w, project_h);
     |gfx_blit(0);
+    |gfx_evalrect(0, 0, project_w, project_h, "a = r;");
     |gfx_mode = gfx_mode_multiply;
-    |gfx_blit(input_track(0));
+    |gfx_blit(input_track(1));
     |
     |gfx_dest = -1;
     |gfx_mode = gfx_mode_normal;
-    |gfx_blit(input_track(1));
+    |gfx_blit(input_track(0));
     |gfx_mode = gfx_mode_use_source_alpha;
-    |gfx_blit(
-    |  camera_with_rounded_corners,
-    |  1,
-    |  project_w * (1 - size),
-    |  0,
-    |  project_w * size,
-    |  project_h * size
-    |);
+    |gfx_blit(white);
     |
-    |gfx_img_free(camera_with_rounded_corners);
+    |gfx_img_free(white);
   >
   CODEPARM 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000
 >

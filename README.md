@@ -14,9 +14,9 @@ If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in pa
 
 <h3 align="center"><a href="https://youtu.be/1BvuRgKNnqc">Watch the video with a demonstration and instructions!</a></h3>
 
-Install the FX Chains from [`fx-chains`](fx-chains/):
-- [`fx-chains/multicam--preview.RfxChain`](fx-chains/multicam--preview.RfxChain)
-- [`fx-chains/multicam--selector.RfxChain`](fx-chains/multicam--selector.RfxChain)
+Install the FX Chains:
+- [`fx-chains/leafac_Video processor - Multicam - Preview.RfxChain`](fx-chains/leafac_Video%20processor%20-%20Multicam%20-%20Preview.RfxChain)
+- [`fx-chains/leafac_Video processor - Multicam - Selector.RfxChain`](fx-chains/leafac_Video%20processor%20-%20Multicam%20-%20Selector.RfxChain)
 
 ## Automixer
 

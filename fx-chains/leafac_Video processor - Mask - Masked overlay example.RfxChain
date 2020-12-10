@@ -1,11 +1,17 @@
 BYPASS 0 0
 <VIDEO_EFFECT "Video processor" ""
   <CODE
-    |// Mask
+    |// Mask - Masked overlay example
     |
-    |gfx_blit(0);
-    |gfx_mode = 3;
-    |gfx_blit(input_track(0));
+    |size = 1/4;
+    |
+    |gfx_mode_use_source_alpha = 0x10000;
+    |
+    |colorspace = "RGBA";
+    |
+    |gfx_blit(input_track(2));
+    |gfx_mode = gfx_mode_use_source_alpha;
+    |gfx_blit(input_track(0), 1, project_w * (1 - size), 0, project_w * size, project_h * size);
   >
   CODEPARM 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000
 >

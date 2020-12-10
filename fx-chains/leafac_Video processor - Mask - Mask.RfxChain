@@ -1,20 +1,16 @@
 BYPASS 0 0
 <VIDEO_EFFECT "Video processor" ""
   <CODE
-    |// Masked compose example
+    |// Mask - Mask
     |
-    |size = 1/4;
+    |gfx_mode_multiply = 3;
+    |
     |colorspace = "RGBA";
-    |gfx_blit(input_track(2));
-    |gfx_mode = 0x10000;
-    |gfx_blit(
-    |  input_track(0),
-    |  1,
-    |  project_w * (1 - size),
-    |  0,
-    |  project_w * size,
-    |  project_h * size
-    |);
+    |
+    |gfx_blit(0);
+    |gfx_evalrect(0, 0, project_w, project_h, "a = r;");
+    |gfx_mode = gfx_mode_multiply;
+    |gfx_blit(input_track(0));
   >
   CODEPARM 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000
 >

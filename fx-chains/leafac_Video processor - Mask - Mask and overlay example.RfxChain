@@ -1,0 +1,30 @@
+BYPASS 0 0
+<VIDEO_EFFECT "Video processor" ""
+  <CODE
+    |// Mask - Mask and overlay example
+    |
+    |size = 1/4;
+    |
+    |gfx_mode_normal = 0;
+    |gfx_mode_multiply = 3;
+    |gfx_mode_use_source_alpha = 0x10000;
+    |
+    |colorspace = "RGBA";
+    |
+    |gfx_dest = masked_overlay = gfx_img_alloc(project_w, project_h);
+    |gfx_blit(0);
+    |gfx_evalrect(0, 0, project_w, project_h, "a = r;");
+    |gfx_mode = gfx_mode_multiply;
+    |gfx_blit(input_track(0));
+    |
+    |gfx_dest = -1;
+    |gfx_mode = gfx_mode_normal;
+    |gfx_blit(input_track(1));
+    |gfx_mode = gfx_mode_use_source_alpha;
+    |gfx_blit(masked_overlay, 1, project_w * (1 - size), 0, project_w * size, project_h * size);
+    |
+    |gfx_img_free(masked_overlay);
+  >
+  CODEPARM 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000
+>
+WAK 0 0
