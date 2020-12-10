@@ -1,0 +1,13 @@
+// https://youtu.be/wXyxUZnEm8o
+
+slider1:gain_db=-18<-60,0,.1>Gain (dB)
+
+@slider
+
+gain_amplitude = 10^(gain_db / 20);
+
+@sample
+
+channel = -1; loop(num_ch, channel += 1;
+  spl(channel) = (rand(2) - 1) * gain_amplitude;
+);

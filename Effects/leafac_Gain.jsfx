@@ -1,0 +1,23 @@
+// https://youtu.be/FsWP5zwaPDQ
+// https://youtu.be/cUHxhbY-nr0
+
+slider1:gain_dB=0<-60,12,.1>Gain (dB)
+
+@slider
+
+gain_amplitude = 10^(gain_dB / 20);
+
+@sample
+
+// dB = 20*log10(abs(amplitude)     (/ MAXIMUM_AMPLITUDE));
+// amplitude = 10^(dB/20);
+
+// signal_dB - constant_in_dB
+// log10(signal_amplitude) - log10(constant_in_amplitude)
+// signal_amplitude / constant_in_amplitude
+
+// amplitude -> dB -> do some computation -> amplitude
+
+channel = -1; loop(num_ch, channel += 1;
+  spl(channel) *= gain_amplitude;
+);

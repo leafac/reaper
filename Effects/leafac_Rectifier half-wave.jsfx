@@ -1,0 +1,7 @@
+// https://youtu.be/0M_aDx874NU
+
+@sample
+
+channel = -1; loop(num_ch, channel += 1;
+  spl(channel) = max(0, spl(channel));
+);

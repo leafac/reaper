@@ -1,0 +1,20 @@
+// https://youtu.be/0M_aDx874NU
+
+@sample
+
+mid = spl0;
+side = spl1;
+
+// mid = left + right;
+// side = left - right;
+
+left = (mid + side) / 2;
+right = (mid - side) / 2;
+
+// left = (mid + side) / 2
+//      = (left + right + left - right) / 2
+//      = (2 * left) / 2
+//      = left
+
+spl0 = left;
+spl1 = right;

@@ -1,0 +1,22 @@
+// https://youtu.be/Cs0J-quWiBg
+
+slider1:left_to_left_db=0<-200,12,.1>Left → Left
+slider2:left_to_right_db=-200<-200,12,.1>Left → Right
+slider3:right_to_left_db=-200<-200,12,.1>Right → Left
+slider4:right_to_right_db=0<-200,12,.1>Right → Right
+
+@slider
+
+left_to_left_amplitude = 10^(left_to_left_db / 20);
+left_to_right_amplitude = 10^(left_to_right_db / 20);
+right_to_left_amplitude = 10^(right_to_left_db / 20);
+right_to_right_amplitude = 10^(right_to_right_db / 20);
+
+@sample
+
+left = spl0;
+right = spl1;
+
+spl0 = left * left_to_left_amplitude + right * right_to_left_amplitude;
+spl1 = left * left_to_right_amplitude + right * right_to_right_amplitude;
+

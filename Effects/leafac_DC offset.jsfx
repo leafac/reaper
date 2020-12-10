@@ -1,0 +1,9 @@
+// https://youtu.be/Cs0J-quWiBg
+
+slider1:offset=0<-2,2,.001>Offset
+
+@sample
+
+channel = -1; loop(num_ch, channel += 1;
+  spl(channel) += offset;
+);
