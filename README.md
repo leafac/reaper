@@ -15,8 +15,9 @@ If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in pa
 <h3 align="center"><a href="https://youtu.be/1BvuRgKNnqc">Watch the video with a demonstration and instructions!</a></h3>
 
 Install the FX Chains:
-- [`fx-chains/leafac_Video processor - Multicam - Preview.RfxChain`](fx-chains/leafac_Video%20processor%20-%20Multicam%20-%20Preview.RfxChain)
-- [`fx-chains/leafac_Video processor - Multicam - Selector.RfxChain`](fx-chains/leafac_Video%20processor%20-%20Multicam%20-%20Selector.RfxChain)
+
+- [`FXChains/leafac_Video processor - Multicam - Preview.RfxChain`](FXChains/leafac_Video%20processor%20-%20Multicam%20-%20Preview.RfxChain)
+- [`FXChains/leafac_Video processor - Multicam - Selector.RfxChain`](FXChains/leafac_Video%20processor%20-%20Multicam%20-%20Selector.RfxChain)
 
 ## Automixer
 
@@ -28,7 +29,7 @@ Install the FX Chains:
 See also:
 
 - [Example projects](https://archive.org/download/leafac/leafac_Automixer%20Examples.zip).
-- [Automixer video editor FX Chain](effects/leafac_Automixer%20video%20editor.RfxChain).
+- [Automixer video editor FX Chain](FXChains/leafac_Automixer%20video%20editor.RfxChain).
 
 Even more information:
 
@@ -48,9 +49,9 @@ Even more information:
 
 ## Third-Party ReaPack Redistribution
 
-| Extension                                                                                               | Author                                                          | Repository Index URL                                                           |
-| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| **All**                                                                                                 |                                                                 | `https://github.com/leafac/reaper/raw/master/third-party/index.xml`            |
-| [SWS](http://sws-extension.org) (For macOS. UserPlugin only, no Python, no Grooves.)                    |                                                                 | `https://github.com/leafac/reaper/raw/master/third-party/sws/sws.xml`          |
-| [ReEQ and ReSpectrum](https://forum.cockos.com/showthread.php?t=213501)                                 | [nitsuj](https://forum.cockos.com/member.php?u=121300)          | `https://github.com/leafac/reaper/raw/master/third-party/reeq/index.xml`       |
-| [ABLevelMatching, AutoGainStaging, and EBUR128LM](https://www.tb-software.com/TBProAudio/download.html) | [TBProAudio](https://www.tb-software.com/TBProAudio/index.html) | `https://github.com/leafac/reaper/raw/master/third-party/tbproaudio/index.xml` |
+| Extension                                                                                               | Author                                                          | Repository Index URL                                                          |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **All**                                                                                                 |                                                                 | `https://github.com/leafac/reaper/raw/master/ThirdParty/index.xml`            |
+| [SWS](http://sws-extension.org) (For macOS. UserPlugin only, no Python, no Grooves.)                    |                                                                 | `https://github.com/leafac/reaper/raw/master/ThirdParty/SWS/sws.xml`          |
+| [ReEQ and ReSpectrum](https://forum.cockos.com/showthread.php?t=213501)                                 | [nitsuj](https://forum.cockos.com/member.php?u=121300)          | `https://github.com/leafac/reaper/raw/master/ThirdParty/ReEQ/index.xml`       |
+| [ABLevelMatching, AutoGainStaging, and EBUR128LM](https://www.tb-software.com/TBProAudio/download.html) | [TBProAudio](https://www.tb-software.com/TBProAudio/index.html) | `https://github.com/leafac/reaper/raw/master/ThirdParty/TBProAudio/index.xml` |
