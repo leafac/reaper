@@ -294,6 +294,9 @@
       </version>
     </reapack>
     <reapack name="leafac_Oscilloscope.jsfx" type="effect">
+      <version name="2.0.0">
+        <source>https://github.com/leafac/reaper/raw/71303abb72f1599971ba84b09b571ceff6bfc9c9/Effects/leafac_Oscilloscope.jsfx</source>
+      </version>
       <version name="1.0.1">
         <source>https://github.com/leafac/reaper/raw/a0ed4520c0690dff2162a3cc2545a3e6838debbd/effects/leafac_Oscilloscope.jsfx</source>
       </version>
@@ -302,6 +305,9 @@
       </version>
     </reapack>
     <reapack name="leafac_Bit crusher.jsfx" type="effect">
+      <version name="2.0.0">
+        <source>https://github.com/leafac/reaper/raw/71303abb72f1599971ba84b09b571ceff6bfc9c9/Effects/leafac_Bit%20crusher.jsfx</source>
+      </version>
       <version name="1.0.0">
         <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_Bit%20crusher.jsfx</source>
       </version>
