@@ -1,6 +1,14 @@
 // https://youtu.be/eKnQrbEkZhI
+// https://youtu.be/BS-SkJllZOU
 
 slider1:bits=16<1,16,.1>Bits
 
+@slider
+
+bit_reduction_factor = 2^(bits + 1);
+
 @sample
-spl0 = spl1 = floor(spl0 * 2^bits) / 2^bits;
+
+channel = -1; loop(num_ch, channel += 1;
+  spl(channel) = floor(spl(channel) * bit_reduction_factor) / bit_reduction_factor;
+);

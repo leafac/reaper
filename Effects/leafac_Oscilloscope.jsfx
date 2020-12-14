@@ -1,9 +1,10 @@
 // https://youtu.be/dJnABqy_kB0
 // https://youtu.be/cUHxhbY-nr0
+// https://youtu.be/BS-SkJllZOU
 
 options:no_meter
 
-slider1:is_paused=0<0,1,1{Play,Pause}> 
+slider1:state=0<0,1,1{Play,Pause}> 
 
 slider3:gfx_samples_size=144000<144000,10,1>Zoom horizontally (Number of samples)
 slider4:amplitude_multiplication_factor=1<0,20,.01>Zoom vertically (Amplitude multiplication factor)
@@ -11,43 +12,69 @@ slider4:amplitude_multiplication_factor=1<0,20,.01>Zoom vertically (Amplitude mu
 slider6:gfx_samples_offset=0<144000,0,1>Move horizontally (Number of samples)
 slider7:move_vertically_factor=0<-1,1,.01>Move vertically (Amplitude multiplication factor)
 
+@serialize
+
+1;
+
 @init
 
-samples = 0;
+state_play = 0;
+state_pause = 1;
+
 samples_size = 48000 * 3 * 2;
-freembuf(samples_size + 1);
+
+address = 0;
+
+samples = address; address += num_ch;
+channel = -1; loop(num_ch, channel += 1;
+  samples[channel] = address; address += samples_size;
+);
+
+freembuf(address + 1);
 
 samples_counter = -1;
 
-old_is_paused = is_paused;
+old_state = state;
 
 @slider
 
-old_is_paused == 1 && is_paused == 0 ? memset(samples, 0, samples_size); old_is_paused = is_paused;
+old_state == state_pause && state == state_play ? (
+  channel = -1; loop(num_ch, channel += 1;
+    memset(samples[channel], 0, samples_size);
+  );
+);
+old_state = state;
 
 @sample
 
-!is_paused ? (
+state == state_play ? (
   samples_counter += 1; samples_counter == samples_size ? samples_counter -= samples_size;
 
-  // FIXME: Maybe look at all the channels.
-  samples[samples_counter] = spl0;
+  channel = -1; loop(num_ch, channel += 1;
+    samples[channel][samples_counter] = spl(channel);
+  );
 );
 
 @gfx
 
-gfx_h_middle = gfx_h/2;
+gfx_clear = 255 + 255 * 256 + 255 * 65536;
+
+gfx_h_middle = gfx_h / 2 * (1 - move_vertically_factor);
+amplitude_h = gfx_h / 2;
 
 gfx_set(0.5);
-gfx_line(0, gfx_h_middle - gfx_h_middle * move_vertically_factor, gfx_w, gfx_h_middle - gfx_h_middle * move_vertically_factor);
+gfx_line(0, gfx_h_middle, gfx_w, gfx_h_middle);
 
-gfx_set(1);
-gfx_x = gfx_w;
-gfx_samples_counter = samples_counter - gfx_samples_offset; gfx_samples_counter <= -1 ? gfx_samples_counter += samples_size;
-loop(gfx_samples_size, gfx_samples_counter -= 1; gfx_samples_counter == -1 ? gfx_samples_counter += samples_size;
-  gfx_lineto(
-    gfx_x - gfx_w / gfx_samples_size,
-    gfx_h_middle - gfx_h_middle * move_vertically_factor - samples[gfx_samples_counter] * gfx_h_middle * amplitude_multiplication_factor
+gfx_channel = num_ch; loop(num_ch, gfx_channel -= 1;
+  color_factor = gfx_channel / (num_ch - 1);
+  gfx_set(color_factor, 0, 1 - color_factor);
+  gfx_x = gfx_w;
+  gfx_samples_counter = samples_counter - gfx_samples_offset; gfx_samples_counter <= -1 ? gfx_samples_counter += samples_size;
+  loop(gfx_samples_size, gfx_samples_counter -= 1; gfx_samples_counter == -1 ? gfx_samples_counter += samples_size;
+    gfx_lineto(
+      gfx_x - gfx_w / gfx_samples_size,
+      gfx_h_middle - samples[gfx_channel][gfx_samples_counter] * amplitude_h * amplitude_multiplication_factor
+    );
   );
 );
 
