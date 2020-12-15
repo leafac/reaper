@@ -1,14 +1,21 @@
 // https://youtu.be/eKnQrbEkZhI
 // https://youtu.be/BS-SkJllZOU
+// https://youtu.be/6C4bv1vVgsc
 
-slider1:bits=16<1,16,.1>Bits
+slider1:bits=16<.1,16,.1>Bits
+slider2:gain_db=-18<-60,0,.1>Gain (dB)
 
 @slider
 
-bit_reduction_factor = 2^(bits + 1);
+gain_amplitude = 10^(gain_db / 20);
 
 @sample
 
 channel = -1; loop(num_ch, channel += 1;
-  spl(channel) = floor(spl(channel) * bit_reduction_factor) / bit_reduction_factor;
+  sample = spl(channel);
+  clamped = min(1, max(-1, sample));
+  normalized = (clamped + 1) / 2;
+  rounded = floor(normalized * (2^bits - 1) + .5) / (2^bits - 1);
+  crushed_sample = rounded * 2 - 1;
+  spl(channel) = crushed_sample * gain_amplitude;
 );
