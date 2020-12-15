@@ -276,6 +276,9 @@
       </version>
     </reapack>
     <reapack name="leafac_Burn-in speakers.jsfx" type="effect">
+      <version name="2.0.0">
+        <source>https://github.com/leafac/reaper/raw/f72ed6a49452c9ba87d82e8421fdf2157b9a2d57/Effects/leafac_Burn-in%20speakers.jsfx</source>
+      </version>
       <version name="1.0.0">
         <source>https://github.com/leafac/reaper/raw/ca54beb9ea98e5bedb7c2e117fb42a589f725f0d/leafac_Burn-in%20speakers.jsfx</source>
       </version>
@@ -305,6 +308,9 @@
       </version>
     </reapack>
     <reapack name="leafac_Bit crusher.jsfx" type="effect">
+      <version name="3.0.0">
+        <source>https://github.com/leafac/reaper/raw/f72ed6a49452c9ba87d82e8421fdf2157b9a2d57/Effects/leafac_Bit%20crusher.jsfx</source>
+      </version>
       <version name="2.0.0">
         <source>https://github.com/leafac/reaper/raw/71303abb72f1599971ba84b09b571ceff6bfc9c9/Effects/leafac_Bit%20crusher.jsfx</source>
       </version>
