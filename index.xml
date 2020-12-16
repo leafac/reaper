@@ -3,6 +3,9 @@
   <category name="Utility">
     <reapack name="leafac_Automixer.jsfx" type="effect">
       <version name="1.1.0">
+        <source>https://github.com/leafac/reaper/raw/19d90f6b10e799784dd216c69be660540a3de6a2/Effects/leafac_Automixer.jsfx</source>
+      </version>
+      <version name="1.1.0">
         <source>https://github.com/leafac/reaper/raw/2d3fa5161733d9ac01d9ae953a217e1f92718f4d/effects/leafac_Automixer.jsfx</source>
       </version>
       <version name="1.0.1">
