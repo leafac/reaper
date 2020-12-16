@@ -64,20 +64,21 @@ rms_sample_counter = -1;
 track_gain_maximum_difference_amplitude = 10^(track_gain_maximum_difference_db / 20);
 track_gain_maximum_debounce_samples = max(1, ceil(srate * track_gain_maximum_debounce_ms / 1000));
 
-memtop = 0;
-tracks_priorities = memtop; memtop += tracks_maximum;
-tracks_squares = memtop; memtop += tracks * rms_size_samples;
-tracks_sums_squares = memtop; memtop += tracks;
-tracks_rmss = memtop; memtop += tracks;
-tracks_gains_unnormalized = memtop; memtop += tracks;
-tracks_gains = memtop; memtop += tracks;
-tracks_rmss_gained = memtop; memtop += tracks;
-memset(0, 0, memtop);
-freembuf(memtop + 1);
-
+address = 0;
+tracks_priorities = address; address += tracks_maximum;
 track = -1; loop(tracks_maximum, track += 1;
   tracks_priorities[track] = slider(33 + track);
 );
+tracks_squares = address; address += tracks;
+track = -1; loop(tracks, track += 1;
+  tracks_squares[track] = address; memset(address, 0, rms_size_samples); address += rms_size_samples;
+);
+tracks_sums_squares = address; memset(address, 0, tracks); address += tracks;
+tracks_rmss = address; memset(address, 0, tracks); address += tracks;
+tracks_gains_unnormalized = address; memset(address, 0, tracks); address += tracks;
+tracks_gains = address; memset(address, 0, tracks); address += tracks;
+tracks_rmss_gained = address; memset(address, 0, tracks); address += tracks;
+freembuf(address + 1);
 
 @sample
 
@@ -91,12 +92,12 @@ track = -1; loop(tracks, track += 1;
   );
   track_square /= channels_per_track;
   track_sum_squares =
-    tracks_sums_squares[track] +
-    track_square -
-    tracks_squares[track * rms_size_samples + rms_sample_counter];
+    tracks_sums_squares[track] -
+    tracks_squares[track][rms_sample_counter] +
+    track_square;
   track_rms = sqrt(track_sum_squares / rms_size_samples);
 
-  tracks_squares[track * rms_size_samples + rms_sample_counter] = track_square;
+  tracks_squares[track][rms_sample_counter] = track_square;
   tracks_sums_squares[track] = track_sum_squares;
   tracks_rmss[track] = track_rms;
   sum_of_tracks_rmss += track_rms;
@@ -141,7 +142,7 @@ abs(track_gain_maximum_gain - tracks_gains[gmem[0]]) < track_gain_maximum_differ
 
 @serialize
 
-version = 110;
+version = 120;
 file_var(0, version);
 
 @gfx 530 180
@@ -202,12 +203,12 @@ track_gfx = -1; loop(tracks, track_gfx += 1;
   gfx_x = track_left;
   gfx_y = track_meters_bottom;
   sprintf(#title, "%d", track_gfx + 1);
-  track_gfx == gmem[0] ? gfx_g = gfx_b = 0;
+  track_gfx == gmem[0] ? gfx_set(1, 0, 0);
   gfx_drawstr(#title, gfx_center_horizontally | gfx_center_vertically, track_right, track_bottom);
-  gfx_g = gfx_b = 1;
+  gfx_set(1);
 );
 
-gfx_g = gfx_b = 0;
+gfx_set(1, 0, 0);
 gfx_x = legend_padding_left;
 gfx_y = gfx_h - legend_padding_bottom;
 gfx_drawstr("Video track");
