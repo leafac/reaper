@@ -27,12 +27,14 @@ reaper.SetMediaTrackInfo_Value(tracks[#tracks], "I_FOLDERDEPTH",
                                reaper.GetMediaTrackInfo_Value(tracks[#tracks],
                                                               "I_FOLDERDEPTH") -
                                    1, true)
+
 reaper.SetMediaTrackInfo_Value(parent, "I_NCHAN", parentChannels)
 for index, track in ipairs(tracks) do
     reaper.SetMediaTrackInfo_Value(track, "I_NCHAN", channelsPerTrack)
     reaper.SetMediaTrackInfo_Value(track, "C_MAINSEND_OFFS",
                                    (index - 1) * channelsPerTrack)
 end
+
 local automixerFX = reaper.TrackFX_AddByName(parent, "leafac_Automixer.jsfx",
                                              false, -1)
 reaper.TrackFX_Show(parent, automixerFX, 3)
