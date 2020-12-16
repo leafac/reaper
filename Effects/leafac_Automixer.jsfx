@@ -142,7 +142,7 @@ abs(track_gain_maximum_gain - tracks_gains[gmem[0]]) < track_gain_maximum_differ
 
 @serialize
 
-version = 120;
+version = 111;
 file_var(0, version);
 
 @gfx 530 180
