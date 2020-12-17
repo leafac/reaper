@@ -23,6 +23,7 @@ Install the FX Chains:
 
 <h3 align="center">Watch the videos with demonstrations and instructions!</h3>
 
+- [Quick start](https://youtu.be/hSnk6ueU3hQ).
 - [Main features](https://youtu.be/qi1jQcIaOxo).
 - [Automixer video editor](https://youtu.be/aEvO3ufOqvY).
 
