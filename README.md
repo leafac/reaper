@@ -30,7 +30,7 @@ Install the FX Chains:
 See also:
 
 - [Example projects](https://archive.org/download/leafac/leafac_Automixer%20Examples.zip).
-- [Automixer video editor FX Chain](FXChains/leafac_Automixer%20video%20editor.RfxChain).
+- [Automixer video editor FX Chain](FXChains/leafac_Video%20processor%20-%20Automixer.RfxChain).
 
 Even more information:
 
