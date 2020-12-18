@@ -1,10 +1,11 @@
 BYPASS 0 0
 <VIDEO_EFFECT "Video processor" ""
   <CODE
-    |// Automixer video editor
+    |// Automixer
+    |//@param 1:instance_identifier 'Instance identifier' 0 0 50 0 1
     |//@gmem=leafac_Automixer
     |
-    |gfx_blit(input_track(gmem[0]));
+    |gfx_blit(input_track(gmem[instance_identifier]));
   >
   CODEPARM 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000
 >
