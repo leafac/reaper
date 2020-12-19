@@ -20,7 +20,7 @@ run("SWS/BR: Normalize loudness of selected items to -23 LUFS",
 run("Item: Auto trim/split items (remove silence)...", 40315)
 run(
     "Script: leafac_Remove gaps between selected items (Reposition selected items across tracks).lua",
-    "_RS0b464a9bf9f8e3f93acce0c86693904bf0011bda")
+    "_RSc57125e96decf0607c2f1e2ab51965ed44d29f76")
 run("SWS: Crossfade adjacent selected items (move edges of adjacent items)",
     "_SWS_CROSSFADE")
 
