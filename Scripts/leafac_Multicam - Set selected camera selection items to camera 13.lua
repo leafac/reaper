@@ -1,6 +1,6 @@
 local itemsCount = reaper.CountSelectedMediaItems(0)
 if itemsCount == 0 then
-    reaper.MB("No camera selection items selected.", "Error", 0)
+    reaper.MB("No camera selection items selected", "Error", 0)
     return
 end
 local camera = string.match(select(2, reaper.get_action_context()),

@@ -2,7 +2,7 @@ local tracks = {}
 for trackIndex = 0, reaper.CountSelectedTracks(0) - 1 do
     table.insert(tracks, reaper.GetSelectedTrack(0, trackIndex))
 end
-if #tracks == 0 then return reaper.MB("No tracks selected.", "Error", 0) end
+if #tracks == 0 then return reaper.MB("No tracks selected", "Error", 0) end
 
 local channelsPerTrack = 0
 for _, track in ipairs(tracks) do
@@ -14,7 +14,7 @@ local parentChannels = #tracks * channelsPerTrack
 if parentChannels > 64 then
     return reaper.MB(
                "The Automixer track would need to have " .. parentChannels ..
-                   " channels, which is more than the 64 supported by REAPER.",
+                   " channels, which is more than the 64 supported by REAPER",
                "Error", 0)
 end
 
