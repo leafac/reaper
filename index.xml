@@ -27,6 +27,11 @@
         <source>https://github.com/leafac/reaper/raw/3f93ca06387d419e045790279f18c8600e8971fe/leafac_Automixer.jsfx</source>
       </version>
     </reapack>
+    <reapack name="leafac_Prepare selected items for editing....lua" type="script">
+      <version name="1.0.0">
+        <source main="main">https://github.com/leafac/reaper/raw/cebbdbee0575830f29c3ae48af10633ed676fc75/Scripts/leafac_Prepare%20selected%20items%20for%20editing....lua</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Truncate silence in selected items and trim....lua" type="script">
       <version name="1.1.0">
         <source main="main">https://github.com/leafac/reaper/raw/15e22e50247cbe0fe27444ed3c835a7e66c4acc6/Scripts/leafac_Truncate%20silence%20in%20selected%20items%20and%20trim....lua</source>
