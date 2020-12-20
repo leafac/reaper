@@ -1,39 +1,19 @@
-if reaper.CountSelectedMediaItems(0) == 0 then
-    return reaper.MB("No items selected", "Error", 0)
+local function run(description, identifier)
+    local identifierNumber = type(identifier) == "number" and identifier or
+                                 reaper.NamedCommandLookup(identifier, 0)
+    if identifierNumber == 0 then
+        error(
+            "Command not found: “" .. description .. "” (" .. identifier ..
+                "). For this script to work you must install SWS and all the packages from the default ReaPack repositories. If you already did that, then this is a bug; please report it to reaper@leafac.com or at https://github.com/leafac/reaper/issues/new.")
+    end
+    reaper.Main_OnCommand(identifierNumber, 0)
 end
 
 reaper.Undo_BeginBlock()
 
-reaper.Main_OnCommand(40315, 0) -- Item: Auto trim/split items (remove silence)...
-
-local items = {}
-local minimumStart = math.huge
-local maximumStop = -math.huge
-for itemIndex = 0, reaper.CountSelectedMediaItems(0) - 1 do
-    local item = reaper.GetSelectedMediaItem(0, itemIndex)
-    local start = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-    local stop = start + reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
-    items[{start = start, stop = stop}] = true
-    minimumStart = math.min(minimumStart, start)
-    maximumStop = math.max(maximumStop, stop)
-end
-
-local gaps = {{start = minimumStart, stop = maximumStop}}
-for item in pairs(items) do
-    local newGaps = {}
-    local function addGap(gap)
-        if gap.start < gap.stop then table.insert(newGaps, gap) end
-    end
-    for _, gap in ipairs(gaps) do
-        addGap({start = math.max(gap.start, item.stop), stop = gap.stop})
-        addGap({start = gap.start, stop = math.min(gap.stop, item.start)})
-    end
-    gaps = newGaps
-end
-
-for _, gap in ipairs(gaps) do
-    reaper.GetSet_LoopTimeRange(true, false, gap.start, gap.stop, false)
-    reaper.Main_OnCommand(40201, 0) -- Time selection: Remove contents of time selection (moving later items)
-end
+run("Item: Auto trim/split items (remove silence)...", 40315)
+run(
+    "Script: leafac_Remove gaps between selected items (Reposition selected items across tracks).lua",
+    "_RSc57125e96decf0607c2f1e2ab51965ed44d29f76")
 
 reaper.Undo_EndBlock("Truncate silence in selected items and trim...", -1)
