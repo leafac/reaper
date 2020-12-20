@@ -4,6 +4,8 @@ end
 
 reaper.Undo_BeginBlock()
 
+reaper.Main_OnCommand(40315, 0) -- Item: Auto trim/split items (remove silence)...
+
 local items = {}
 local minimumStart = math.huge
 local maximumStop = -math.huge
@@ -34,6 +36,4 @@ for _, gap in ipairs(gaps) do
     reaper.Main_OnCommand(40201, 0) -- Time selection: Remove contents of time selection (moving later items)
 end
 
-reaper.Undo_EndBlock(
-    "Remove gaps between selected items (Reposition selected items across tracks)",
-    -1)
+reaper.Undo_EndBlock("Truncate silence and trim...", -1)
