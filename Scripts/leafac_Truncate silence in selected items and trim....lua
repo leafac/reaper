@@ -31,14 +31,9 @@ for item in pairs(items) do
     gaps = newGaps
 end
 
-reaper.Undo_EndBlock("Truncate silence... - WORK IN PROGRESS", -1)
-reaper.Undo_DoUndo2(0)
-
-reaper.Undo_BeginBlock()
-
 for _, gap in ipairs(gaps) do
     reaper.GetSet_LoopTimeRange(true, false, gap.start, gap.stop, false)
     reaper.Main_OnCommand(40201, 0) -- Time selection: Remove contents of time selection (moving later items)
 end
 
-reaper.Undo_EndBlock("Truncate silence...", -1)
+reaper.Undo_EndBlock("Truncate silence in selected items and trim...", -1)
