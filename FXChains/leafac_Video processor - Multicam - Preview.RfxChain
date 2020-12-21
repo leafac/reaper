@@ -3,7 +3,7 @@ BYPASS 0 0
   <CODE
     |// Multicam - Preview
     |
-    |input_get_name(input_next_item(0), #selected_camera_string);
+    |input_get_name(1, #selected_camera_string);
     |match("%d", #selected_camera_string, selected_camera_number);
     |selected_camera_number = max(1, selected_camera_number);
     |
