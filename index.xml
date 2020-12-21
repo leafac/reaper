@@ -41,11 +41,17 @@
       </version>
     </reapack>
     <reapack name="leafac_Truncate silence in selected items....lua" type="script">
+      <version name="1.1.0">
+        <source main="main">https://github.com/leafac/reaper/raw/9643a38fd97e31298e74e15ddc51614482552c55/Scripts/leafac_Truncate%20silence%20in%20selected%20items....lua</source>
+      </version>
       <version name="1.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/b0e9cbea9e1d3b9b4d2c213c2c88557bebe07128/Scripts/leafac_Truncate%20silence%20in%20selected%20items....lua</source>
       </version>
     </reapack>
     <reapack name="leafac_Remove gaps between selected items (Reposition selected items across tracks).lua" type="script">
+      <version name="2.1.0">
+        <source main="main">https://github.com/leafac/reaper/raw/9643a38fd97e31298e74e15ddc51614482552c55/Scripts/leafac_Remove%20gaps%20between%20selected%20items%20(Reposition%20selected%20items%20across%20tracks).lua</source>
+      </version>
       <version name="2.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/ebb541765b5ed9f1e86221094fa66ddd35c1a9cc/Scripts/leafac_Remove%20gaps%20between%20selected%20items%20(Reposition%20selected%20items%20across%20tracks).lua</source>
       </version>
