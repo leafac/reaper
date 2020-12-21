@@ -21,17 +21,22 @@ end
 local gaps = {{start = minimumStart, stop = maximumStop}}
 for item in pairs(items) do
     local newGaps = {}
-    local function addGap(gap)
-        if gap.start < gap.stop then table.insert(newGaps, gap) end
-    end
     for _, gap in ipairs(gaps) do
-        addGap({start = math.max(gap.start, item.stop), stop = gap.stop})
-        addGap({start = gap.start, stop = math.min(gap.stop, item.start)})
+        local candidateNewGaps = {
+            {start = math.max(gap.start, item.stop), stop = gap.stop},
+            {start = gap.start, stop = math.min(gap.stop, item.start)}
+        }
+        for _, candidateNewGap in ipairs(candidateNewGaps) do
+            if candidateNewGap.start < candidateNewGap.stop then
+                table.insert(newGaps, candidateNewGap)
+            end
+        end
     end
     gaps = newGaps
 end
 
-reaper.Undo_EndBlock("Truncate silence in selected items... - WORK IN PROGRESS", -1)
+reaper.Undo_EndBlock("Truncate silence in selected items... - WORK IN PROGRESS",
+                     -1)
 reaper.Undo_DoUndo2(0)
 
 reaper.Undo_BeginBlock()
