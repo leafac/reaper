@@ -32,11 +32,17 @@
       </version>
     </reapack>
     <reapack name="leafac_Prepare project for audio editing....lua" type="script">
+      <version name="1.0.1">
+        <source main="main">https://github.com/leafac/reaper/raw/1548edacceb7890a1eadc43c39fa9dbd80c04c15/Scripts/leafac_Prepare%20project%20for%20audio%20editing....lua</source>
+      </version>
       <version name="1.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/38fe6a4c98495ca0758b9645d0be37ee1b9c552b/Scripts/leafac_Prepare%20project%20for%20audio%20editing....lua</source>
       </version>
     </reapack>
     <reapack name="leafac_Prepare project for video editing....lua" type="script">
+      <version name="1.0.1">
+        <source main="main">https://github.com/leafac/reaper/raw/1548edacceb7890a1eadc43c39fa9dbd80c04c15/Scripts/leafac_Prepare%20project%20for%20video%20editing....lua</source>
+      </version>
       <version name="1.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/38fe6a4c98495ca0758b9645d0be37ee1b9c552b/Scripts/leafac_Prepare%20project%20for%20video%20editing....lua</source>
       </version>
