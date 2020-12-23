@@ -2,6 +2,10 @@
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
     <reapack name="leafac_Automixer.jsfx" type="effect">
+      <version name="1.3.2">
+        <source>https://github.com/leafac/reaper/raw/292df23feaef39937045e2ad160bb60994dbf8ec/Effects/leafac_Automixer.jsfx</source>
+        <source type="script" main="main" file="leafac_Automixer setup.lua">https://github.com/leafac/reaper/raw/292df23feaef39937045e2ad160bb60994dbf8ec/Scripts/leafac_Automixer%20setup.lua</source>
+      </version>
       <version name="1.3.1">
         <source>https://github.com/leafac/reaper/raw/6d54db57a457ed658d2d9c92e52e8787b53be103/Effects/leafac_Automixer.jsfx</source>
         <source type="script" main="main" file="leafac_Automixer setup.lua">https://github.com/leafac/reaper/raw/6d54db57a457ed658d2d9c92e52e8787b53be103/Scripts/leafac_Automixer%20setup.lua</source>
