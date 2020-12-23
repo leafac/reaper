@@ -31,6 +31,16 @@
         <source>https://github.com/leafac/reaper/raw/3f93ca06387d419e045790279f18c8600e8971fe/leafac_Automixer.jsfx</source>
       </version>
     </reapack>
+    <reapack name="leafac_Play or stop (Move edit cursor to play cursor).lua" type="script">
+      <version name="1.0.0">
+        <source main="main">https://github.com/leafac/reaper/raw/492513d73936be4c0f4b29b6dfc830679f5d0e69/Scripts/leafac_Play%20or%20stop%20(Move%20edit%20cursor%20to%20play%20cursor).lua</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Play from start of time selection or edit cursor.lua" type="script">
+      <version name="1.0.0">
+        <source main="main">https://github.com/leafac/reaper/raw/492513d73936be4c0f4b29b6dfc830679f5d0e69/Scripts/leafac_Play%20from%20start%20of%20time%20selection%20or%20edit%20cursor.lua</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Group tracks into a folder.lua" type="script">
       <version name="1.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/112eb8866609b2b00ff87c44accae6de62908d1d/Scripts/leafac_Group%20tracks%20into%20a%20folder.lua</source>
