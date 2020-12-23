@@ -36,7 +36,7 @@ if isVideo then
         [[SWS/BR: Options - Toggle "Grid snap settings follow grid visibility"]],
         "_BR_OPTIONS_SNAP_FOLLOW_GRID_VIS", false)
     reaper.MB([[
-Set Grid snap spacing: Frame minimum 0 pixels
+Set Grid snap spacing: Frame minimum 0 pixels.
 ]], "Grid/Snap Settings", 0)
     run("Options: Show snap/grid settings", 40071)
 end
