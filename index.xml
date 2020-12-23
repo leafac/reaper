@@ -31,6 +31,16 @@
         <source>https://github.com/leafac/reaper/raw/3f93ca06387d419e045790279f18c8600e8971fe/leafac_Automixer.jsfx</source>
       </version>
     </reapack>
+    <reapack name="leafac_Duplicate items or tracks (depending on focus) ignoring time selection.lua" type="script">
+      <version name="1.0.0">
+        <source main="main">https://github.com/leafac/reaper/raw/dc10e014b9cf97a25d6d8338cc1c7c0ea7378574/Scripts/leafac_Duplicate%20items%20or%20tracks%20(depending%20on%20focus)%20ignoring%20time%20selection.lua</source>
+      </version>
+    </reapack>
+    <reapack name="leafac_Duplicate items or tracks (depending on focus) within time selection, if any (smart copy).lua" type="script">
+      <version name="1.0.0">
+        <source main="main">https://github.com/leafac/reaper/raw/dc10e014b9cf97a25d6d8338cc1c7c0ea7378574/Scripts/leafac_Duplicate%20items%20or%20tracks%20(depending%20on%20focus)%20within%20time%20selection,%20if%20any%20(smart%20copy).lua</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Group tracks into a folder.lua" type="script">
       <version name="1.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/112eb8866609b2b00ff87c44accae6de62908d1d/Scripts/leafac_Group%20tracks%20into%20a%20folder.lua</source>
