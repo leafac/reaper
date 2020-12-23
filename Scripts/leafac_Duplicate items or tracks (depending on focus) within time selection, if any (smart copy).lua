@@ -1,7 +1,0 @@
-reaper.Undo_BeginBlock()
-
-reaper.Main_OnCommand(41383, 0) -- Edit: Copy items/tracks/envelope points (depending on focus) within time selection, if any (smart copy)
-reaper.Main_OnCommand(42398, 0) -- Item: Paste items/tracks
-
-reaper.Undo_EndBlock(string.match(select(2, reaper.get_action_context()),
-                                  "leafac_(.+)%.lua$"), -1)
