@@ -23,10 +23,19 @@ local parentIndex =
 reaper.InsertTrackAtIndex(parentIndex, true)
 local parent = reaper.GetTrack(0, parentIndex)
 reaper.SetMediaTrackInfo_Value(parent, "I_FOLDERDEPTH", 1, true)
-reaper.SetMediaTrackInfo_Value(tracks[#tracks], "I_FOLDERDEPTH",
-                               reaper.GetMediaTrackInfo_Value(tracks[#tracks],
-                                                              "I_FOLDERDEPTH") -
-                                   1, true)
+local currentDepth = 0
+for trackIndex = reaper.GetMediaTrackInfo_Value(tracks[#tracks],
+                                                "IP_TRACKNUMBER") - 1, reaper.CountTracks(
+    0) - 1 do
+    local track = reaper.GetTrack(0, trackIndex)
+    local trackDepth = reaper.GetMediaTrackInfo_Value(track, "I_FOLDERDEPTH")
+    currentDepth = currentDepth + trackDepth
+    if currentDepth <= 0 then
+        reaper.SetMediaTrackInfo_Value(track, "I_FOLDERDEPTH", trackDepth - 1,
+                                       true)
+        break
+    end
+end
 
 reaper.SetMediaTrackInfo_Value(parent, "I_NCHAN", parentChannels)
 for index, track in ipairs(tracks) do
