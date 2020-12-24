@@ -31,10 +31,9 @@ Set:
 Set Project Settings > Project sample rate.
 ]], "Project Settings", 0)
 run("File: Project settings...", 40021)
+run([[SWS/BR: Options - Toggle "Grid snap settings follow grid visibility"]],
+    "_BR_OPTIONS_SNAP_FOLLOW_GRID_VIS", not isVideo)
 if isVideo then
-    run(
-        [[SWS/BR: Options - Toggle "Grid snap settings follow grid visibility"]],
-        "_BR_OPTIONS_SNAP_FOLLOW_GRID_VIS", false)
     reaper.MB([[
 Set Grid snap spacing: Frame minimum 0 pixels.
 ]], "Grid/Snap Settings", 0)
