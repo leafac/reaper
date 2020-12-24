@@ -13,5 +13,3 @@ run("SWS/BR: Normalize loudness of selected items to -23 LUFS",
     "_BR_NORMALIZE_LOUDNESS_ITEMS23")
 run("Script: leafac_Truncate silence in selected items....lua",
     "_RS5a2c9bd3d4528369f57d919529e8eaf24610b33f")
-run("SWS: Crossfade adjacent selected items (move edges of adjacent items)",
-    "_SWS_CROSSFADE")
