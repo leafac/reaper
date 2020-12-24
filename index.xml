@@ -105,6 +105,9 @@
       </version>
     </reapack>
     <reapack name="leafac_Prepare selected items for editing....lua" type="script">
+      <version name="2.0.0">
+        <source main="main">https://github.com/leafac/reaper/raw/bf6850fbdfc7d9fc5254894b51234f22c3ad8c23/Scripts/leafac_Prepare%20selected%20items%20for%20editing....lua</source>
+      </version>
       <version name="1.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/cebbdbee0575830f29c3ae48af10633ed676fc75/Scripts/leafac_Prepare%20selected%20items%20for%20editing....lua</source>
       </version>
