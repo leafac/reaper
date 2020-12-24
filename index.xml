@@ -36,26 +36,10 @@
         <source main="main">https://github.com/leafac/reaper/raw/69e8a3ef065b932981acf7ea4e7db63ba0789e3c/Scripts/leafac_Ripple%20delete.lua</source>
       </version>
     </reapack>
-    <reapack name="leafac_Prepare project for audio editing....lua" type="script">
-      <version name="1.1.0">
-        <source main="main">https://github.com/leafac/reaper/raw/2d7dfb3ad9f344bcaf77f89f6f59c184febdfd37/Scripts/leafac_Prepare%20project%20for%20audio%20editing....lua</source>
-      </version>
-      <version name="1.0.1">
-        <source main="main">https://github.com/leafac/reaper/raw/1548edacceb7890a1eadc43c39fa9dbd80c04c15/Scripts/leafac_Prepare%20project%20for%20audio%20editing....lua</source>
-      </version>
+    <reapack name="leafac_Prepare project for editing....lua" type="script">
       <version name="1.0.0">
-        <source main="main">https://github.com/leafac/reaper/raw/38fe6a4c98495ca0758b9645d0be37ee1b9c552b/Scripts/leafac_Prepare%20project%20for%20audio%20editing....lua</source>
-      </version>
-    </reapack>
-    <reapack name="leafac_Prepare project for video editing....lua" type="script">
-      <version name="1.1.0">
-        <source main="main">https://github.com/leafac/reaper/raw/2d7dfb3ad9f344bcaf77f89f6f59c184febdfd37/Scripts/leafac_Prepare%20project%20for%20video%20editing....lua</source>
-      </version>
-      <version name="1.0.1">
-        <source main="main">https://github.com/leafac/reaper/raw/1548edacceb7890a1eadc43c39fa9dbd80c04c15/Scripts/leafac_Prepare%20project%20for%20video%20editing....lua</source>
-      </version>
-      <version name="1.0.0">
-        <source main="main">https://github.com/leafac/reaper/raw/38fe6a4c98495ca0758b9645d0be37ee1b9c552b/Scripts/leafac_Prepare%20project%20for%20video%20editing....lua</source>
+        <source main="main" file="leafac_Prepare project for audio editing....lua">https://github.com/leafac/reaper/raw/ef54fb462e6de2dfc74999ed3cb059e5d79cc93f/Scripts/leafac_Prepare%20project%20for%20editing....lua</source>
+        <source main="main" file="leafac_Prepare project for video editing....lua">https://github.com/leafac/reaper/raw/ef54fb462e6de2dfc74999ed3cb059e5d79cc93f/Scripts/leafac_Prepare%20project%20for%20editing....lua</source>
       </version>
     </reapack>
     <reapack name="leafac_Set grid lines off.lua" type="script">
