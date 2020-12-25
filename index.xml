@@ -42,24 +42,16 @@
         <source main="main" file="leafac_Prepare project for video editing....lua">https://github.com/leafac/reaper/raw/ef54fb462e6de2dfc74999ed3cb059e5d79cc93f/Scripts/leafac_Prepare%20project%20for%20editing....lua</source>
       </version>
     </reapack>
-    <reapack name="leafac_Set grid lines off.lua" type="script">
+    <reapack name="leafac_Set grid lines.lua" type="script">
       <version name="1.0.0">
-        <source main="main">https://github.com/leafac/reaper/raw/38fe6a4c98495ca0758b9645d0be37ee1b9c552b/Scripts/leafac_Set%20grid%20lines%20off.lua</source>
+        <source main="main" file="leafac_Set grid lines on.lua">https://github.com/leafac/reaper/raw/396820ee36386e1b9d8fdc7f8ee22a7d685cf2d8/Scripts/leafac_Set%20grid%20lines.lua</source>
+        <source main="main" file="leafac_Set grid lines off.lua">https://github.com/leafac/reaper/raw/396820ee36386e1b9d8fdc7f8ee22a7d685cf2d8/Scripts/leafac_Set%20grid%20lines.lua</source>
       </version>
     </reapack>
-    <reapack name="leafac_Set grid lines on.lua" type="script">
+    <reapack name="leafac_Set preserve pitch in audio items when changing master playrate.lua" type="script">
       <version name="1.0.0">
-        <source main="main">https://github.com/leafac/reaper/raw/38fe6a4c98495ca0758b9645d0be37ee1b9c552b/Scripts/leafac_Set%20grid%20lines%20on.lua</source>
-      </version>
-    </reapack>
-    <reapack name="leafac_Set preserve pitch in audio items when changing master playrate off.lua" type="script">
-      <version name="1.0.0">
-        <source main="main">https://github.com/leafac/reaper/raw/38fe6a4c98495ca0758b9645d0be37ee1b9c552b/Scripts/leafac_Set%20preserve%20pitch%20in%20audio%20items%20when%20changing%20master%20playrate%20off.lua</source>
-      </version>
-    </reapack>
-    <reapack name="leafac_Set preserve pitch in audio items when changing master playrate on.lua" type="script">
-      <version name="1.0.0">
-        <source main="main">https://github.com/leafac/reaper/raw/38fe6a4c98495ca0758b9645d0be37ee1b9c552b/Scripts/leafac_Set%20preserve%20pitch%20in%20audio%20items%20when%20changing%20master%20playrate%20on.lua</source>
+        <source main="main" file="leafac_Set preserve pitch in audio items when changing master playrate on.lua">https://github.com/leafac/reaper/raw/396820ee36386e1b9d8fdc7f8ee22a7d685cf2d8/Scripts/leafac_Set%20preserve%20pitch%20in%20audio%20items%20when%20changing%20master%20playrate.lua</source>
+        <source main="main" file="leafac_Set preserve pitch in audio items when changing master playrate off.lua">https://github.com/leafac/reaper/raw/396820ee36386e1b9d8fdc7f8ee22a7d685cf2d8/Scripts/leafac_Set%20preserve%20pitch%20in%20audio%20items%20when%20changing%20master%20playrate.lua</source>
       </version>
     </reapack>
     <reapack name="leafac_Play or stop (Move edit cursor to play cursor).lua" type="script">
