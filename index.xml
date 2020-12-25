@@ -70,14 +70,10 @@
         <source main="main">https://github.com/leafac/reaper/raw/492513d73936be4c0f4b29b6dfc830679f5d0e69/Scripts/leafac_Play%20from%20start%20of%20time%20selection%20or%20edit%20cursor.lua</source>
       </version>
     </reapack>
-    <reapack name="leafac_Group tracks into a folder.lua" type="script">
+    <reapack name="leafac_Group and ungroup tracks in folders.lua" type="script">
       <version name="1.0.0">
-        <source main="main">https://github.com/leafac/reaper/raw/112eb8866609b2b00ff87c44accae6de62908d1d/Scripts/leafac_Group%20tracks%20into%20a%20folder.lua</source>
-      </version>
-    </reapack>
-    <reapack name="leafac_Ungroup tracks from within folders.lua" type="script">
-      <version name="1.0.0">
-        <source main="main">https://github.com/leafac/reaper/raw/112eb8866609b2b00ff87c44accae6de62908d1d/Scripts/leafac_Ungroup%20tracks%20from%20within%20folders.lua</source>
+        <source main="main" file="leafac_Group tracks into a folder.lua">https://github.com/leafac/reaper/raw/112eb8866609b2b00ff87c44accae6de62908d1d/Scripts/leafac_Group%20tracks%20into%20a%20folder.lua</source>
+        <source main="main" file="leafac_Ungroup tracks from within folders.lua">https://github.com/leafac/reaper/raw/112eb8866609b2b00ff87c44accae6de62908d1d/Scripts/leafac_Ungroup%20tracks%20from%20within%20folders.lua</source>
       </version>
     </reapack>
     <reapack name="leafac_Prepare selected items for editing....lua" type="script">
