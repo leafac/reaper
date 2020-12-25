@@ -76,7 +76,17 @@
         <source main="main" file="leafac_Ungroup tracks from within folders.lua">https://github.com/leafac/reaper/raw/112eb8866609b2b00ff87c44accae6de62908d1d/Scripts/leafac_Ungroup%20tracks%20from%20within%20folders.lua</source>
       </version>
     </reapack>
-    <reapack name="leafac_Truncate silence.lua" type="script">
+    <reapack name="leafac_Truncate silence....lua" type="script">
+      <version name="1.0.0">
+        <source main="main" file="leafac_Prepare selected items for editing....lua">https://github.com/leafac/reaper/raw/f7a080853675dfa2b5f092a636849f6a1ae874f2/Scripts/leafac_Truncate%20silence....lua</source>
+        <source main="main" file="leafac_Prepare selected items for editing (options)....lua">https://github.com/leafac/reaper/raw/f7a080853675dfa2b5f092a636849f6a1ae874f2/Scripts/leafac_Truncate%20silence....lua</source>
+        <source main="main" file="leafac_Truncate silence in selected items....lua">https://github.com/leafac/reaper/raw/f7a080853675dfa2b5f092a636849f6a1ae874f2/Scripts/leafac_Truncate%20silence....lua</source>
+        <source main="main" file="leafac_Truncate silence in selected items (options)....lua">https://github.com/leafac/reaper/raw/f7a080853675dfa2b5f092a636849f6a1ae874f2/Scripts/leafac_Truncate%20silence....lua</source>
+        <source main="main" file="leafac_Truncate silence in selected items and trim....lua">https://github.com/leafac/reaper/raw/f7a080853675dfa2b5f092a636849f6a1ae874f2/Scripts/leafac_Truncate%20silence....lua</source>
+        <source main="main" file="leafac_Truncate silence in selected items and trim (options)....lua">https://github.com/leafac/reaper/raw/f7a080853675dfa2b5f092a636849f6a1ae874f2/Scripts/leafac_Truncate%20silence....lua</source>
+        <source main="main" file="leafac_Remove gaps between selected items (Reposition selected items across tracks).lua">https://github.com/leafac/reaper/raw/f7a080853675dfa2b5f092a636849f6a1ae874f2/Scripts/leafac_Truncate%20silence....lua</source>
+        <source main="main" file="leafac_Remove gaps between selected items (Reposition selected items across tracks) (options)....lua">https://github.com/leafac/reaper/raw/f7a080853675dfa2b5f092a636849f6a1ae874f2/Scripts/leafac_Truncate%20silence....lua</source>
+      </version>
     </reapack>
     <reapack name="leafac_Render project to disk… (warn if playrate is not 100%).lua" type="script">
       <version name="1.1.0">
