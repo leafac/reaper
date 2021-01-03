@@ -2,8 +2,6 @@ local actionName = string.match(select(2, reaper.get_action_context()),
                                 "leafac_(.+)%.lua$")
 local isVideo = string.match(actionName, "video")
 
-isVideo = true
-
 local continue, userInputs
 if isVideo then
     continue, userInputs = reaper.GetUserInputs(actionName, 4,
