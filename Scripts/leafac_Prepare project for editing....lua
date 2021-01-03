@@ -2,6 +2,25 @@ local actionName = string.match(select(2, reaper.get_action_context()),
                                 "leafac_(.+)%.lua$")
 local isVideo = string.match(actionName, "video")
 
+isVideo = true
+
+local continue, userInputs
+if isVideo then
+    continue, userInputs = reaper.GetUserInputs(actionName, 4,
+                                                "Sample rate (default: 48000),Frame rate (default: 30),Video width (default: 1920),Video height (default: 1080)",
+                                                "")
+else
+    continue, userInputs = reaper.GetUserInputs(actionName, 1,
+                                                "Sample rate (default: 48000)",
+                                                "")
+end
+if not continue then return end
+local userInputsIterator = string.gmatch(userInputs, "[^,]*")
+local sampleRate = tonumber(userInputsIterator() or nil) or 48000
+local frameRate = tonumber(userInputsIterator() or nil) or 30
+local videoWidth = tonumber(userInputsIterator() or nil) or 1920
+local videoHeight = tonumber(userInputsIterator() or nil) or 1080
+
 local function run(description, identifier, isOn)
     local identifierNumber = type(identifier) == "number" and identifier or
                                  reaper.NamedCommandLookup(identifier, 0)
@@ -16,28 +35,25 @@ end
 
 reaper.Undo_BeginBlock()
 
+reaper.GetSetProjectInfo(0, "PROJECT_SRATE", sampleRate, true) -- Project Settings > Project Settings > Project sample rate > Number
+reaper.GetSetProjectInfo(0, "PROJECT_SRATE_USE", 1, true) -- Project Settings > Project Settings > Project sample rate > Checkbox
+if isVideo then
+    reaper.SNM_SetIntConfigVar("projfrbase", frameRate) -- Project Settings > Video > Frame rate
+    reaper.SNM_SetIntConfigVar("projvidw", videoWidth) -- Project Settings > Video > Preferred video size > Width
+    reaper.SNM_SetIntConfigVar("projvidh", videoHeight) -- Project Settings > Video > Preferred video size > Height
+end
 run("View: Time unit for ruler: Hours:Minutes:Seconds:Frames", 40370)
 run("View: Secondary time unit for ruler: None", 42360)
 run(
     "Transport: Toggle preserve pitch in audio items when changing master playrate",
     40671, true)
 run("Options: Toggle grid lines", 40145, false)
-reaper.MB(isVideo and [[
-Set:
-1. Project Settings > Project sample rate.
-2. Video > Frame rate.
-3. Video > Preferred video size.
-]] or [[
-Set Project Settings > Project sample rate.
-]], "Project Settings", 0)
-run("File: Project settings...", 40021)
 run([[SWS/BR: Options - Toggle "Grid snap settings follow grid visibility"]],
     "_BR_OPTIONS_SNAP_FOLLOW_GRID_VIS", not isVideo)
 if isVideo then
-    reaper.MB([[
-Set Grid snap spacing: Frame minimum 0 pixels.
-]], "Grid/Snap Settings", 0)
-    run("Options: Show snap/grid settings", 40071)
+    reaper.SNM_SetIntConfigVar("projgridframe", reaper.SNM_GetIntConfigVar(
+                                   "projgridframe", 0) | 2) -- Grid/Snap Settings > Grid snap spacing: Frame
+    reaper.SNM_SetIntConfigVar("projgridsnapmin", 0) -- Grid/Snap Settings > Grid snap spacing minimum
 end
 
 reaper.Undo_EndBlock(actionName, -1)
