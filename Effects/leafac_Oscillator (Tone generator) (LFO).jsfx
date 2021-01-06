@@ -1,0 +1,39 @@
+// https://youtu.be/QRHqYsCIj9c
+
+slider1:frequency=440<20,20000,1>Frequency (Hz)
+
+slider3:sine_mix=1<0,1,.01>Sine
+
+slider5:square_mix=0<0,1,.01>Square
+slider6:square_width=.5<0,1,.01>Width
+
+slider8:sawtooth_down_up_mix=0<0,1,.01>Sawtooth (down-up)
+
+slider10:sawtooth_up_down_mix=0<0,1,.01>Sawtooth (up-down)
+
+slider64:output_db=-18<-62,0,.01>Output (dB)
+
+@init
+
+cycle = 0;
+
+@slider
+
+output_amplitude = 10^(output_db / 20);
+
+@sample
+
+cycle += frequency / srate; cycle > 1 ? cycle -= 1;
+
+sum_mix = sine_mix + square_mix + sawtooth_down_up_mix + sawtooth_up_down_mix;
+
+channel = -1; loop(num_ch, channel += 1;
+  spl(channel) =
+    (
+      sin(cycle * 2 * $pi) * sine_mix / sum_mix +
+      (cycle < square_width ? -1 : 1) * square_mix / sum_mix +
+      (cycle * 2 - 1) * sawtooth_down_up_mix / sum_mix +
+      (cycle * 2 - 1) * -1 * sawtooth_up_down_mix / sum_mix
+    )
+    * output_amplitude;
+);
