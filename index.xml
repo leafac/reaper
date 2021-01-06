@@ -356,6 +356,11 @@
     </reapack>
   </category>
   <category name="Programming Audio Effects">
+    <reapack name="leafac_Oscillator (Tone generator) (LFO).jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/da1fba8f2c3d2f9b35814471c7bdeef32a9fc3db/Effects/leafac_Oscillator%20(Tone%20generator)%20(LFO).jsfx</source>
+      </version>
+    </reapack>
     <reapack name="leafac_RMS.jsfx" type="effect">
       <version name="4.0.0">
         <source>https://github.com/leafac/reaper/raw/beb2c12f2dccf421b4b159a0181dc1b955bc462d/effects/leafac_RMS.jsfx</source>
