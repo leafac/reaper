@@ -54,6 +54,7 @@ function wave(cycle) (
 @slider
 
 output_amplitude = 10^(output_db / 20);
+
 sum_mix = sine_mix + square_mix + sawtooth_down_up_mix + sawtooth_up_down_mix;
 
 @sample
@@ -81,4 +82,3 @@ plot_x = -1; loop(plot_w, plot_x += 1;
 );
 
 gfx_lineto(gfx_x, gfx_h_middle - (plot_h / 2) * wave(0));
-
