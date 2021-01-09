@@ -1,15 +1,20 @@
 // https://youtu.be/QRHqYsCIj9c
+// https://youtu.be/_0EKaqN2_Rg
 
 slider1:frequency=440<20,20000,1>Frequency (Hz)
 
 slider3:sine_mix=1<0,1,.01>Sine
+slider4:sine_phase=0<0,1,.01>Phase shift
 
-slider5:square_mix=0<0,1,.01>Square
-slider6:square_width=.5<0,1,.01>Width
+slider6:square_mix=0<0,1,.01>Square
+slider7:square_phase=0<0,1,.01>Phase shift
+slider8:square_width=.5<0,1,.01>Width
 
-slider8:sawtooth_down_up_mix=0<0,1,.01>Sawtooth (down-up)
+slider10:sawtooth_down_up_mix=0<0,1,.01>Sawtooth (down-up)
+slider11:sawtooth_down_up_phase=0<0,1,.01>Phase shift
 
-slider10:sawtooth_up_down_mix=0<0,1,.01>Sawtooth (up-down)
+slider13:sawtooth_up_down_mix=0<0,1,.01>Sawtooth (up-down)
+slider14:sawtooth_up_down_phase=0<0,1,.01>Phase shift
 
 slider64:output_db=-18<-62,0,.01>Output (dB)
 
@@ -17,23 +22,63 @@ slider64:output_db=-18<-62,0,.01>Output (dB)
 
 cycle = 0;
 
+function wrap(number) (
+  number <= 1 ? number : number - 1;
+);
+
+function sine(cycle) (
+  sin(cycle * 2 * $pi);
+);
+
+function square(cycle) (
+  cycle < square_width ? -1 : 1;
+);
+
+function sawtooth_down_up(cycle) (
+  cycle * 2 - 1;
+);
+
+function sawtooth_up_down(cycle) (
+  cycle * -2 + 1;
+);
+
+function wave(cycle) (
+  (
+    sine(wrap(cycle + sine_phase)) * sine_mix +
+    square(wrap(cycle + square_phase)) * square_mix +
+    sawtooth_down_up(wrap(cycle + sawtooth_down_up_phase)) * sawtooth_down_up_mix +
+    sawtooth_up_down(wrap(cycle + sawtooth_up_down_phase)) * sawtooth_up_down_mix
+  ) / sum_mix;
+);
+
 @slider
 
 output_amplitude = 10^(output_db / 20);
+sum_mix = sine_mix + square_mix + sawtooth_down_up_mix + sawtooth_up_down_mix;
 
 @sample
 
-cycle += frequency / srate; cycle > 1 ? cycle -= 1;
-
-sum_mix = sine_mix + square_mix + sawtooth_down_up_mix + sawtooth_up_down_mix;
+cycle = wrap(cycle + frequency / srate);
 
 channel = -1; loop(num_ch, channel += 1;
-  spl(channel) =
-    (
-      sin(cycle * 2 * $pi) * sine_mix / sum_mix +
-      (cycle < square_width ? -1 : 1) * square_mix / sum_mix +
-      (cycle * 2 - 1) * sawtooth_down_up_mix / sum_mix +
-      (cycle * 2 - 1) * -1 * sawtooth_up_down_mix / sum_mix
-    )
-    * output_amplitude;
+  spl(channel) = wave(cycle) * output_amplitude;
 );
+
+@gfx 400 200
+
+padding = 10;
+plot_w = gfx_w - padding * 2;
+plot_h = gfx_h - padding * 2;
+gfx_h_middle = gfx_h / 2;
+
+gfx_set(1);
+
+gfx_x = padding;
+gfx_y = gfx_h_middle - (plot_h / 2) * wave(1);
+
+plot_x = -1; loop(plot_w, plot_x += 1;
+  gfx_lineto(gfx_x + 1, gfx_h_middle - (plot_h / 2) * wave(plot_x / plot_w));
+);
+
+gfx_lineto(gfx_x, gfx_h_middle - (plot_h / 2) * wave(0));
+
