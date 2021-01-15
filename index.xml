@@ -2,6 +2,11 @@
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
     <reapack name="leafac_OBS.lua" type="script">
+      <version name="1.1.0">
+        <source type="data" file="leafac_obs-cli" platform="darwin">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-macos</source>
+        <source type="data" file="leafac_obs-cli" platform="linux">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-linux</source>
+        <source type="data" file="leafac_obs-cli.exe" platform="windows">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-win.exe</source>
+      </version>
       <version name="1.0.0">
         <source type="data" platform="darwin">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-macos</source>
         <source type="data" platform="linux">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-linux</source>
