@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
+    <reapack name="leafac_OBS.lua" type="script">
+      <version name="1.0.0">
+        <source type="data" platform="darwin">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-macos</source>
+        <source type="data" platform="linux">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-linux</source>
+        <source type="data" platform="windows">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-win.exe</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Ripple delete.lua" type="script">
       <version name="1.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/69e8a3ef065b932981acf7ea4e7db63ba0789e3c/Scripts/leafac_Ripple%20delete.lua</source>
