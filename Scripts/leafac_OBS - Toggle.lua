@@ -78,7 +78,14 @@ else
     reaper.CSurf_OnStop()
     obs([[StopRecording 'SetRecordingFolder={ "rec-folder": "]] ..
             originalRecordingFolder .. [[" }']])
-    -- TODO: Wait until OBS is done recording!
+    local startTime = reaper.time_precise()
+    while obs([[--field 0.recording GetStreamingStatus]]) == "true" do
+        if reaper.time_precise() > startTime + 10 then
+            return reaper.MB("Timed out waiting for recording to end.", "Error",
+                             0)
+
+        end
+    end
 
     -- FIXME: Currently this script is listing the contents of the recording folder as a hack to find the recording.
     --        In a future release of obs-websocket we’ll be able to ask for the recording file name directly.
