@@ -1,31 +1,20 @@
 local ADDRESS = "localhost:4444"
 local PASSWORD = ""
-
 local EXTENSION = "mkv"
-
 local LATENCY = 0
-
 local TRACK_NAME = "OBS"
-
 local SUBFOLDER = ""
-
-local IS_WINDOWS = string.match(reaper.GetOS(), "Win")
-
-local CHMOD = [[/bin/chmod]]
-local MV = IS_WINDOWS and [[move]] or [[/bin/mv]]
-
-if IS_WINDOWS then
-    reaper.MB([[
-This Action probably doesn’t work on Windows yet.
-
-I (the author of this Action, Leandro Facchinetti <https://leafac.com>) don’t have access to a Windows machine to test.
-
-If you have a Windows machine, you’re interested in having this Action work on Windows, and you may help testing, please contact me at reaper@leafac.com.
-]], "Warning", 0)
-end
 
 local actionName = string.match(select(2, reaper.get_action_context()),
                                 "leafac_(.+)%.lua$")
+
+local operatingSystem = reaper.GetOS()
+if not (string.match(operatingSystem, "OSX") or
+    string.match(operatingSystem, "mac")) then
+    reaper.MB(
+        "If you’re interested in helping test this Action in other operating systems (Windows and Linux), please contact the author at reaper@leafac.com.",
+        "This Action has only been tested in macOS.", 0)
+end
 
 local function execute(command, errorMessage)
     local output = reaper.ExecProcess(command, 5000)
@@ -36,18 +25,17 @@ local function execute(command, errorMessage)
     return string.gsub(string.gsub(output, "^0%s*", ""), "%s*$", "")
 end
 
-local obsPath
-if IS_WINDOWS then
-    obsPath = [[']] .. reaper.GetResourcePath() .. [[/Data/leafac_obs-cli.exe']]
+local obsCli
+if string.match(operatingSystem, "Win") then
+    obsCli = reaper.GetResourcePath() .. [[/Data/leafac_obs-cli.exe]]
 else
-    obsPath = [[']] .. reaper.GetResourcePath() .. [[/Data/leafac_obs-cli']]
-    execute(CHMOD .. [[ +x ]] .. obsPath)
+    obsCli = reaper.GetResourcePath() .. [[/Data/leafac_obs-cli]]
+    execute([[/bin/chmod +x ']] .. obsCli .. [[']])
 end
 
 local function obs(arguments)
-    return execute(
-               obsPath .. [[ --address ']] .. ADDRESS .. [[' --password ']] ..
-                   PASSWORD .. [[' ]] .. arguments, [[
+    return execute([[']] .. obsCli .. [[' --address ']] .. ADDRESS ..
+                       [[' --password ']] .. PASSWORD .. [[' ]] .. arguments, [[
 Failed to control OBS.
 
 1. Check that OBS and obs-websocket are running.
@@ -57,6 +45,7 @@ Failed to control OBS.
 end
 
 local isPlaying = reaper.GetPlayState() & 1 == 1
+local projectFolder = reaper.GetProjectPath("") .. [[/]] .. SUBFOLDER
 
 local function getCurrentPosition()
     return isPlaying and reaper.GetPlayPosition() or reaper.GetCursorPosition()
@@ -64,24 +53,32 @@ end
 
 if string.match(actionName, "Start") or
     (string.match(actionName, "Toggle") and not isPlaying) then
-    obs([[StartRecording]])
-    reaper.SetProjExtState(0, "leafac_OBS", "start",
-                           tostring(getCurrentPosition()))
+    local originalRecordingFolder = obs(
+                                        [[--field 0.rec-folder GetRecordingFolder SetRecordingFolder='{ "rec-folder": "]] ..
+                                            projectFolder ..
+                                            [[" }' StartRecording]])
+    local currentPosition = getCurrentPosition()
     reaper.CSurf_OnRecord()
+    reaper.SetProjExtState(0, "leafac_OBS", "startPosition",
+                           tostring(currentPosition))
+    reaper.SetProjExtState(0, "leafac_OBS", "originalRecordingFolder",
+                           originalRecordingFolder)
 else
-    local stopPosition = getCurrentPosition()
-    reaper.CSurf_OnStop()
-    local recordingFolder = obs(
-                                [[--field 1.rec-folder StopRecording GetRecordingFolder]])
     local hadStartPosition, startPosition =
-        reaper.GetProjExtState(0, "leafac_OBS", "start")
-    if hadStartPosition == 0 then
+        reaper.GetProjExtState(0, "leafac_OBS", "startPosition")
+    local hadOriginalRecordingFolder, originalRecordingFolder =
+        reaper.GetProjExtState(0, "leafac_OBS", "originalRecordingFolder")
+    if hadStartPosition == 0 or hadOriginalRecordingFolder == 0 then
         return reaper.MB(
-                   "Failed to find the start point of the OBS recording. Did you use the ‘OBS - Start recording’ action to start recording?",
+                   "Failed to find an ongoing OBS recording. Did you start the OBS recording through REAPER?",
                    "Error", 0)
     end
     startPosition = tonumber(startPosition)
-    local projectFolder = reaper.GetProjectPath("")
+
+    local stopPosition = getCurrentPosition()
+    reaper.CSurf_OnStop()
+    obs([[StopRecording SetRecordingFolder='{ "rec-folder": "]] ..
+            originalRecordingFolder .. [[" }']])
 
     -- FIXME: Currently this script is listing the contents of the recording folder as a hack to find the recording.
     --        In a future release of obs-websocket we’ll be able to ask for the recording file name directly.
@@ -91,7 +88,7 @@ else
     local fileIndex = -1
     while true do
         fileIndex = fileIndex + 1
-        local file = reaper.EnumerateFiles(recordingFolder, fileIndex)
+        local file = reaper.EnumerateFiles(projectFolder, fileIndex)
         if file == nil then break end
         if string.match(file, "%." .. EXTENSION .. "$") then
             table.insert(files, file)
@@ -99,14 +96,12 @@ else
     end
     if #files == 0 then
         return reaper.MB(
-                   "Failed to find recording. Do you have the rigth EXTENSION configured in the source code for this action?\n\nExtension: " ..
-                       EXTENSION .. "\n\nRecording folder: " .. recordingFolder,
+                   "Failed to find recording. Do you have the right EXTENSION configured in the source code for this action?\n\nExtension: " ..
+                       EXTENSION .. "\n\nProject folder: " .. projectFolder,
                    "Error", 0)
     end
     table.sort(files)
     local file = files[#files]
-    execute(MV .. [[ ']] .. recordingFolder .. [[/]] .. file .. [[' ']] ..
-                projectFolder .. [[/]] .. SUBFOLDER .. file .. [[']])
 
     local obsTrack
     local numberOfTracks = reaper.GetNumTracks()
@@ -128,11 +123,12 @@ else
     reaper.SetMediaItemInfo_Value(item, "D_POSITION", startPosition)
     reaper.SetMediaItemInfo_Value(item, "D_LENGTH", stopPosition - startPosition)
     local take = reaper.AddTakeToMediaItem(item)
-    local source =
-        reaper.PCM_Source_CreateFromFile(projectFolder .. "/" .. file)
+    local source = reaper.PCM_Source_CreateFromFile(
+                       projectFolder .. [[/]] .. file)
     reaper.SetMediaItemTake_Source(take, source)
     reaper.SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", LATENCY)
     reaper.Main_OnCommand(40047, 0) -- Peaks: Build any missing peaks
 
-    reaper.SetProjExtState(0, "leafac_OBS", "start", "")
+    reaper.SetProjExtState(0, "leafac_OBS", "startPosition", "")
+    reaper.SetProjExtState(0, "leafac_OBS", "originalRecordingFolder", "")
 end
