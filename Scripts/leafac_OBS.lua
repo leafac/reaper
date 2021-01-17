@@ -4,6 +4,7 @@ local EXTENSION = "mkv"
 local LATENCY = 0
 local TRACK_NAME = "OBS"
 local SUBFOLDER = ""
+local STOP_RECORDING_TIMEOUT = 10
 
 local actionName = string.match(select(2, reaper.get_action_context()),
                                 "leafac_(.+)%.lua$")
@@ -80,7 +81,7 @@ else
             originalRecordingFolder .. [[" }']])
     local startTime = reaper.time_precise()
     while obs([[--field 0.recording GetStreamingStatus]]) == "true" do
-        if reaper.time_precise() > startTime + 10 then
+        if reaper.time_precise() > startTime + STOP_RECORDING_TIMEOUT then
             return reaper.MB("Timed out waiting for recording to end.", "Error",
                              0)
 
