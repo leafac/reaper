@@ -54,7 +54,7 @@ end
 if string.match(actionName, "Start") or
     (string.match(actionName, "Toggle") and not isPlaying) then
     local originalRecordingFolder = obs(
-                                        [[--field 0.rec-folder GetRecordingFolder SetRecordingFolder='{ "rec-folder": "]] ..
+                                        [[--field 0.rec-folder GetRecordingFolder 'SetRecordingFolder={ "rec-folder": "]] ..
                                             projectFolder ..
                                             [[" }' StartRecording]])
     local currentPosition = getCurrentPosition()
@@ -77,7 +77,7 @@ else
 
     local stopPosition = getCurrentPosition()
     reaper.CSurf_OnStop()
-    obs([[StopRecording SetRecordingFolder='{ "rec-folder": "]] ..
+    obs([[StopRecording 'SetRecordingFolder={ "rec-folder": "]] ..
             originalRecordingFolder .. [[" }']])
 
     -- FIXME: Currently this script is listing the contents of the recording folder as a hack to find the recording.
