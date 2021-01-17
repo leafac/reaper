@@ -12,8 +12,8 @@ local operatingSystem = reaper.GetOS()
 if not (string.match(operatingSystem, "OSX") or
     string.match(operatingSystem, "mac")) then
     reaper.MB(
-        "If you’re interested in helping test this Action in other operating systems (Windows and Linux), please contact the author at reaper@leafac.com.",
-        "This Action has only been tested in macOS.", 0)
+        "If you can help test this Action in other operating systems (Windows and Linux), please contact the author at reaper@leafac.com.",
+        "This Action has been tested only in macOS.", 0)
 end
 
 local function execute(command, errorMessage)
@@ -25,11 +25,10 @@ local function execute(command, errorMessage)
     return string.gsub(string.gsub(output, "^0%s*", ""), "%s*$", "")
 end
 
-local obsCli
+local obsCli = reaper.GetResourcePath() .. [[/Data/leafac_obs-cli]]
 if string.match(operatingSystem, "Win") then
-    obsCli = reaper.GetResourcePath() .. [[/Data/leafac_obs-cli.exe]]
+    obsCli = obsCli .. [[.exe]]
 else
-    obsCli = reaper.GetResourcePath() .. [[/Data/leafac_obs-cli]]
     execute([[/bin/chmod +x ']] .. obsCli .. [[']])
 end
 
@@ -57,10 +56,10 @@ if string.match(actionName, "Start") or
                                         [[--field 0.rec-folder GetRecordingFolder 'SetRecordingFolder={ "rec-folder": "]] ..
                                             projectFolder ..
                                             [[" }' StartRecording]])
-    local currentPosition = getCurrentPosition()
+    local startPosition = getCurrentPosition()
     reaper.CSurf_OnRecord()
     reaper.SetProjExtState(0, "leafac_OBS", "startPosition",
-                           tostring(currentPosition))
+                           tostring(startPosition))
     reaper.SetProjExtState(0, "leafac_OBS", "originalRecordingFolder",
                            originalRecordingFolder)
 else
@@ -70,7 +69,7 @@ else
         reaper.GetProjExtState(0, "leafac_OBS", "originalRecordingFolder")
     if hadStartPosition == 0 or hadOriginalRecordingFolder == 0 then
         return reaper.MB(
-                   "Failed to find an ongoing OBS recording. Did you start the OBS recording through REAPER?",
+                   "Failed to find an ongoing OBS recording. Did you start an OBS recording through REAPER?",
                    "Error", 0)
     end
     startPosition = tonumber(startPosition)
@@ -79,6 +78,7 @@ else
     reaper.CSurf_OnStop()
     obs([[StopRecording 'SetRecordingFolder={ "rec-folder": "]] ..
             originalRecordingFolder .. [[" }']])
+    -- TODO: Wait until OBS is done recording!
 
     -- FIXME: Currently this script is listing the contents of the recording folder as a hack to find the recording.
     --        In a future release of obs-websocket we’ll be able to ask for the recording file name directly.
