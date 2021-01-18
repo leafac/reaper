@@ -1,11 +1,11 @@
 local ADDRESS = "localhost:4444"
 local PASSWORD = ""
 local EXTENSION = "mkv"
-local LATENCY = 0
+local LATENCY = 0.08
 local TRACK_NAME = "OBS"
 local SUBFOLDER = ""
 local EXECUTE_TIMEOUT = 5000
-local STOP_RECORDING_TIMEOUT = 10
+local OBS_STOP_RECORDING_TIMEOUT = 10
 
 local actionName = string.match(select(2, reaper.get_action_context()),
                                 "leafac_(.+)%.lua$")
@@ -60,6 +60,7 @@ if string.match(actionName, "Start") or
                                             [[" }' StartRecording]])
     local startPosition = getCurrentPosition()
     reaper.CSurf_OnRecord()
+
     reaper.SetProjExtState(0, "leafac_OBS", "startPosition",
                            tostring(startPosition))
     reaper.SetProjExtState(0, "leafac_OBS", "originalRecordingFolder",
@@ -82,7 +83,7 @@ else
             originalRecordingFolder .. [[" }']])
     local startTime = reaper.time_precise()
     while obs([[--field 0.recording GetStreamingStatus]]) == "true" do
-        if reaper.time_precise() > startTime + STOP_RECORDING_TIMEOUT then
+        if reaper.time_precise() > startTime + OBS_STOP_RECORDING_TIMEOUT then
             return reaper.MB("Timed out waiting for recording to end.", "Error",
                              0)
 
