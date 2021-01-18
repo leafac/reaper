@@ -4,6 +4,7 @@ local EXTENSION = "mkv"
 local LATENCY = 0
 local TRACK_NAME = "OBS"
 local SUBFOLDER = ""
+local EXECUTE_TIMEOUT = 5000
 local STOP_RECORDING_TIMEOUT = 10
 
 local actionName = string.match(select(2, reaper.get_action_context()),
@@ -18,7 +19,7 @@ if not (string.match(operatingSystem, "OSX") or
 end
 
 local function execute(command, errorMessage)
-    local output = reaper.ExecProcess(command, 5000)
+    local output = reaper.ExecProcess(command, EXECUTE_TIMEOUT)
     if output == nil or not string.match(output, "^0") then
         error((errorMessage or "") .. "\n\nCommand:\n" .. command ..
                   "\n\nOutput:\n" .. output)
