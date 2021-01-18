@@ -6,7 +6,7 @@ local TRACK_NAME = "OBS"
 local ALWAYS_CREATE_NEW_TRACK = false
 local SUBFOLDER = ""
 local EXECUTE_TIMEOUT = 5000
-local OBS_RECORDING_STATUS_TIMEOUT = 10
+local OBS_STOP_RECORDING_TIMEOUT = 10
 
 local actionName = string.match(select(2, reaper.get_action_context()),
                                 "leafac_(.+)%.lua$")
@@ -46,25 +46,12 @@ Failed to control OBS.
 ]])
 end
 
-local function waitObsRecordingStatus(recordingStatus)
-    local startTime = reaper.time_precise()
-    while obs([[--field 0.recording GetStreamingStatus]]) ~=
-        tostring(recordingStatus) do
-        if reaper.time_precise() > startTime + OBS_RECORDING_STATUS_TIMEOUT then
-            error("Timed out waiting for recording status to be " ..
-                      recordingStatus .. ".")
-        end
-    end
-end
-
 local isPlaying = reaper.GetPlayState() & 1 == 1
 local projectFolder = reaper.GetProjectPath("") .. [[/]] .. SUBFOLDER
 
 local function getCurrentPosition()
     return isPlaying and reaper.GetPlayPosition() or reaper.GetCursorPosition()
 end
-
-local actionName = "TODO: Toggle"
 
 if string.match(actionName, "Start") or
     (string.match(actionName, "Toggle") and not isPlaying) then
@@ -75,84 +62,16 @@ if string.match(actionName, "Start") or
     local startPosition = getCurrentPosition()
     reaper.CSurf_OnRecord()
 
-    reaper.defer(function()
-        waitObsRecordingStatus(true)
-
-        reaper.SetProjExtState(0, "leafac_OBS", "startPosition",
-                               tostring(startPosition))
-        reaper.SetProjExtState(0, "leafac_OBS", "originalRecordingFolder",
-                               originalRecordingFolder)
-
-        local function latencyMeasurementsStep(latencyMeasurements)
-            if #latencyMeasurements < 5 then
-                -- reaper.defer(function()
-                local before = reaper.GetPlayPosition()
-                -- reaper.defer(function()
-                local obsTimecodeString =
-                    obs([[--field 0.rec-timecode GetStreamingStatus]])
-                local obsTimecodeHours, obsTimecodeMinutes, obsTimecodeSeconds,
-                      obsTimecodeMilliseconds =
-                    string.match(obsTimecodeString, "^(%d+):(%d+):(%d+).(%d+)$")
-                local obsTimecode = tonumber(obsTimecodeHours) * 60 * 60 +
-                                        tonumber(obsTimecodeMinutes) * 60 +
-                                        tonumber(obsTimecodeSeconds) +
-                                        tonumber(obsTimecodeMilliseconds) / 1000
-                -- reaper.defer(function()
-                local after = reaper.GetPlayPosition()
-                table.insert(latencyMeasurements, {
-                    before = before,
-                    obsTimecode = obsTimecode,
-                    after = after
-                })
-                reaper.defer(function()
-                    latencyMeasurementsStep(latencyMeasurements)
-                end)
-                -- end)
-                -- end)
-                -- end)
-            else
-                table.sort(latencyMeasurements,
-                           function(latencyMeasurement1, latencyMeasurement2)
-                    return latencyMeasurement1.obsTimecode -
-                               (latencyMeasurement1.before - startPosition) <
-                               latencyMeasurement2.obsTimecode -
-                               (latencyMeasurement2.before - startPosition)
-                end)
-                local latency = 0
-                -- for latencyMeasurementIndex = 3, #latencyMeasurements - 2 do
-                local latencyMeasurement = latencyMeasurements[1]
-                -- latencyMeasurements[latencyMeasurementIndex]
-                latency =
-                    latency + (latencyMeasurement.before - startPosition) -
-                        latencyMeasurement.obsTimecode
-
-                -- end
-                -- latency = latency / (#latencyMeasurements - 4)
-
-                reaper.ShowConsoleMsg("Before,OBS Timecode,After\n")
-                for _, latencyMeasurement in ipairs(latencyMeasurements) do
-                    reaper.ShowConsoleMsg(
-                        (latencyMeasurement.before - startPosition) .. "," ..
-                            latencyMeasurement.obsTimecode .. "," ..
-                            (latencyMeasurement.after - startPosition) .. "\n")
-                end
-                reaper.ShowConsoleMsg("\nLatency," .. latency ..
-                                          "\n\n--------------\n\n")
-
-                reaper.SetProjExtState(0, "leafac_OBS", "latency", latency)
-            end
-        end
-        latencyMeasurementsStep({})
-    end)
+    reaper.SetProjExtState(0, "leafac_OBS", "startPosition",
+                           tostring(startPosition))
+    reaper.SetProjExtState(0, "leafac_OBS", "originalRecordingFolder",
+                           originalRecordingFolder)
 else
     local hadStartPosition, startPosition =
         reaper.GetProjExtState(0, "leafac_OBS", "startPosition")
     local hadOriginalRecordingFolder, originalRecordingFolder =
         reaper.GetProjExtState(0, "leafac_OBS", "originalRecordingFolder")
-    local hadLatency, latency = reaper.GetProjExtState(0, "leafac_OBS",
-                                                       "latency")
-    if hadStartPosition == 0 or hadOriginalRecordingFolder == 0 or hadLatency ==
-        0 then
+    if hadStartPosition == 0 or hadOriginalRecordingFolder == 0 then
         return reaper.MB(
                    "Failed to find an ongoing OBS recording. Did you start an OBS recording through REAPER?",
                    "Error", 0)
@@ -163,7 +82,13 @@ else
     reaper.CSurf_OnStop()
     obs([[StopRecording 'SetRecordingFolder={ "rec-folder": "]] ..
             originalRecordingFolder .. [[" }']])
-    waitObsRecordingStatus(false)
+    local startWaitingObsStopRecording = reaper.time_precise()
+    while obs([[--field 0.recording GetStreamingStatus]]) ~= "false" do
+        if reaper.time_precise() > startWaitingObsStopRecording +
+            OBS_STOP_RECORDING_TIMEOUT then
+            error("Timed out waiting for OBS to stop recording.")
+        end
+    end
 
     -- FIXME: Currently this script is listing the contents of the recording folder as a hack to find the recording.
     --        In a future release of obs-websocket we’ll be able to ask for the recording file name directly.
@@ -211,10 +136,9 @@ else
     local source = reaper.PCM_Source_CreateFromFile(
                        projectFolder .. [[/]] .. file)
     reaper.SetMediaItemTake_Source(take, source)
-    reaper.SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", latency + LATENCY)
+    reaper.SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", LATENCY)
     reaper.Main_OnCommand(40047, 0) -- Peaks: Build any missing peaks
 
     reaper.SetProjExtState(0, "leafac_OBS", "startPosition", "")
     reaper.SetProjExtState(0, "leafac_OBS", "originalRecordingFolder", "")
-    reaper.SetProjExtState(0, "leafac_OBS", "latency", "")
 end
