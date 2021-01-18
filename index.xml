@@ -2,6 +2,14 @@
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
     <reapack name="leafac_OBS.lua" type="script">
+      <version name="2.4.0">
+        <source main="main" file="leafac_OBS - Start recording.lua">https://github.com/leafac/reaper/raw/2a80b0ae2beb44a569444e3dce15195fc971d71e/Scripts/leafac_OBS.lua</source>
+        <source main="main" file="leafac_OBS - Stop recording.lua">https://github.com/leafac/reaper/raw/2a80b0ae2beb44a569444e3dce15195fc971d71e/Scripts/leafac_OBS.lua</source>
+        <source main="main" file="leafac_OBS - Toggle recording.lua">https://github.com/leafac/reaper/raw/2a80b0ae2beb44a569444e3dce15195fc971d71e/Scripts/leafac_OBS.lua</source>
+        <source type="data" file="leafac_obs-cli" platform="darwin">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-macos</source>
+        <source type="data" file="leafac_obs-cli" platform="linux">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-linux</source>
+        <source type="data" file="leafac_obs-cli.exe" platform="windows">https://github.com/leafac/obs-cli/releases/download/v2.2.1/obs-cli-win.exe</source>
+      </version>
       <version name="2.3.0">
         <source main="main" file="leafac_OBS - Start recording.lua">https://github.com/leafac/reaper/raw/080444b29e25c7a26b000ea01011ceb4194391d4/Scripts/leafac_OBS.lua</source>
         <source main="main" file="leafac_OBS - Stop recording.lua">https://github.com/leafac/reaper/raw/080444b29e25c7a26b000ea01011ceb4194391d4/Scripts/leafac_OBS.lua</source>
