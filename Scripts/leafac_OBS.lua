@@ -3,6 +3,7 @@ local PASSWORD = ""
 local EXTENSION = "mkv"
 local LATENCY = 0.08
 local TRACK_NAME = "OBS"
+local ALWAYS_CREATE_NEW_TRACK = false
 local SUBFOLDER = ""
 local EXECUTE_TIMEOUT = 5000
 local OBS_STOP_RECORDING_TIMEOUT = 10
@@ -123,7 +124,7 @@ else
             break
         end
     end
-    if obsTrack == nil then
+    if obsTrack == nil or ALWAYS_CREATE_NEW_TRACK then
         reaper.InsertTrackAtIndex(numberOfTracks, false)
         obsTrack = reaper.GetTrack(0, numberOfTracks)
         reaper.GetSetMediaTrackInfo_String(obsTrack, "P_NAME", TRACK_NAME, true)
