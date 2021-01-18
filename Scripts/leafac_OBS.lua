@@ -1,12 +1,12 @@
 local ADDRESS = "localhost:4444"
 local PASSWORD = ""
 local EXTENSION = "mkv"
-local LATENCY = 0.08
+local LATENCY = 0.2
 local TRACK_NAME = "OBS"
 local ALWAYS_CREATE_NEW_TRACK = false
 local SUBFOLDER = ""
 local EXECUTE_TIMEOUT = 5000
-local OBS_STOP_RECORDING_TIMEOUT = 10
+local OBS_RECORDING_STATUS_TIMEOUT = 10
 
 local actionName = string.match(select(2, reaper.get_action_context()),
                                 "leafac_(.+)%.lua$")
@@ -46,6 +46,17 @@ Failed to control OBS.
 ]])
 end
 
+local function waitObsRecordingStatus(recordingStatus)
+    local startTime = reaper.time_precise()
+    while obs([[--field 0.recording GetStreamingStatus]]) ~=
+        tostring(recordingStatus) do
+        if reaper.time_precise() > startTime + OBS_RECORDING_STATUS_TIMEOUT then
+            error("Timed out waiting for recording status to be " ..
+                      recordingStatus .. ".")
+        end
+    end
+end
+
 local isPlaying = reaper.GetPlayState() & 1 == 1
 local projectFolder = reaper.GetProjectPath("") .. [[/]] .. SUBFOLDER
 
@@ -59,6 +70,7 @@ if string.match(actionName, "Start") or
                                         [[--field 0.rec-folder GetRecordingFolder 'SetRecordingFolder={ "rec-folder": "]] ..
                                             projectFolder ..
                                             [[" }' StartRecording]])
+    waitObsRecordingStatus(true)
     local startPosition = getCurrentPosition()
     reaper.CSurf_OnRecord()
 
@@ -82,14 +94,7 @@ else
     reaper.CSurf_OnStop()
     obs([[StopRecording 'SetRecordingFolder={ "rec-folder": "]] ..
             originalRecordingFolder .. [[" }']])
-    local startTime = reaper.time_precise()
-    while obs([[--field 0.recording GetStreamingStatus]]) == "true" do
-        if reaper.time_precise() > startTime + OBS_STOP_RECORDING_TIMEOUT then
-            return reaper.MB("Timed out waiting for recording to end.", "Error",
-                             0)
-
-        end
-    end
+    waitObsRecordingStatus(false)
 
     -- FIXME: Currently this script is listing the contents of the recording folder as a hack to find the recording.
     --        In a future release of obs-websocket we’ll be able to ask for the recording file name directly.
