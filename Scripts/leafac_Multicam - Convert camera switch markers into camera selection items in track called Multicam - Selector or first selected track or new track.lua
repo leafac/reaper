@@ -57,7 +57,7 @@ for cameraSwitchIndex = #cameraSwitches, 1, -1 do
         NAME ]] .. cameraSwitch.camera .. "\n" .. [[
         <SOURCE VIDEOEFFECT
             <CODE
-            | 
+                | 
             >
         >
         %1
