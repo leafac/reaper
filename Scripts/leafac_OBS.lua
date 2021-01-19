@@ -86,7 +86,8 @@ else
     while obs([[--field 0.recording GetStreamingStatus]]) ~= "false" do
         if reaper.time_precise() > startWaitingObsStopRecording +
             OBS_STOP_RECORDING_TIMEOUT then
-            error("Timed out waiting for OBS to stop recording.")
+            return reaper.MB("Timed out waiting for OBS to stop recording",
+                             "Error", 0)
         end
     end
 
@@ -115,7 +116,7 @@ else
 
     local obsTrack
     local numberOfTracks = reaper.GetNumTracks()
-    for trackIndex = 0, numberOfTracks - 1 do
+    for trackIndex = 0, numberOfTracks - 1, 1 do
         local track = reaper.GetTrack(0, trackIndex)
         local _, trackName = reaper.GetTrackName(track)
         if trackName == TRACK_NAME then
