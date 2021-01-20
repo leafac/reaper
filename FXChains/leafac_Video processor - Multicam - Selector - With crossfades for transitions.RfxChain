@@ -1,12 +1,22 @@
 BYPASS 0 0
 <VIDEO_EFFECT "Video processor" ""
   <CODE
-    |// Multicam - Selector
+    |// Multicam - Selector - With crossfades for transitions
     |
     |input_get_name(0, #selected_camera_string);
     |match("%d", #selected_camera_string, selected_camera_number);
     |selected_camera_number = max(1, selected_camera_number);
-    |gfx_blit(input_track(selected_camera_number - 1));
+    |input_info(0, project_w, project_h, 0, gfx_a);
+    |gfx_a == 1 ? (
+    |  gfx_blit(input_track(selected_camera_number - 1));
+    |) : (
+    |  gfx_fillrect(0, 0, project_w, project_h);
+    |  gfx_blit(input_track(selected_camera_number - 1));
+    |  input_get_name(1, #other_selected_camera_string);
+    |  match("%d", #other_selected_camera_string, other_selected_camera_number);
+    |  input_info(1, project_w, project_h, 0, gfx_a);
+    |  gfx_blit(input_track(other_selected_camera_number - 1));
+    |);
   >
   CODEPARM 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000 0.0000000000
 >
