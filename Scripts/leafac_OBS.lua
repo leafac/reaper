@@ -96,9 +96,7 @@ else
     --        (The obs-websocket version at the time of this writing is 4.8.)
     --        See https://github.com/Palakis/obs-websocket/issues/258.
     local files = {}
-    local fileIndex = -1
-    while true do
-        fileIndex = fileIndex + 1
+    for fileIndex = 0, math.huge do
         local file = reaper.EnumerateFiles(projectFolder, fileIndex)
         if file == nil then break end
         if string.match(file, "%." .. EXTENSION .. "$") then
