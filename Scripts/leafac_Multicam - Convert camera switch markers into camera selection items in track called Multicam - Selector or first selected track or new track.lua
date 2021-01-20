@@ -52,9 +52,12 @@ for cameraSwitchIndex = #cameraSwitches, 1, -1 do
     reaper.SetMediaItemInfo_Value(item, "D_POSITION", cameraSwitch.position)
     reaper.SetMediaItemInfo_Value(item, "D_LENGTH",
                                   currentPosition - cameraSwitch.position)
+    reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0)
+    reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0)
     local _, chunk = reaper.GetItemStateChunk(item, "", false)
     chunk = string.gsub(chunk, ">%s*$", [[
         NAME ]] .. cameraSwitch.camera .. "\n" .. [[
+        FADEFLAG 1
         <SOURCE VIDEOEFFECT
             <CODE
                 | 
