@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OBS Multicam</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        -webkit-text-size-adjust: 100%;
+        text-align: center;
+        max-width: 600px;
+        padding: 0 1em;
+        margin: 1em auto;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+
+      fieldset {
+        display: inline-block;
+        border: 1px solid silver;
+        border-radius: 10px;
+        margin: 1em;
+      }
+
+      label {
+        display: inline-block;
+        font-size: 1em;
+        background-color: white;
+        color: black;
+        border: 1px solid darkgray;
+        border-radius: 5px;
+        padding: 0.5em 0.7em;
+        margin: 0.5em;
+        outline: none;
+      }
+
+      label:active,
+      input:checked + label {
+        background-color: gainsboro;
+      }
+
+      input {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>OBS Multicam</h1>
+    <fieldset>
+      <legend>Recording</legend>
+      <input id="recording" type="radio" name="recording" />
+      <label
+        for="recording"
+        onclick="fetch(`/_/_RSa8097198b5ba34eafff45805c1727ed4e42baeb6`);"
+      >
+        Start
+      </label>
+      <input id="stop" type="radio" name="recording" />
+      <label
+        for="stop"
+        onclick="fetch(`/_/_RS40031326265963e3606b3fd8fc73993a6243a2da`);"
+        >Stop</label
+      >
+    </fieldset>
+    <fieldset>
+      <legend>Marker</legend>
+      <label onclick="fetch(`/_/40157`);">Add marker</label>
+    </fieldset>
+    <fieldset>
+      <legend>
+        Multicam - Insert camera switch marker to camera at current position
+      </legend>
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(
+            auto-fill,
+            minmax(min(100px, 100%), 1fr)
+          );
+          grid-auto-rows: auto;
+        "
+      >
+        <input id="camera-1" type="radio" name="camera" />
+        <label
+          for="camera-1"
+          onclick="fetch(`/_/_RS0ef00f2c7fa13a89a670ae0ceebab188f76bdb39`);"
+          >Camera<br />1</label
+        >
+        <input id="camera-2" type="radio" name="camera" />
+        <label
+          for="camera-2"
+          onclick="fetch(`/_/_RS03c9eeea5a76cf51ebdf036cfc01c627d8814dbf`);"
+          >Camera<br />2</label
+        >
+        <input id="camera-3" type="radio" name="camera" />
+        <label
+          for="camera-3"
+          onclick="fetch(`/_/_RS309d84519b55ca7bf4054c61375ddc0c9af0c7d2`);"
+          >Camera<br />3</label
+        >
+        <input id="camera-4" type="radio" name="camera" />
+        <label
+          for="camera-4"
+          onclick="fetch(`/_/_RSd61147b2cb175b462459e920c43c47922bcbeaf5`);"
+          >Camera<br />4</label
+        >
+        <input id="camera-5" type="radio" name="camera" />
+        <label
+          for="camera-5"
+          onclick="fetch(`/_/_RSf7a6434cba550ccea54620a8eb54f8fe8b15fb4a`);"
+          >Camera<br />5</label
+        >
+        <input id="camera-6" type="radio" name="camera" />
+        <label
+          for="camera-6"
+          onclick="fetch(`/_/_RSd181fc45c40415430229c90e2098b0201080e7cf`);"
+          >Camera<br />6</label
+        >
+        <input id="camera-7" type="radio" name="camera" />
+        <label
+          for="camera-7"
+          onclick="fetch(`/_/_RS5c7bd5fd6591d41d07934f325d89a954ce896c15`);"
+          >Camera<br />7</label
+        >
+        <input id="camera-8" type="radio" name="camera" />
+        <label
+          for="camera-8"
+          onclick="fetch(`/_/_RS4dd6dba7ceb01a5ca98db81f84cb543bd3ef1fe9`);"
+          >Camera<br />8</label
+        >
+        <input id="camera-9" type="radio" name="camera" />
+        <label
+          for="camera-9"
+          onclick="fetch(`/_/_RSbbcb3f707773d86dacdbe2a23b5dbd6e58e78794`);"
+          >Camera<br />9</label
+        >
+        <input id="camera-10" type="radio" name="camera" />
+        <label
+          for="camera-10"
+          onclick="fetch(`/_/_RS83cb04c1a64bc2becdb617e9995a58728b2bd3a7`);"
+          >Camera<br />10</label
+        >
+        <input id="camera-11" type="radio" name="camera" />
+        <label
+          for="camera-11"
+          onclick="fetch(`/_/_RS70f0424d175c375cff0726eae5cc0788f4c52dbf`);"
+          >Camera<br />11</label
+        >
+        <input id="camera-12" type="radio" name="camera" />
+        <label
+          for="camera-12"
+          onclick="fetch(`/_/_RSbb947ec2c5867decf3ad6893c4afb09990c4dc57`);"
+          >Camera<br />12</label
+        >
+        <input id="camera-13" type="radio" name="camera" />
+        <label
+          for="camera-13"
+          onclick="fetch(`/_/_RS3af7a0db7641863fc23faabf0964d399d95384bc`);"
+          >Camera<br />13</label
+        >
+        <input id="camera-14" type="radio" name="camera" />
+        <label
+          for="camera-14"
+          onclick="fetch(`/_/_RS25544e4cfca7af5865d2d929f7254036f88d7d8d`);"
+          >Camera<br />14</label
+        >
+        <input id="camera-15" type="radio" name="camera" />
+        <label
+          for="camera-15"
+          onclick="fetch(`/_/_RS4d2a25441ed9ab295f4656d9e6606769e72dcff4`);"
+          >Camera<br />15</label
+        >
+        <input id="camera-16" type="radio" name="camera" />
+        <label
+          for="camera-16"
+          onclick="fetch(`/_/_RS13ad69a754e1b2ce4c8b487407ed467c0dc6485e`);"
+          >Camera<br />16</label
+        >
+        <input id="camera-17" type="radio" name="camera" />
+        <label
+          for="camera-17"
+          onclick="fetch(`/_/_RSd7657dd83ff59c64a76028afd498ddf8a4973d8c`);"
+          >Camera<br />17</label
+        >
+        <input id="camera-18" type="radio" name="camera" />
+        <label
+          for="camera-18"
+          onclick="fetch(`/_/_RSae2b190f73dc105c0c206c81d79fa5f76e326d3f`);"
+          >Camera<br />18</label
+        >
+        <input id="camera-19" type="radio" name="camera" />
+        <label
+          for="camera-19"
+          onclick="fetch(`/_/_RS495cefc2082749b6a946f7e61fec5bb53c43c712`);"
+          >Camera<br />19</label
+        >
+        <input id="camera-20" type="radio" name="camera" />
+        <label
+          for="camera-20"
+          onclick="fetch(`/_/_RSd88747e2c0774748ec25c30afc3e392eecb68c9d`);"
+          >Camera<br />20</label
+        >
+      </div>
+    </fieldset>
+  </body>
+</html>

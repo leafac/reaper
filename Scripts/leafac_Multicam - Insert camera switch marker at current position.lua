@@ -4,4 +4,4 @@ reaper.AddProjectMarker(0, false,
                             reaper.GetCursorPosition(), 0,
                         "Multicam - Switch to camera " ..
                             string.match(select(2, reaper.get_action_context()),
-                                         "leafac_.*(%d+).*%.lua$"), -1)
+                                         "leafac_.-(%d+).*%.lua$"), -1)
