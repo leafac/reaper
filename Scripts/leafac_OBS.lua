@@ -23,7 +23,7 @@ local function execute(command, errorMessage)
     local output = reaper.ExecProcess(command, EXECUTE_TIMEOUT)
     if output == nil or not string.match(output, "^0") then
         error((errorMessage or "") .. "\n\nCommand:\n" .. command ..
-                  "\n\nOutput:\n" .. output)
+                  "\n\nOutput:\n" .. tostring(output))
     end
     return string.gsub(string.gsub(output, "^0%s*", ""), "%s*$", "")
 end
