@@ -2,6 +2,10 @@
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
     <reapack name="leafac_OBS Multicam.html" type="webinterface">
+      <version name="1.1.0">
+        <source>https://github.com/leafac/reaper/raw/9e754afa1167555f11f70702d04c25c2eef91aa4/WebInterfaces/leafac_OBS%20Multicam.html</source>
+        <source type="data" file="leafac_OBS Multicam - Hammerspoon.lua">https://github.com/leafac/reaper/raw/9e754afa1167555f11f70702d04c25c2eef91aa4/Data/leafac_OBS%20Multicam%20-%20Hammerspoon.lua</source>
+      </version>
       <version name="1.0.0">
         <source>https://github.com/leafac/reaper/raw/9e754afa1167555f11f70702d04c25c2eef91aa4/WebInterfaces/leafac_OBS%20Multicam.html</source>
         <source type="data">https://github.com/leafac/reaper/raw/9e754afa1167555f11f70702d04c25c2eef91aa4/Data/leafac_OBS%20Multicam%20-%20Hammerspoon.lua</source>
