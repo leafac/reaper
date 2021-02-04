@@ -53,7 +53,9 @@ if string.match(actionName, "Start") or
                                         [[--field 0.rec-folder GetRecordingFolder ]] ..
                                             (isWindows and
                                                 ([["SetRecordingFolder={ \"rec-folder\": \"]] ..
-                                                    projectFolder .. [[\" }"]]) or
+                                                    string.gsub(projectFolder,
+                                                                [[\]], [[\\]]) ..
+                                                    [[\" }"]]) or
                                                 ([['SetRecordingFolder={ "rec-folder": "]] ..
                                                     projectFolder .. [[" }']])) ..
                                             [[ StartRecording]])
@@ -78,11 +80,11 @@ else
 
     local stopPosition = getCurrentPosition()
     reaper.CSurf_OnStop()
-    obs([[StopRecording ]] .. (isWindows and
-            ([["SetRecordingFolder={ \"rec-folder\": \"]] ..
-                originalRecordingFolder .. [[\" }"]]) or
-            ([['SetRecordingFolder={ "rec-folder": "]] ..
-                originalRecordingFolder .. [[" }']])))
+    obs([[StopRecording ]] ..
+            (isWindows and ([["SetRecordingFolder={ \"rec-folder\": \"]] ..
+                string.gsub(originalRecordingFolder, [[\]], [[\\]]) .. [[\" }"]]) or
+                ([['SetRecordingFolder={ "rec-folder": "]] ..
+                    originalRecordingFolder .. [[" }']])))
     local startWaitingObsStopRecording = reaper.time_precise()
     while obs([[--field 0.recording GetStreamingStatus]]) ~= "false" do
         if reaper.time_precise() > startWaitingObsStopRecording +
