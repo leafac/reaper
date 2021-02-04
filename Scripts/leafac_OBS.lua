@@ -11,13 +11,7 @@ local OBS_STOP_RECORDING_TIMEOUT = 10
 local actionName = string.match(select(2, reaper.get_action_context()),
                                 "leafac_(.+)%.lua$")
 
-local operatingSystem = reaper.GetOS()
-if not (string.match(operatingSystem, "OSX") or
-    string.match(operatingSystem, "mac")) then
-    reaper.MB(
-        "If you can help test this Action in other operating systems (Windows and Linux), please contact the author at reaper@leafac.com.",
-        "This Action has been tested only in macOS.", 0)
-end
+local isWindows = string.match(reaper.GetOS(), "Win")
 
 local function execute(command, errorMessage)
     local output = reaper.ExecProcess(command, EXECUTE_TIMEOUT)
@@ -29,15 +23,15 @@ local function execute(command, errorMessage)
 end
 
 local obsCli = reaper.GetResourcePath() .. [[/Data/leafac_obs-cli]]
-if string.match(operatingSystem, "Win") then
+if isWindows then
     obsCli = obsCli .. [[.exe]]
 else
-    execute([[/bin/chmod +x ']] .. obsCli .. [[']])
+    execute([[/bin/chmod +x "]] .. obsCli .. [["]])
 end
 
 local function obs(arguments)
-    return execute([[']] .. obsCli .. [[' --address ']] .. ADDRESS ..
-                       [[' --password ']] .. PASSWORD .. [[' ]] .. arguments, [[
+    return execute([["]] .. obsCli .. [[" --address "]] .. ADDRESS ..
+                       [[" --password "]] .. PASSWORD .. [[" ]] .. arguments, [[
 Failed to control OBS.
 
 1. Check that OBS and obs-websocket are running.
@@ -56,9 +50,13 @@ end
 if string.match(actionName, "Start") or
     (string.match(actionName, "Toggle") and not isPlaying) then
     local originalRecordingFolder = obs(
-                                        [[--field 0.rec-folder GetRecordingFolder 'SetRecordingFolder={ "rec-folder": "]] ..
-                                            projectFolder ..
-                                            [[" }' StartRecording]])
+                                        [[--field 0.rec-folder GetRecordingFolder ]] ..
+                                            (isWindows and
+                                                ([["SetRecordingFolder={ \"rec-folder\": \"]] ..
+                                                    projectFolder .. [[\" }"]]) or
+                                                ([['SetRecordingFolder={ "rec-folder": "]] ..
+                                                    projectFolder .. [[" }']])) ..
+                                            [[ StartRecording]])
     local startPosition = getCurrentPosition()
     reaper.CSurf_OnRecord()
 
@@ -80,8 +78,11 @@ else
 
     local stopPosition = getCurrentPosition()
     reaper.CSurf_OnStop()
-    obs([[StopRecording 'SetRecordingFolder={ "rec-folder": "]] ..
-            originalRecordingFolder .. [[" }']])
+    obs([[StopRecording ]] .. (isWindows and
+            ([["SetRecordingFolder={ \"rec-folder\": \"]] ..
+                originalRecordingFolder .. [[\" }"]]) or
+            ([['SetRecordingFolder={ "rec-folder": "]] ..
+                originalRecordingFolder .. [[" }']])))
     local startWaitingObsStopRecording = reaper.time_precise()
     while obs([[--field 0.recording GetStreamingStatus]]) ~= "false" do
         if reaper.time_precise() > startWaitingObsStopRecording +
