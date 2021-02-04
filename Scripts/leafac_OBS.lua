@@ -41,7 +41,7 @@ Failed to control OBS.
 end
 
 local isPlaying = reaper.GetPlayState() & 1 == 1
-local projectFolder = reaper.GetProjectPath("") .. [[/]] .. SUBFOLDER
+local projectFolder = reaper.GetProjectPath("") .. SUBFOLDER
 
 local function getCurrentPosition()
     return isPlaying and reaper.GetPlayPosition() or reaper.GetCursorPosition()
