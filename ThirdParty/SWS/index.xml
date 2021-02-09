@@ -2,6 +2,9 @@
 <index version="1" name="Leandro Facchinetti SWS Redistribution">
   <category name="SWS">
     <reapack name="SWS" type="extension">
+      <version name="2.12.1.3">
+        <source file="reaper_sws-x86_64.dylib" platform="darwin">https://github.com/leafac/reaper/raw/1b9c70fdd8cbdc589d3b48545226d91b77ab79ec/ThirdParty/SWS/reaper_sws-x86_64.dylib</source>
+      </version>
       <version name="2.10.0.1">
         <source file="reaper_sws_extension.dylib" platform="darwin">https://github.com/leafac/reaper/raw/99c163da65b4233c3e9574dd856309abf5c8df12/reaper_sws_extension.dylib</source>
       </version>
