@@ -14,10 +14,10 @@ else
 end
 if not continue then return end
 local userInputsIterator = string.gmatch(userInputs, "[^,]*")
-local sampleRate = tonumber(userInputsIterator() or nil) or 48000
-local frameRate = tonumber(userInputsIterator() or nil) or 30
-local videoWidth = tonumber(userInputsIterator() or nil) or 1920
-local videoHeight = tonumber(userInputsIterator() or nil) or 1080
+local sampleRate = tonumber(userInputsIterator()) or 48000
+local frameRate = tonumber(userInputsIterator()) or 30
+local videoWidth = tonumber(userInputsIterator()) or 1920
+local videoHeight = tonumber(userInputsIterator()) or 1080
 
 local function run(description, identifier, isOn)
     local identifierNumber = type(identifier) == "number" and identifier or

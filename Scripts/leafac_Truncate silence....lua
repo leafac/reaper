@@ -77,9 +77,9 @@ if string.match(actionName, "%(options%)") then
     if not continue then return end
 end
 local userInputsIterator = string.gmatch(userInputs, "[^,]*")
-local keepPercentage = tonumber(userInputsIterator() or nil) or 0
-local keepMinimum = tonumber(userInputsIterator() or nil) or 0
-local keepMaximum = tonumber(userInputsIterator() or nil) or math.huge
+local keepPercentage = tonumber(userInputsIterator()) or 0
+local keepMinimum = tonumber(userInputsIterator()) or 0
+local keepMaximum = tonumber(userInputsIterator()) or math.huge
 
 if shouldUndo then reaper.Undo_BeginBlock() end
 

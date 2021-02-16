@@ -1,15 +1,79 @@
-local ADDRESS = "localhost:4444"
-local PASSWORD = ""
-local EXTENSION = "mkv"
-local LATENCY = 0
-local TRACK_NAME = "OBS"
-local ALWAYS_CREATE_NEW_TRACK = false
-local SUBFOLDER = ""
-local EXECUTE_TIMEOUT = 5000
-local OBS_STOP_RECORDING_TIMEOUT = 10
-
 local actionName = string.match(select(2, reaper.get_action_context()),
                                 "leafac_(.+)%.lua$")
+
+local function getAdvancedSetting(name, default)
+    if reaper.HasExtState("leafac_OBS", name) then
+        local value = reaper.GetExtState("leafac_OBS", name)
+        if type(default) == "number" then
+            return tonumber(value) or default
+        elseif type(default) == "boolean" then
+            return value ~= "false"
+        else
+            return value
+        end
+    else
+        return default
+    end
+end
+
+local ADVANCED_SETTINGS = {
+    "ADDRESS", "PASSWORD", "EXTENSION", "LATENCY", "TRACK_NAME",
+    "ALWAYS_CREATE_NEW_TRACK", "SUBFOLDER", "EXECUTE_TIMEOUT",
+    "OBS_STOP_RECORDING_TIMEOUT"
+}
+
+local ADDRESS = getAdvancedSetting("ADDRESS", "localhost:4444")
+local PASSWORD = getAdvancedSetting("PASSWORD", "")
+local EXTENSION = getAdvancedSetting("EXTENSION", "mkv")
+local LATENCY = getAdvancedSetting("LATENCY", 0)
+local TRACK_NAME = getAdvancedSetting("TRACK_NAME", "OBS")
+local ALWAYS_CREATE_NEW_TRACK = getAdvancedSetting("ALWAYS_CREATE_NEW_TRACK",
+                                                   false)
+local SUBFOLDER = getAdvancedSetting("SUBFOLDER", "")
+local EXECUTE_TIMEOUT = getAdvancedSetting("EXECUTE_TIMEOUT", 5000)
+local OBS_STOP_RECORDING_TIMEOUT = getAdvancedSetting(
+                                       "OBS_STOP_RECORDING_TIMEOUT", 10)
+
+if string.match(actionName, "Advanced settings") then
+    local continue, userInputs = reaper.GetUserInputs(actionName,
+                                                      #ADVANCED_SETTINGS,
+                                                      "Address (" .. ADDRESS ..
+                                                          ")," .. "Password (" ..
+                                                          PASSWORD .. ")," ..
+                                                          "Extension (" ..
+                                                          EXTENSION .. ")," ..
+                                                          "Latency (s) (" ..
+                                                          LATENCY .. ")," ..
+                                                          "Track name (" ..
+                                                          TRACK_NAME .. ")," ..
+                                                          "Always create new track (" ..
+                                                          tostring(
+                                                              ALWAYS_CREATE_NEW_TRACK) ..
+                                                          ")," .. "Subfolder (" ..
+                                                          SUBFOLDER .. ")," ..
+                                                          "Execute timeout (ms) (" ..
+                                                          EXECUTE_TIMEOUT ..
+                                                          ")," ..
+                                                          "OBS stop recording timeout (s) (" ..
+                                                          OBS_STOP_RECORDING_TIMEOUT ..
+                                                          ")", "")
+    if not continue then return end
+    local userInputsIterator = string.gmatch(userInputs, "[^,]*")
+    for _, advancedSetting in ipairs(ADVANCED_SETTINGS) do
+        local userInput = userInputsIterator()
+        if userInput ~= nil and userInput ~= "" then
+            reaper.SetExtState("leafac_OBS", advancedSetting, userInput, true)
+        end
+    end
+    return
+end
+
+if string.match(actionName, "Reset advanced settings to factory defaults") then
+    for _, advancedSetting in ipairs(ADVANCED_SETTINGS) do
+        reaper.DeleteExtState("leafac_OBS", advancedSetting, true)
+    end
+    return
+end
 
 local isWindows = string.match(reaper.GetOS(), "Win")
 
