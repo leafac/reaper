@@ -17,6 +17,7 @@ slider1:bypassed=0<0,1,1{Enabled,Bypassed}> 
 slider3:channels_per_track=2<2,32,2>Channels per track
 slider4:rms_size_ms=300<0,1000,.1>Reaction time (RMS size in ms)
 slider5:strength=1<0,5,.01>Strength
+slider6:lookahead_ms=0<0,1000,.1>Lookahead (ms)
 
 slider15:instance_identifier=0<0,50,1>-Instance identifier
 
@@ -64,6 +65,11 @@ tracks_maximum = 64 / 2;
 tracks = num_ch / channels_per_track;
 rms_size_samples = max(1, ceil(srate * rms_size_ms / 1000));
 rms_sample_counter = -1;
+lookahead_samples = max(1, ceil(srate * lookahead_ms / 1000));
+lookahead_sample_counter = -1;
+pdc_delay = lookahead_samples;
+pdc_bot_ch = 0;
+pdc_top_ch = num_ch;
 track_gain_maximum_difference_amplitude = 10^(track_gain_maximum_difference_db / 20);
 track_gain_maximum_debounce_samples = max(1, ceil(srate * track_gain_maximum_debounce_ms / 1000));
 
@@ -71,6 +77,13 @@ address = 0;
 tracks_priorities = address; address += tracks_maximum;
 track = -1; loop(tracks_maximum, track += 1;
   tracks_priorities[track] = slider(33 + track);
+);
+tracks_samples = address; address += tracks;
+track = -1; loop(tracks, track += 1;
+  tracks_samples[track] = address; address += channels_per_track;
+  channel = -1; loop(channels_per_track, channel += 1;
+    tracks_samples[track][channel] = address; memset(address, 0, lookahead_samples); address += lookahead_samples;
+  );
 );
 tracks_squares = address; address += tracks;
 track = -1; loop(tracks, track += 1;
@@ -86,6 +99,7 @@ freembuf(address + 1);
 @sample
 
 rms_sample_counter += 1; rms_sample_counter == rms_size_samples ? rms_sample_counter -= rms_size_samples;
+lookahead_sample_counter += 1; lookahead_sample_counter == lookahead_samples ? lookahead_sample_counter -= lookahead_samples;
 
 sum_of_tracks_rmss = 0;
 track = -1; loop(tracks, track += 1;
@@ -132,7 +146,8 @@ track = -1; loop(tracks, track += 1;
   tracks_rmss_gained[track] = track_rms_gained;
 
   channel = -1; loop(channels_per_track, channel += 1;
-    sample = spl(track * channels_per_track + channel);
+    sample = tracks_samples[track][channel][lookahead_sample_counter];
+    tracks_samples[track][channel][lookahead_sample_counter] = spl(track * channels_per_track + channel);
     spl(track * channels_per_track + channel) = 0;
     spl(channel) += sample * track_gain;
   );
@@ -151,7 +166,7 @@ abs(track_gain_maximum_gain - tracks_gains[gmem[instance_identifier]]) < track_g
 
 @serialize
 
-version = 130;
+version = 140;
 file_var(0, version);
 
 @gfx 530 180
