@@ -4,7 +4,7 @@
     <reapack name="leafac_Import take markers from OBS Controller (InfoWriter) CSV file.lua" type="script">
       <version name="1.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/49fb1bc796975f60ebba8b5b1510f988df5f6916/Scripts/leafac_Import%20take%20markers%20from%20OBS%20Controller%20(InfoWriter)%20CSV%20file.lua</source>
-        <source type="webinterface">https://github.com/leafac/reaper/raw/49fb1bc796975f60ebba8b5b1510f988df5f6916/WebInterfaces/leafac_OBS%20Controller.html</source>
+        <source file="leafac_OBS Controller.html" type="webinterface">https://github.com/leafac/reaper/raw/49fb1bc796975f60ebba8b5b1510f988df5f6916/WebInterfaces/leafac_OBS%20Controller.html</source>
       </version>
     </reapack>
     <reapack name="leafac_OBS Multicam.html" type="webinterface">
