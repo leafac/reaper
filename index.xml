@@ -694,6 +694,10 @@
       </version>
     </reapack>
     <reapack name="leafac_Automixer.jsfx" type="effect">
+      <version name="2.0.0">
+        <source>https://github.com/leafac/reaper/raw/e55c1ac199e4ee7141ce6ad2d914cb4e2dfc5010/Effects/leafac_Automixer.jsfx</source>
+        <source type="script" main="main" file="leafac_Automixer setup.lua">https://github.com/leafac/reaper/raw/e55c1ac199e4ee7141ce6ad2d914cb4e2dfc5010/Scripts/leafac_Automixer%20setup.lua</source>
+      </version>
       <version name="1.4.0">
         <source>https://github.com/leafac/reaper/raw/5c0f22458be2f954dbf9c9f7eeaeab0093686ec6/Effects/leafac_Automixer.jsfx</source>
         <source type="script" main="main" file="leafac_Automixer setup.lua">https://github.com/leafac/reaper/raw/5c0f22458be2f954dbf9c9f7eeaeab0093686ec6/Scripts/leafac_Automixer%20setup.lua</source>
