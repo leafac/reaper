@@ -12,7 +12,7 @@ Video processor:
 gfx_blit(input_track(gmem[instance_identifier]));
 */
 
-slider1:bypassed=0<0,1,1{Enabled,Bypassed}> 
+slider1:mode=0<0,2,1{Single-track output,Multi-track output,Bypassed}> 
 
 slider3:channels_per_track=2<2,32,2>Channels per track
 slider4:rms_size_ms=300<0,1000,.1>Reaction time (RMS size in ms)
@@ -58,6 +58,12 @@ slider63:1<0,10,0.1>-Track 31 priority
 slider64:1<0,10,0.1>-Track 32 priority
 
 options:no_meter gmem=leafac_Automixer
+
+@init
+
+MODE_SINGLE_TRACK_OUTPUT = 0;
+MODE_MULTI_TRACK_OUTPUT = 1;
+MODE_BYPASSED = 2;
 
 @slider
 
@@ -139,7 +145,7 @@ track_gain_maximum_track = -1;
 track_gain_maximum_gain = -1;
 track = -1; loop(tracks, track += 1;
   track_gain = tracks_gains_computation[track] / sum_of_tracks_gains;
-  bypassed ? track_gain = 1;
+  mode == MODE_BYPASSED ? track_gain = 1;
   track_rms_gained = tracks_rmss[track] * track_gain;
 
   tracks_gains[track] = track_gain;
@@ -148,8 +154,12 @@ track = -1; loop(tracks, track += 1;
   channel = -1; loop(channels_per_track, channel += 1;
     sample = tracks_samples[track][channel][lookahead_sample_counter];
     tracks_samples[track][channel][lookahead_sample_counter] = spl(track * channels_per_track + channel);
-    spl(track * channels_per_track + channel) = 0;
-    spl(channel) += sample * track_gain;
+    mode == MODE_MULTI_TRACK_OUTPUT ? (
+      spl(track * channels_per_track + channel) = sample * track_gain;
+    ) : (
+      spl(track * channels_per_track + channel) = 0;
+      spl(channel) += sample * track_gain;
+    );
   );
 
   track_gain_maximum_gain < track_gain ? (
@@ -166,7 +176,7 @@ abs(track_gain_maximum_gain - tracks_gains[gmem[instance_identifier]]) < track_g
 
 @serialize
 
-version = 140;
+version = 200;
 file_var(0, version);
 
 @gfx 530 180
