@@ -53,6 +53,7 @@ for inputIndex, media in ipairs(mediasToConvert) do
                        (stream.isVideo and ".mp4" or ".wav")
             repeatedFileIndex = repeatedFileIndex + 1
         until not reaper.file_exists(file)
+        stream.file = file
         table.insert(convertCommandParts,
                      " -map " .. tostring(inputIndex - 1) .. ":" ..
                          tostring(streamIndex - 1) ..
@@ -60,12 +61,11 @@ for inputIndex, media in ipairs(mediasToConvert) do
                          "\"")
     end
 end
---[[ TODO: Create unique file names if multiple media items point at the same media file
+-- TODO: Create unique file names if multiple media items point at the same media file
 local convertCommandResult = reaper.ExecProcess(table.concat(convertCommandParts), 0)
 if convertCommandResult == nil or not string.match(convertCommandResult, "^0\n") then
   error("Convertion failed: " .. tostring(convertCommandResult))
 end
---]]
 
 local tracksToCreateMap = {}
 for _, media in ipairs(mediasToConvert) do
@@ -114,4 +114,28 @@ for _, trackToCreate in ipairs(tracksToCreateList) do
                                    parentTrackDepth - 1)
     -- FIXME: This doesn’t work when the track is a child track.
 end
+
+-- FIXME: Is there a way to just copy the existing item and change the source underneath, instead
+-- of creating new items and copying properties by hand?
+for _, media in ipairs(mediasToConvert) do
+    local track = reaper.GetMediaItemTrack(media.mediaItem)
+    local trackNumber = reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
+    local position = reaper.GetMediaItemInfo_Value(media.mediaItem, "D_POSITION")
+    local length = reaper.GetMediaItemInfo_Value(media.mediaItem, "D_LENGTH")
+    local mute = reaper.GetMediaItemInfo_Value(media.mediaItem, "B_MUTE")
+    local take = reaper.GetActiveTake(media.mediaItem)
+    local startOffset = reaper.GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+    for streamIndex, stream in ipairs(media.streams) do
+        local streamTrack = reaper.GetTrack(0, trackNumber + streamIndex - 1)
+        local streamMediaItem = reaper.AddMediaItemToTrack(streamTrack)
+        reaper.SetMediaItemInfo_Value(streamMediaItem, "D_POSITION", position)
+        reaper.SetMediaItemInfo_Value(streamMediaItem, "D_LENGTH", length)
+        reaper.SetMediaItemInfo_Value(streamMediaItem, "B_MUTE", mute)
+        local streamTake = reaper.AddTakeToMediaItem(streamMediaItem)
+        reaper.SetMediaItemTakeInfo_Value(streamTake, "D_STARTOFFS", startOffset)
+        local source = reaper.PCM_Source_CreateFromFile(stream.file)
+        reaper.SetMediaItemTake_Source(streamTake, source)
+    end
+end
+reaper.Main_OnCommand(40047, 0) -- Peaks: Build any missing peaks
 
