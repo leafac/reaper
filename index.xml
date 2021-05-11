@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
+    <reapack name="leafac_Explode multistream (multitrack) media file to new one-stream (one-track) media files.lua" type="script">
+      <version name="0.0.1">
+        <source main="main">https://github.com/leafac/reaper/raw/73600db2dfc1841fcdc05b7f0c1fd3de3d454eba/Scripts/leafac_Explode%20multistream%20(multitrack)%20media%20file%20to%20new%20one-stream%20(one-track)%20media%20files.lua</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Import take markers from OBS Controller (InfoWriter) CSV file.lua" type="script">
       <version name="1.0.0">
         <source main="main">https://github.com/leafac/reaper/raw/49fb1bc796975f60ebba8b5b1510f988df5f6916/Scripts/leafac_Import%20take%20markers%20from%20OBS%20Controller%20(InfoWriter)%20CSV%20file.lua</source>
