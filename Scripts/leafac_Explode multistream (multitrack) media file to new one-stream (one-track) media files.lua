@@ -1,3 +1,10 @@
+local continue = reaper.MB(
+  "It may or may not work yet. See https://www.youtube.com/channel/UC_R-6HcHW5V9_FlZe30tnGA. Do you want to continue?",
+  "Warning: This is a work in progress",
+  4
+)
+if continue == 7 then return end
+
 -- ffmpeg -i 2021-05-01\ 18-31-03.mkv -map 0:0 -c copy 2021-05-01\ 18-31-03--0.mp4 -map 0:1 2021-05-01\ 18-31-03--1.wav -map 0:2 2021-05-01\ 18-31-03--2.wav
 -- FIXME: ffmpeg’s absolute path
 local ffmpeg = "/usr/local/bin/ffmpeg"
