@@ -123,6 +123,7 @@ for _, media in ipairs(mediasToConvert) do
     local position = reaper.GetMediaItemInfo_Value(media.mediaItem, "D_POSITION")
     local length = reaper.GetMediaItemInfo_Value(media.mediaItem, "D_LENGTH")
     local mute = reaper.GetMediaItemInfo_Value(media.mediaItem, "B_MUTE")
+    reaper.SetMediaItemInfo_Value(media.mediaItem, "B_MUTE", 1)
     local take = reaper.GetActiveTake(media.mediaItem)
     local startOffset = reaper.GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
     for streamIndex, stream in ipairs(media.streams) do
