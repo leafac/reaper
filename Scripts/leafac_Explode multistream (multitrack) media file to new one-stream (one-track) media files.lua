@@ -48,6 +48,7 @@ end
 if #mediasToConvert == 0 then return end
 
 local convertCommandParts = {ffmpeg}
+local files = {}
 for inputIndex, media in ipairs(mediasToConvert) do
     table.insert(convertCommandParts, " -i \"" .. media.file .. "\"")
     for streamIndex, stream in ipairs(media.streams) do
@@ -60,7 +61,8 @@ for inputIndex, media in ipairs(mediasToConvert) do
                            string.format(" %03d", repeatedFileIndex)) ..
                        (stream.isVideo and ".mp4" or ".wav")
             repeatedFileIndex = repeatedFileIndex + 1
-        until not reaper.file_exists(file)
+        until not reaper.file_exists(file) and not files[file]
+        files[file] = true
         stream.file = file
         table.insert(convertCommandParts,
                      " -map " .. tostring(inputIndex - 1) .. ":" ..
@@ -69,7 +71,6 @@ for inputIndex, media in ipairs(mediasToConvert) do
                          "\"")
     end
 end
--- TODO: Create unique file names if multiple media items point at the same media file
 local convertCommandResult = reaper.ExecProcess(
                                  table.concat(convertCommandParts), 0)
 if convertCommandResult == nil or not string.match(convertCommandResult, "^0\n") then
