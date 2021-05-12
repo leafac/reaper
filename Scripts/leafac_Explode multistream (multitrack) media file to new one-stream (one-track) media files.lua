@@ -3,8 +3,6 @@ local continue = reaper.MB(
                      "Warning: This is a work in progress", 4)
 if continue == 7 then return end
 
--- ffmpeg -i 2021-05-01\ 18-31-03.mkv -map 0:0 -c copy 2021-05-01\ 18-31-03--0.mp4 -map 0:1 2021-05-01\ 18-31-03--1.wav -map 0:2 2021-05-01\ 18-31-03--2.wav
--- FIXME: ffmpeg’s absolute path
 local ffmpeg = [["]] .. reaper.GetResourcePath() .. "/Data/leafac_ffmpeg" ..
                    (string.match(reaper.GetOS(), "Win") and ".exe" or "") ..
                    [["]]
@@ -126,8 +124,6 @@ for _, trackToCreate in ipairs(tracksToCreateList) do
     -- FIXME: This doesn’t work when the track is a child track.
 end
 
--- FIXME: Is there a way to just copy the existing item and change the source underneath, instead
--- of creating new items and copying properties by hand?
 for _, media in ipairs(mediasToConvert) do
     local track = reaper.GetMediaItemTrack(media.mediaItem)
     local trackNumber = reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
