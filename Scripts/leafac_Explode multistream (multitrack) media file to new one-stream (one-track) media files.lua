@@ -1,13 +1,16 @@
 local continue = reaper.MB(
-  "It may or may not work yet. See https://www.youtube.com/channel/UC_R-6HcHW5V9_FlZe30tnGA. Do you want to continue?",
-  "Warning: This is a work in progress",
-  4
-)
+                     "It may or may not work yet. See https://www.youtube.com/channel/UC_R-6HcHW5V9_FlZe30tnGA. Do you want to continue?",
+                     "Warning: This is a work in progress", 4)
 if continue == 7 then return end
 
 -- ffmpeg -i 2021-05-01\ 18-31-03.mkv -map 0:0 -c copy 2021-05-01\ 18-31-03--0.mp4 -map 0:1 2021-05-01\ 18-31-03--1.wav -map 0:2 2021-05-01\ 18-31-03--2.wav
 -- FIXME: ffmpeg’s absolute path
-local ffmpeg = "/usr/local/bin/ffmpeg"
+local ffmpeg = [["]] .. reaper.GetResourcePath() .. "/Data/leafac_ffmpeg" ..
+                   (string.match(reaper.GetOS(), "Win") and ".exe" or "") ..
+                   [["]]
+if not string.match(reaper.GetOS(), "Win") then
+    reaper.ExecProcess("/bin/chmod +x " .. ffmpeg, 500)
+end
 
 local selectedMediaItemsCount = reaper.CountSelectedMediaItems(0)
 if selectedMediaItemsCount == 0 then return end
@@ -69,9 +72,10 @@ for inputIndex, media in ipairs(mediasToConvert) do
     end
 end
 -- TODO: Create unique file names if multiple media items point at the same media file
-local convertCommandResult = reaper.ExecProcess(table.concat(convertCommandParts), 0)
+local convertCommandResult = reaper.ExecProcess(
+                                 table.concat(convertCommandParts), 0)
 if convertCommandResult == nil or not string.match(convertCommandResult, "^0\n") then
-  error("Convertion failed: " .. tostring(convertCommandResult))
+    error("Convertion failed: " .. tostring(convertCommandResult))
 end
 
 local tracksToCreateMap = {}
@@ -127,7 +131,8 @@ end
 for _, media in ipairs(mediasToConvert) do
     local track = reaper.GetMediaItemTrack(media.mediaItem)
     local trackNumber = reaper.GetMediaTrackInfo_Value(track, "IP_TRACKNUMBER")
-    local position = reaper.GetMediaItemInfo_Value(media.mediaItem, "D_POSITION")
+    local position =
+        reaper.GetMediaItemInfo_Value(media.mediaItem, "D_POSITION")
     local length = reaper.GetMediaItemInfo_Value(media.mediaItem, "D_LENGTH")
     local mute = reaper.GetMediaItemInfo_Value(media.mediaItem, "B_MUTE")
     reaper.SetMediaItemInfo_Value(media.mediaItem, "B_MUTE", 1)
