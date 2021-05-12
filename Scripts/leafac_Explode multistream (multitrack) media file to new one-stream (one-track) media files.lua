@@ -20,8 +20,8 @@ for selectedMediaItemIndex = 0, selectedMediaItemsCount - 1 do
     local mediaItem = reaper.GetSelectedMediaItem(0, selectedMediaItemIndex)
     local take = reaper.GetActiveTake(mediaItem)
     local source = reaper.GetMediaItemTake_Source(take)
-    -- FIXME: Does Windows normalize ‘file’ to forward slashes?
-    local file = reaper.GetMediaSourceFileName(source, "")
+    local file = string.gsub(reaper.GetMediaSourceFileName(source, ""), "\\",
+                             "/")
     table.insert(mediasToInspect,
                  {mediaItem = mediaItem, file = file, streams = {}})
 end
