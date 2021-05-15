@@ -1,13 +1,8 @@
-local continue = reaper.MB(
-                     "It may or may not work yet. See https://www.youtube.com/channel/UC_R-6HcHW5V9_FlZe30tnGA. Do you want to continue?",
-                     "Warning: This is a work in progress", 4)
-if continue == 7 then return end
-
 local ffmpeg = [["]] .. reaper.GetResourcePath() .. "/Data/leafac_ffmpeg" ..
                    (string.match(reaper.GetOS(), "Win") and ".exe" or "") ..
                    [["]]
 if not string.match(reaper.GetOS(), "Win") then
-    reaper.ExecProcess("/bin/chmod +x " .. ffmpeg, 500)
+    reaper.ExecProcess("/bin/chmod +x " .. ffmpeg, 0)
 end
 
 local selectedMediaItemsCount = reaper.CountSelectedMediaItems(0)
@@ -28,10 +23,10 @@ local inspectCommandParts = {ffmpeg}
 for _, media in ipairs(mediasToInspect) do
     table.insert(inspectCommandParts, " -i \"" .. media.file .. "\"")
 end
-local fileInformation = reaper.ExecProcess(table.concat(inspectCommandParts),
-                                           500)
+local fileInformation = reaper.ExecProcess(table.concat(inspectCommandParts), 0)
 if fileInformation == nil or not string.match(fileInformation, "1\n") then
-    error("Error inspecting media file:\n\n" .. file .. "\n\n" ..
+    error("Error inspecting media files:\n\n" ..
+              table.concat(inspectCommandParts) .. "\n\n" ..
               tostring(fileInformation))
 end
 for input, stream, description in string.gmatch(fileInformation,
@@ -55,7 +50,7 @@ for inputIndex, media in ipairs(mediasToConvert) do
         local file
         local repeatedFileIndex = 1
         repeat
-            file = string.match(media.file, "^(.*/.*)%..*$") .. " [stream " ..
+            file = string.match(media.file, "^(.*)%..*$") .. " [stream " ..
                        tostring(streamIndex) .. "]" ..
                        (repeatedFileIndex == 1 and "" or
                            string.format(" %03d", repeatedFileIndex)) ..
@@ -74,7 +69,8 @@ end
 local convertCommandResult = reaper.ExecProcess(
                                  table.concat(convertCommandParts), 0)
 if convertCommandResult == nil or not string.match(convertCommandResult, "^0\n") then
-    error("Convertion failed: " .. tostring(convertCommandResult))
+    error("Error converting media files: " .. tostring(convertCommandResult) ..
+              "\n\n" .. tostring(convertCommandResult))
 end
 
 local tracksToCreateMap = {}
@@ -87,7 +83,7 @@ for _, media in ipairs(mediasToConvert) do
 end
 
 local tracksToCreateList = {}
-for trackNumber, numberOfChildrenToCreate in ipairs(tracksToCreateMap) do
+for trackNumber, numberOfChildrenToCreate in pairs(tracksToCreateMap) do
     table.insert(tracksToCreateList, {
         trackNumber = trackNumber,
         numberOfChildrenToCreate = numberOfChildrenToCreate
@@ -122,7 +118,6 @@ for _, trackToCreate in ipairs(tracksToCreateList) do
                                                1)
     reaper.SetMediaTrackInfo_Value(lastChildTrack, "I_FOLDERDEPTH",
                                    parentTrackDepth - 1)
-    -- FIXME: This doesn’t work when the track is a child track.
 end
 
 for _, media in ipairs(mediasToConvert) do
