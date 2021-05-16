@@ -1,3 +1,5 @@
+-- https://youtu.be/diSDgw1g7QE
+
 local ffmpeg = [["]] .. reaper.GetResourcePath() .. "/Data/leafac_ffmpeg" ..
                    (string.match(reaper.GetOS(), "Win") and ".exe" or "") ..
                    [["]]
