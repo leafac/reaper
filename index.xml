@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
+    <reapack name="leafac_iddqd_Seach REAPER Mania tutorial....lua" type="script">
+      <version name="1.0.0">
+        <source main="main">https://github.com/leafac/reaper/raw/b79603300fb877ba6906784ea62d07c06462b0ba/Scripts/leafac_iddqd_Seach%20REAPER%20Mania%20tutorial....lua</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Explode multistream (multitrack) media file to new one-stream (one-track) media files.lua" type="script">
       <!--
         Static ffmpeg builds collected from:
