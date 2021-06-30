@@ -6,8 +6,28 @@
         <source main="main">https://github.com/leafac/reaper/raw/73600db2dfc1841fcdc05b7f0c1fd3de3d454eba/Scripts/leafac_Copy%20track%20___,%20item%20___%20and%20paste%20on%20new%20track,%20measure%20___.lua</source>
       </version>
     </reapack>
+    <reapack name="leafac_iddqd_Search REAPER Mania tutorial....lua" type="script">
+      <version name="1.0.0">
+        <source main="main">https://github.com/leafac/reaper/raw/3a07cccc2c9a549d2774b76ecb8b8dd6a91163fe/Scripts/leafac_iddqd_Search%20REAPER%20Mania%20tutorial....lua</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Explode multistream (multitrack) media file to new one-stream (one-track) media files.lua" type="script">
-      <!-- TODO: Missing ffmpeg for Apple M1 and Windows 32 bits -->
+      <!--
+        Static ffmpeg builds collected from:
+        macOS: https://evermeet.cx/ffmpeg/
+        Linux: https://johnvansickle.com/ffmpeg/
+        Windows: https://www.gyan.dev/ffmpeg/builds/
+        FIXME: We’re not shipping Windows 32 bits, because the link above, which comes from ffmpeg’s website, doesn’t have one. Let’s wait for someone to need it.
+      -->
+      <version name="1.0.0">
+        <source main="main">https://github.com/leafac/reaper/raw/e848ed8c08b4c06ef5e1f79bb026b35483055064/Scripts/leafac_Explode%20multistream%20(multitrack)%20media%20file%20to%20new%20one-stream%20(one-track)%20media%20files.lua</source>
+        <source type="data" file="leafac_ffmpeg.exe" platform="windows">https://github.com/leafac/reaper/releases/download/ffmpeg/ffmpeg--windows.exe</source>
+        <source type="data" file="leafac_ffmpeg" platform="darwin">https://github.com/leafac/reaper/releases/download/ffmpeg/ffmpeg--darwin</source>
+        <source type="data" file="leafac_ffmpeg" platform="linux64">https://github.com/leafac/reaper/releases/download/ffmpeg/ffmpeg--linux64</source>
+        <source type="data" file="leafac_ffmpeg" platform="linux32">https://github.com/leafac/reaper/releases/download/ffmpeg/ffmpeg--linux32</source>
+        <source type="data" file="leafac_ffmpeg" platform="linux-aarch64">https://github.com/leafac/reaper/releases/download/ffmpeg/ffmpeg--linux-aarch64</source>
+        <source type="data" file="leafac_ffmpeg" platform="linux-armv7l">https://github.com/leafac/reaper/releases/download/ffmpeg/ffmpeg--linux-armv7l</source>
+      </version>
       <version name="0.0.2">
         <source main="main">https://github.com/leafac/reaper/raw/73600db2dfc1841fcdc05b7f0c1fd3de3d454eba/Scripts/leafac_Explode%20multistream%20(multitrack)%20media%20file%20to%20new%20one-stream%20(one-track)%20media%20files.lua</source>
         <source type="data" file="leafac_ffmpeg" platform="darwin">https://github.com/leafac/reaper/releases/download/ffmpeg/ffmpeg--darwin</source>
@@ -20,11 +40,6 @@
       <version name="0.0.1">
         <source main="main">https://github.com/leafac/reaper/raw/73600db2dfc1841fcdc05b7f0c1fd3de3d454eba/Scripts/leafac_Explode%20multistream%20(multitrack)%20media%20file%20to%20new%20one-stream%20(one-track)%20media%20files.lua</source>
       </version>
-      <!--
-        macOS: https://evermeet.cx/ffmpeg/
-        Linux: https://johnvansickle.com/ffmpeg/
-        Windows: https://www.gyan.dev/ffmpeg/builds/
-      -->
     </reapack>
     <reapack name="leafac_Import take markers from OBS Controller (InfoWriter) CSV file.lua" type="script">
       <version name="1.0.0">

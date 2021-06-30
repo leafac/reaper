@@ -12,6 +12,15 @@
   </category>
   <category name="Filter">
     <reapack name="ReEQ and ReSpectrum" type="effect">
+      <version name="1.0.12">
+        <source file="ReEQ and ReSpectrum/ReEQ.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.12/ReEQ.jsfx</source>
+        <source file="ReEQ and ReSpectrum/ReSpectrum.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.12/ReSpectrum.jsfx</source>
+        <source file="ReEQ and ReSpectrum/firhalfband.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.12/firhalfband.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/rbj_filter.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.12/rbj_filter.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/spectrum.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.12/spectrum.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/svf_filter.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.12/svf_filter.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/textinput.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.12/textinput.jsfx-inc</source>
+      </version>
       <version name="1.0.11">
         <source file="ReEQ and ReSpectrum/ReEQ.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/ReEQ.jsfx</source>
         <source file="ReEQ and ReSpectrum/ReSpectrum.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.0.11/ReSpectrum.jsfx</source>
