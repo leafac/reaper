@@ -3,7 +3,7 @@
   <category name="Utility">
     <reapack name="leafac_Copy track ___, item ___ and paste on new track, measure ___.lua" type="script">
       <version name="0.0.1">
-        <source main="main">https://github.com/leafac/reaper/raw/73600db2dfc1841fcdc05b7f0c1fd3de3d454eba/Scripts/leafac_Copy%20track%20___,%20item%20___%20and%20paste%20on%20new%20track,%20measure%20___.lua</source>
+        <source main="main">https://github.com/leafac/reaper/raw/b5c56056889061e7d093db8e8a6abe108c5e1c1b/Scripts/leafac_Copy%20track%20___,%20item%20___%20and%20paste%20on%20new%20track,%20measure%20___.lua</source>
       </version>
     </reapack>
     <reapack name="leafac_iddqd_Search REAPER Mania tutorial....lua" type="script">
