@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
-    <reapack name="Scripts/leafac_Play from ___ to ___ in loop for ___ times and then unloop.lua" type="script">
+    <reapack name="leafac_Play from ___ to ___ in loop for ___ times and then unloop.lua" type="script">
       <version name="0.0.1">
         <source main="main">https://github.com/leafac/reaper/raw/6ba33ef0ddb9ad3205049ff89eea872cca62f911/Scripts/leafac_Play%20from%20___%20to%20___%20in%20loop%20for%20___%20times%20and%20then%20unloop.lua</source>
       </version>
