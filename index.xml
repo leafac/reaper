@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
+    <reapack name="Scripts/leafac_Play from ___ to ___ in loop for ___ times and then unloop.lua" type="script">
+      <version name="0.0.1">
+        <source main="main">https://github.com/leafac/reaper/raw/6ba33ef0ddb9ad3205049ff89eea872cca62f911/Scripts/leafac_Play%20from%20___%20to%20___%20in%20loop%20for%20___%20times%20and%20then%20unloop.lua</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Copy track ___, item ___ and paste on new track, measure ___.lua" type="script">
       <version name="0.0.1">
         <source main="main">https://github.com/leafac/reaper/raw/b5c56056889061e7d093db8e8a6abe108c5e1c1b/Scripts/leafac_Copy%20track%20___,%20item%20___%20and%20paste%20on%20new%20track,%20measure%20___.lua</source>
