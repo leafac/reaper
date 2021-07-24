@@ -3,99 +3,18 @@
   <category name="SWS">
     <reapack name="SWS" type="extension">
       <version name="2.12.1.3">
-        <source file="reaper_sws-x64.dll" platform="win64">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/reaper_sws-x64.dll</source>
-        <source file="reaper_sws-x86.dll" platform="win32">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/reaper_sws-x86.dll</source>
-        <source file="reaper_sws-arm64.dylib" platform="darwin-arm64">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/reaper_sws-arm64.dylib</source>
-        <source file="reaper_sws-x86_64.dylib" platform="darwin64">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/reaper_sws-x86_64.dylib</source>
-        <source file="reaper_sws-i386.dylib" platform="darwin32">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/reaper_sws-i386.dylib</source>
-        <source file="reaper_sws-x86_64.so" platform="linux64">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/reaper_sws-x86_64.so</source>
-        <source file="reaper_sws-i686.so" platform="linux32">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/reaper_sws-i686.so</source>
-        <source file="reaper_sws-aarch64.so" platform="linux-aarch64">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/reaper_sws-aarch64.so</source>
-        <source file="reaper_sws-armv7l.so" platform="linux-armv7l">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/reaper_sws-armv7l.so</source>
-        <source file="sws_python.py" type="script">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/sws_python.py</source>
-        <source file="sws_python64.py" type="script">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/sws_python64.py</source>
-        <source file="SWS/Grooves/16th Quantize.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/16th%20Quantize.rgt</source>
-        <source file="SWS/Grooves/ASR10 16'th Subz 2 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/ASR10%2016'th%20Subz%202%20bar.rgt</source>
-        <source file="SWS/Grooves/ASR10 16'th triplet Subz 2 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/ASR10%2016'th%20triplet%20Subz%202%20bar.rgt</source>
-        <source file="SWS/Grooves/ASR10 32'nd Subz 2 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/ASR10%2032'nd%20Subz%202%20bar.rgt</source>
-        <source file="SWS/Grooves/ASR10 32'nd triplet Subz 2 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/ASR10%2032'nd%20triplet%20Subz%202%20bar.rgt</source>
-        <source file="SWS/Grooves/ASR10 8'th Subz 2 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/ASR10%208'th%20Subz%202%20bar.rgt</source>
-        <source file="SWS/Grooves/ASR10 8'th triplet Subz 2 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/ASR10%208'th%20triplet%20Subz%202%20bar.rgt</source>
-        <source file="SWS/Grooves/DX_16_ 50% swing.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/DX_16_%2050%25%20swing.rgt</source>
-        <source file="SWS/Grooves/DX_16_ 54% swing.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/DX_16_%2054%25%20swing.rgt</source>
-        <source file="SWS/Grooves/DX_16_ 58% swing.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/DX_16_%2058%25%20swing.rgt</source>
-        <source file="SWS/Grooves/DX_16_ 62% swing.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/DX_16_%2062%25%20swing.rgt</source>
-        <source file="SWS/Grooves/DX_16_ 66% swing.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/DX_16_%2066%25%20swing.rgt</source>
-        <source file="SWS/Grooves/DX_16_ 70% swing.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/DX_16_%2070%25%20swing.rgt</source>
-        <source file="SWS/Grooves/DX_32_ 50% swing.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/DX_32_%2050%25%20swing.rgt</source>
-        <source file="SWS/Grooves/DX_32_ 66% swing.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/DX_32_%2066%25%20swing.rgt</source>
-        <source file="SWS/Grooves/DX_32_ 83% swing.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/DX_32_%2083%25%20swing.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 50%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2050%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 54%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2054%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 58%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2058%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 63%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2063%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 67%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2067%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 71%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2071%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 75%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2075%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 79%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2079%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 83%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2083%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16 88%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16%2088%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-16T%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-16T%25.rgt</source>
-        <source file="SWS/Grooves/Korg DDD-1-8T%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Korg%20DDD-1-8T%25.rgt</source>
-        <source file="SWS/Grooves/Logic_16A.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_16A.rgt</source>
-        <source file="SWS/Grooves/Logic_16B.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_16B.rgt</source>
-        <source file="SWS/Grooves/Logic_16C.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_16C.rgt</source>
-        <source file="SWS/Grooves/Logic_16D.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_16D.rgt</source>
-        <source file="SWS/Grooves/Logic_16E.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_16E.rgt</source>
-        <source file="SWS/Grooves/Logic_16F.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_16F.rgt</source>
-        <source file="SWS/Grooves/Logic_8A.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_8A.rgt</source>
-        <source file="SWS/Grooves/Logic_8B.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_8B.rgt</source>
-        <source file="SWS/Grooves/Logic_8C.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_8C.rgt</source>
-        <source file="SWS/Grooves/Logic_8D.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_8D.rgt</source>
-        <source file="SWS/Grooves/Logic_8E.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_8E.rgt</source>
-        <source file="SWS/Grooves/Logic_8F.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/Logic_8F.rgt</source>
-        <source file="SWS/Grooves/MPC 16'th Triplet Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2016'th%20Triplet%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 32'nd Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2032'nd%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 32'nd Triplet Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2032'nd%20Triplet%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 50% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2050%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 51% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2051%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 52% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2052%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 53% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2053%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 54% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2054%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 55% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2055%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 56% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2056%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 57% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2057%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 58% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2058%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 59% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2059%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 60% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2060%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 61% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2061%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 62% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2062%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 63% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2063%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 64% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2064%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 65% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2065%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 66% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2066%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 67% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2067%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 68% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2068%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 69% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2069%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 70% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2070%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 71% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2071%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 72% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2072%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 73% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2073%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 74% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2074%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 75% Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%2075%25%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/MPC 8'th Triplet Subz 4 bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/MPC%208'th%20Triplet%20Subz%204%20bar.rgt</source>
-        <source file="SWS/Grooves/SP1200_50%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_50%25.rgt</source>
-        <source file="SWS/Grooves/SP1200_50%_16T.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_50%25_16T.rgt</source>
-        <source file="SWS/Grooves/SP1200_50%_32_2bar.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_50%25_32_2bar.rgt</source>
-        <source file="SWS/Grooves/SP1200_50%_8T.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_50%25_8T.rgt</source>
-        <source file="SWS/Grooves/SP1200_54%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_54%25.rgt</source>
-        <source file="SWS/Grooves/SP1200_54%_16T.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_54%25_16T.rgt</source>
-        <source file="SWS/Grooves/SP1200_54%_8T.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_54%25_8T.rgt</source>
-        <source file="SWS/Grooves/SP1200_58%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_58%25.rgt</source>
-        <source file="SWS/Grooves/SP1200_63%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_63%25.rgt</source>
-        <source file="SWS/Grooves/SP1200_67%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_67%25.rgt</source>
-        <source file="SWS/Grooves/SP1200_71%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/SP1200_71%25.rgt</source>
-        <source file="SWS/Grooves/energyXT_50%.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/energyXT_50%25.rgt</source>
+        <source file="reaper_sws-x64.dll" platform="win64">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/reaper_sws-x64.dll</source>
+        <source file="reaper_sws-x86.dll" platform="win32">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/reaper_sws-x86.dll</source>
+        <source file="reaper_sws-arm64.dylib" platform="darwin-arm64">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/reaper_sws-arm64.dylib</source>
+        <source file="reaper_sws-x86_64.dylib" platform="darwin64">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/reaper_sws-x86_64.dylib</source>
+        <source file="reaper_sws-i386.dylib" platform="darwin32">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/reaper_sws-i386.dylib</source>
+        <source file="reaper_sws-x86_64.so" platform="linux64">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/reaper_sws-x86_64.so</source>
+        <source file="reaper_sws-i686.so" platform="linux32">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/reaper_sws-i686.so</source>
+        <source file="reaper_sws-aarch64.so" platform="linux-aarch64">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/reaper_sws-aarch64.so</source>
+        <source file="reaper_sws-armv7l.so" platform="linux-armv7l">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/reaper_sws-armv7l.so</source>
+        <source file="sws_python.py" type="script">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/sws_python.py</source>
+        <source file="sws_python64.py" type="script">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/sws_python64.py</source>
+        <source file="SWS-Grooves.zip" type="data">https://github.com/leafac/reaper/raw/1a25b79a9d18384ac7caa451e00a59692b2f1611/ThirdParty/SWS/SWS-Grooves.zip</source>
       </version>
       <version name="2.10.0.1">
         <source file="reaper_sws_extension.dylib" platform="darwin">https://github.com/leafac/reaper/raw/11753ec7cd96cdf093e46a9dbd65895c2833f434/third-party/sws/reaper_sws_extension.dylib</source>
