@@ -12,6 +12,8 @@
         <source file="reaper_sws-i686.so" platform="linux32">https://github.com/leafac/reaper/raw/7554619c70a56fe592cd54163f6618a5752f6640/ThirdParty/SWS/reaper_sws-i686.so</source>
         <source file="reaper_sws-aarch64.so" platform="linux-aarch64">https://github.com/leafac/reaper/raw/7554619c70a56fe592cd54163f6618a5752f6640/ThirdParty/SWS/reaper_sws-aarch64.so</source>
         <source file="reaper_sws-armv7l.so" platform="linux-armv7l">https://github.com/leafac/reaper/raw/7554619c70a56fe592cd54163f6618a5752f6640/ThirdParty/SWS/reaper_sws-armv7l.so</source>
+        <source file="sws_python.py" type="script">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/sws_python.py</source>
+        <source file="SWS/Grooves/16th Quantize.rgt" type="data">https://github.com/leafac/reaper/raw/cd66a73c53f94f815df4be4e1ff45dc322a5afa2/ThirdParty/SWS/Grooves/16th%20Quantize.rgt</source>
       </version>
       <version name="2.10.0.1">
         <source file="reaper_sws_extension.dylib" platform="darwin">https://github.com/leafac/reaper/raw/99c163da65b4233c3e9574dd856309abf5c8df12/reaper_sws_extension.dylib</source>
