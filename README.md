@@ -5,7 +5,7 @@
 Add the following repository to [ReaPack](https://reapack.com):
 
 ```
-https://github.com/leafac/reaper/raw/master/index.xml
+https://github.com/leafac/reaper/raw/main/index.xml
 ```
 
 If you’re new to this, check [this video](https://youtu.be/gVbMbqGSB7E) (in particular, 11:26).
@@ -53,7 +53,7 @@ Even more information:
 
 | Extension                                                                                               | Author                                                                        | Repository Index URL                                                          |
 | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **All**                                                                                                 |                                                                               | `https://github.com/leafac/reaper/raw/master/ThirdParty/index.xml`            |
-| [SWS](http://sws-extension.org)                                                                         | [The SWS Contributors](https://github.com/reaper-oss/sws/graphs/contributors) | `https://github.com/leafac/reaper/raw/master/ThirdParty/SWS/index.xml`        |
-| [ReEQ and ReSpectrum](https://forum.cockos.com/showthread.php?t=213501)                                 | [nitsuj](https://forum.cockos.com/member.php?u=121300)                        | `https://github.com/leafac/reaper/raw/master/ThirdParty/ReEQ/index.xml`       |
-| [ABLevelMatching, AutoGainStaging, and EBUR128LM](https://www.tb-software.com/TBProAudio/download.html) | [TBProAudio](https://www.tb-software.com/TBProAudio/index.html)               | `https://github.com/leafac/reaper/raw/master/ThirdParty/TBProAudio/index.xml` |
+| **All**                                                                                                 |                                                                               | `https://github.com/leafac/reaper/raw/main/ThirdParty/index.xml`            |
+| [SWS](http://sws-extension.org)                                                                         | [The SWS Contributors](https://github.com/reaper-oss/sws/graphs/contributors) | `https://github.com/leafac/reaper/raw/main/ThirdParty/SWS/index.xml`        |
+| [ReEQ and ReSpectrum](https://forum.cockos.com/showthread.php?t=213501)                                 | [nitsuj](https://forum.cockos.com/member.php?u=121300)                        | `https://github.com/leafac/reaper/raw/main/ThirdParty/ReEQ/index.xml`       |
+| [ABLevelMatching, AutoGainStaging, and EBUR128LM](https://www.tb-software.com/TBProAudio/download.html) | [TBProAudio](https://www.tb-software.com/TBProAudio/index.html)               | `https://github.com/leafac/reaper/raw/main/ThirdParty/TBProAudio/index.xml` |
