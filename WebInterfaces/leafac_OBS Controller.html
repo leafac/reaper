@@ -160,9 +160,14 @@
           (() => {
             const element = document.currentScript.previousElementSibling;
             obs.once("AuthenticationSuccess", async function refresh() {
+              const streamingStatus = await obs.send("GetStreamingStatus");
               const recordingStatus = await obs.send("GetRecordingStatus");
               const statistics = (await obs.send("GetStats")).stats;
               element.innerText = `${
+                streamingStatus.streaming
+                  ? `📡 ${formatTimecode(streamingStatus.streamTimecode)} · `
+                  : ``
+              }${
                 recordingStatus.isRecording
                   ? `🔴 ${formatTimecode(recordingStatus.recordTimecode)} · `
                   : ``
