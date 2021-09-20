@@ -1,0 +1,11 @@
+import leafac_L.jsfx-inc
+
+@gfx
+
+
+L_color_purple_500();
+L_rounded_rectangle_fill(15, 20, 30, 115, 9999999);
+
+L_color_red_500();
+gfx_roundrect(15, 20, 30, 115, 9999999);
+
