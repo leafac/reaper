@@ -1,11 +1,15 @@
 import leafac_L.jsfx-inc
 
-@gfx
+@gfx 672 288
 
+L_initialize();
 
-L_color_purple_500();
-L_rounded_rectangle_fill(15, 20, 30, 115, 9999999);
+box__x = L_space__4(); box__y =  L_space__4();
 
-L_color_red_500();
-gfx_roundrect(15, 20, 30, 115, 9999999);
+box__palette_box__width = L_space__16(); box__palette_box__height = L_space__8();
+L_color__teal__500();
+L_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
 
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + L_space__1();
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + L_line_height__small());

@@ -1,9 +1,6 @@
 /*
-font-family
-font-size / line-height
+Maybe we should have a fixed palette for font configurations 8 sizes/ bold or not/ always arial
 letter-spacing
-width
-space
 border-width
 opacity
 rotate
@@ -15,27 +12,185 @@ animations
   transition-duration
   transition-timing-function
 colorpicker???
+Basic algorithms
+  Sorting
+  Searching
+  Bézier
+  Hyperbolic trigonometric functions
+Document
+  Dimensions for the @gfx block can’t use functions
+  You must call L_initialize();
+  How to manage different font sizes/styles/decoration
+  why always arial (because of retina + operating system font support)
+    workaround (render every text in the interface as images)
 */
 
 @init
 
-// BORDER RADIUS
+gfx_ext_retina = 1;
 
-L_border_radius__none = 0;
-L_border_radius__small = 2;
-L_border_radius__base = 4;
-L_border_radius__medium = 6;
-L_border_radius__large = 8;
-L_border_radius__extra_large = 12;
-L_border_radius__extra_large_2 = 16;
-L_border_radius__extra_large_3 = 24;
-L_border_radius__full = 9999;
+// DESIGN SYSTEM
+// https://github.com/leafac/css/blob/f1fb7bdc73f1cf7afcffcc61222c36f1c1ff0702/source/index.ts
+
+/*
+console.log(`
+L_space___96 = -24rem;
+`.replace(/([\d.]+)rem/g, (_, rem) => Number(rem) * 16));
+// => L_space___96 = -384;
+*/
+
+// FONT INDICES
+
+L_font_index__base = 1;
+
+// FONT FAMILIES
+
+L_font_family__sans_serif = "Arial";
+
+// FONT SIZES
+
+function L_font_size__extra_small__2() ( gfx_ext_retina * 10 );
+function L_line_height__extra_small__2() ( gfx_ext_retina * 14 );
+function L_font_size__extra_small() ( gfx_ext_retina * 12 );
+function L_line_height__extra_small() ( gfx_ext_retina * 16 );
+function L_font_size__small() ( gfx_ext_retina * 14 );
+function L_line_height__small() ( gfx_ext_retina * 20 );
+function L_font_size__base() ( gfx_ext_retina * 16 );
+function L_line_height__base() ( gfx_ext_retina * 24 );
+function L_font_size__large() ( gfx_ext_retina * 18 );
+function L_line_height__large() ( gfx_ext_retina * 28 );
+function L_font_size__extra_large() ( gfx_ext_retina * 20 );
+function L_line_height__extra_large() ( gfx_ext_retina * 28 );
+function L_font_size__extra_large__2() ( gfx_ext_retina * 24 );
+function L_line_height__extra_large__2() ( gfx_ext_retina * 32 );
+function L_font_size__extra_large__3() ( gfx_ext_retina * 30 );
+function L_line_height__extra_large__3() ( gfx_ext_retina * 36 );
+function L_font_size__extra_large__4() ( gfx_ext_retina * 36 );
+function L_line_height__extra_large__4() ( gfx_ext_retina * 40 );
+function L_font_size__extra_large__5() ( gfx_ext_retina * 48 );
+function L_line_height__extra_large__5() ( gfx_ext_retina * 1 );
+function L_font_size__extra_large__6() ( gfx_ext_retina * 60 );
+function L_line_height__extra_large__6() ( gfx_ext_retina * 1 );
+function L_font_size__extra_large__7() ( gfx_ext_retina * 72 );
+function L_line_height__extra_large__7() ( gfx_ext_retina * 1 );
+function L_font_size__extra_large__8() ( gfx_ext_retina * 96 );
+function L_line_height__extra_large__8() ( gfx_ext_retina * 1 );
+function L_font_size__extra_large__9() ( gfx_ext_retina * 128 );
+function L_line_height__extra_large__9() ( gfx_ext_retina * 1 );
+
+// TEXT ALIGNMENTS
+
+L_TEXT_ALIGN__HORIZONTAL__LEFT = 0;
+L_TEXT_ALIGN__HORIZONTAL__CENTER = 1;
+L_TEXT_ALIGN__HORIZONTAL__RIGHT = 2;
+L_TEXT_ALIGN__VERTICAL__TOP = 0;
+L_TEXT_ALIGN__VERTICAL__CENTER = 4;
+L_TEXT_ALIGN__VERTICAL__BOTTOM = 8;
+L_TEXT_ALIGN__OVERFLOW__VISIBLE = 256;
+
+// WIDTHS
+
+function L_width__0() ( gfx_ext_retina * 0 );
+function L_width__extra_small() ( gfx_ext_retina * 320 );
+function L_width__small() ( gfx_ext_retina * 384 );
+function L_width__medium() ( gfx_ext_retina * 448 );
+function L_width__large() ( gfx_ext_retina * 512 );
+function L_width__extra_large() ( gfx_ext_retina * 576 );
+function L_width__extra_large__2() ( gfx_ext_retina * 672 );
+function L_width__extra_large__3() ( gfx_ext_retina * 768 );
+function L_width__extra_large__4() ( gfx_ext_retina * 896 );
+function L_width__extra_large__5() ( gfx_ext_retina * 1024 );
+function L_width__extra_large__6() ( gfx_ext_retina * 1152 );
+function L_width__extra_large__7() ( gfx_ext_retina * 1280 );
+function L_width__prose() ( gfx_ext_retina * 546 );
+
+// SPACES
+
+function L_space___96() ( gfx_ext_retina * -384 );
+function L_space___80() ( gfx_ext_retina * -320 );
+function L_space___72() ( gfx_ext_retina * -288 );
+function L_space___64() ( gfx_ext_retina * -256 );
+function L_space___60() ( gfx_ext_retina * -240 );
+function L_space___56() ( gfx_ext_retina * -224 );
+function L_space___52() ( gfx_ext_retina * -208 );
+function L_space___48() ( gfx_ext_retina * -192 );
+function L_space___44() ( gfx_ext_retina * -176 );
+function L_space___40() ( gfx_ext_retina * -160 );
+function L_space___36() ( gfx_ext_retina * -144 );
+function L_space___32() ( gfx_ext_retina * -128 );
+function L_space___28() ( gfx_ext_retina * -112 );
+function L_space___24() ( gfx_ext_retina * -96 );
+function L_space___20() ( gfx_ext_retina * -80 );
+function L_space___16() ( gfx_ext_retina * -64 );
+function L_space___14() ( gfx_ext_retina * -56 );
+function L_space___12() ( gfx_ext_retina * -48 );
+function L_space___11() ( gfx_ext_retina * -44 );
+function L_space___10() ( gfx_ext_retina * -40 );
+function L_space___9() ( gfx_ext_retina * -36 );
+function L_space___8() ( gfx_ext_retina * -32 );
+function L_space___7() ( gfx_ext_retina * -28 );
+function L_space___6() ( gfx_ext_retina * -24 );
+function L_space___5() ( gfx_ext_retina * -20 );
+function L_space___4() ( gfx_ext_retina * -16 );
+function L_space___3_5() ( gfx_ext_retina * -14 );
+function L_space___3() ( gfx_ext_retina * -12 );
+function L_space___2_5() ( gfx_ext_retina * -10 );
+function L_space___2() ( gfx_ext_retina * -8 );
+function L_space___1_5() ( gfx_ext_retina * -6 );
+function L_space___1() ( gfx_ext_retina * -4 );
+function L_space___0_5() ( gfx_ext_retina * -2 );
+function L_space___px() ( gfx_ext_retina * -1 );
+function L_space__0() ( gfx_ext_retina * 0 );
+function L_space__px() ( gfx_ext_retina * 1 );
+function L_space__0_5() ( gfx_ext_retina * 2 );
+function L_space__1() ( gfx_ext_retina * 4 );
+function L_space__1_5() ( gfx_ext_retina * 6 );
+function L_space__2() ( gfx_ext_retina * 8 );
+function L_space__2_5() ( gfx_ext_retina * 10 );
+function L_space__3() ( gfx_ext_retina * 12 );
+function L_space__3_5() ( gfx_ext_retina * 14 );
+function L_space__4() ( gfx_ext_retina * 16 );
+function L_space__5() ( gfx_ext_retina * 20 );
+function L_space__6() ( gfx_ext_retina * 24 );
+function L_space__7() ( gfx_ext_retina * 28 );
+function L_space__8() ( gfx_ext_retina * 32 );
+function L_space__9() ( gfx_ext_retina * 36 );
+function L_space__10() ( gfx_ext_retina * 40 );
+function L_space__11() ( gfx_ext_retina * 44 );
+function L_space__12() ( gfx_ext_retina * 48 );
+function L_space__14() ( gfx_ext_retina * 56 );
+function L_space__16() ( gfx_ext_retina * 64 );
+function L_space__20() ( gfx_ext_retina * 80 );
+function L_space__24() ( gfx_ext_retina * 96 );
+function L_space__28() ( gfx_ext_retina * 112 );
+function L_space__32() ( gfx_ext_retina * 128 );
+function L_space__36() ( gfx_ext_retina * 144 );
+function L_space__40() ( gfx_ext_retina * 160 );
+function L_space__44() ( gfx_ext_retina * 176 );
+function L_space__48() ( gfx_ext_retina * 192 );
+function L_space__52() ( gfx_ext_retina * 208 );
+function L_space__56() ( gfx_ext_retina * 224 );
+function L_space__60() ( gfx_ext_retina * 240 );
+function L_space__64() ( gfx_ext_retina * 256 );
+function L_space__72() ( gfx_ext_retina * 288 );
+function L_space__80() ( gfx_ext_retina * 320 );
+function L_space__96() ( gfx_ext_retina * 384 );
+
+// BORDER RADIUSES
+
+function L_border_radius__none() ( gfx_ext_retina * 0);
+function L_border_radius__small() ( gfx_ext_retina * 2);
+function L_border_radius__base() ( gfx_ext_retina * 4);
+function L_border_radius__medium() ( gfx_ext_retina * 6);
+function L_border_radius__large() ( gfx_ext_retina * 8);
+function L_border_radius__extra_large() ( gfx_ext_retina * 12);
+function L_border_radius__extra_large__2() ( gfx_ext_retina * 16);
+function L_border_radius__extra_large__3() ( gfx_ext_retina * 24);
+function L_border_radius__full() ( gfx_ext_retina * 9999);
 
 // COLORS
 
 /*
-https://github.com/leafac/css/blob/f1fb7bdc73f1cf7afcffcc61222c36f1c1ff0702/source/index.ts
-
 console.log(
   `
     --color--black: #000000;
@@ -61,6 +216,12 @@ function L_${colorLine.slice(2, -10).replaceAll("-", "_")}() (
 );
 
 */
+
+function L_color__gray__REAPER() (
+  gfx_r = 0.91372549019608;
+  gfx_g = 0.91372549019608;
+  gfx_b = 0.91372549019608;
+);
 
 function L_color__black() (
   gfx_r = 0;
@@ -1396,12 +1557,25 @@ function L_color__rose__900() (
 
 // DRAWING FUNCTIONS
 
+function L_set_background_color() (
+  gfx_clear = gfx_r * 255 + gfx_g * 255 * 256 + gfx_b * 255 * 65536;
+);
+
 function L_rounded_rectangle_fill(x, y, width, height, radius) (
   radius = min(radius, min(width / 2, height / 2));
   gfx_rect(x + radius, y, width - radius * 2, height);
   gfx_rect(x, y + radius, width, height - radius * 2);
   gfx_circle(x + radius, y + radius, radius, 1);
-  gfx_circle(x + width - radius, y + radius, radius, 1);
-  gfx_circle(x + radius, y + height - radius, radius, 1);
-  gfx_circle(x + width - radius, y + height - radius, radius, 1);
+  gfx_circle(x + width - radius - 1, y + radius, radius, 1);
+  gfx_circle(x + radius, y + height - radius - 1, radius, 1);
+  gfx_circle(x + width - radius - 1, y + height - radius - 1, radius, 1);
+);
+
+// INITIALIZE
+
+function L_initialize() (
+  gfx_setfont(L_font_index__base, L_font_family__sans_serif, L_font_size__small());
+
+  L_color__gray__REAPER();
+  L_set_background_color();
 );
