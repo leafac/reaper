@@ -1,15 +1,2560 @@
+slider1:page=0<0,0,5{Colors 1,Colors 2,Colors 3,Colors 4,Colors 5}>Page
+
 import leafac_L.jsfx-inc
 
-@gfx 672 288
+@init
 
-L_initialize();
+PAGE__COLORS__1 = _enumeration();
+PAGE__COLORS__2 = _enumeration();
+PAGE__COLORS__3 = _enumeration();
+PAGE__COLORS__4 = _enumeration();
+PAGE__COLORS__5 = _enumeration();
 
+@gfx 672 384
+
+_initialize_gfx();
+
+palette__sample__width = _(_SPACE__8);
+palette__sample__height = _(_SPACE__8);
+palette__gap = _(_SPACE__1);
+palette__label__width = palette__sample__width;
+palette__label__height = _(_LINE_HEIGHT__EXTRA_SMALL);
+palette__width = palette__sample__width;
+palette__height = palette__sample__height + palette__gap + palette__label__height;
+palette__padding = _(_SPACE__4);
+
+palette_x = palette__padding;
+palette_y = palette__padding;
+_(_COLOR__TEAL__400);
+_rounded_rectangle_fill(palette_x, palette_y, palette__sample__width, palette__sample__height, _(_BORDER_RADIUS__BASE));
+_(_COLOR__GRAY__WARM__700);
+gfx_x = palette_x; gfx_y = palette_y + palette__sample__height + palette__gap;
+gfx_drawstr("400", _(_TEXT_ALIGN__HORIZONTAL__CENTER), gfx_x + palette__label__width, gfx_y + palette__label__height);
+
+// PREAMBLE
+
+/*
+box__palette_box__width = L_space__8(); box__palette_box__height = L_space__8();
 box__x = L_space__4(); box__y =  L_space__4();
+box__label__height = L_line_height__small();
+box__label__margin_top = L_space__1();
 
-box__palette_box__width = L_space__16(); box__palette_box__height = L_space__8();
-L_color__teal__500();
-L_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+// LOOP
+
+gray__REAPER
+black
+white
+
+
+const colors = [
+  "gray__blue",
+  "gray__cool",
+  "gray__medium",
+  "gray__true",
+  "gray__warm",
+  "red",
+  "orange",
+  "amber",
+  "yellow",
+  "lime",
+  "green",
+  "emerald",
+  "teal",
+  "cyan",
+  "sky",
+  "blue",
+  "indigo",
+  "violet",
+  "purple",
+  "fuchsia",
+  "pink",
+  "rose",
+];
+
+for (let colorIndex = 0; colorIndex < colors.length; colorIndex++) {
+  const color = colors[colorIndex];
+  if (colorIndex % 5 === 0) {
+    const page = colorIndex / 5 + 1;
+    console.log(`
+page == PAGE__COLORS__${page} ? (
+`);
+  }
+  console.log(`
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("${color}");  
+box__x += L_space__24();
+`);
+  for (const shade of [
+    "50",
+    "100",
+    "200",
+    "300",
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+    "900",
+  ])
+    console.log(`
+L_color__${color}__${shade}();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
 
 L_color__gray__warm__700();
-gfx_x = box__x; gfx_y = box__y + box__palette_box__height + L_space__1();
-gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + L_line_height__small());
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("${shade}", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+`);
+
+  console.log(`
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+`);
+  if (colorIndex % 5 === 4) console.log(`);`);
+}
+
+console.log(`);`);
+
+
+page == PAGE__COLORS__1 ? (
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("gray__blue");  
+box__x += L_space__24();
+
+
+L_color__gray__blue__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__blue__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__blue__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__blue__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__blue__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__blue__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__blue__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__blue__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__blue__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__blue__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("gray__cool");  
+box__x += L_space__24();
+
+
+L_color__gray__cool__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__cool__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__cool__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__cool__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__cool__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__cool__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__cool__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__cool__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__cool__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__cool__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("gray__medium");  
+box__x += L_space__24();
+
+
+L_color__gray__medium__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__medium__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__medium__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__medium__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__medium__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__medium__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__medium__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__medium__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__medium__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__medium__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("gray__true");  
+box__x += L_space__24();
+
+
+L_color__gray__true__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__true__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__true__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__true__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__true__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__true__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__true__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__true__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__true__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__true__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("gray__warm");  
+box__x += L_space__24();
+
+
+L_color__gray__warm__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__warm__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__warm__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__warm__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__warm__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__warm__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__warm__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__warm__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__warm__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__gray__warm__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+);
+
+page == PAGE__COLORS__2 ? (
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("red");  
+box__x += L_space__24();
+
+
+L_color__red__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__red__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__red__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__red__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__red__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__red__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__red__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__red__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__red__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__red__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("orange");  
+box__x += L_space__24();
+
+
+L_color__orange__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__orange__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__orange__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__orange__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__orange__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__orange__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__orange__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__orange__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__orange__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__orange__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("amber");  
+box__x += L_space__24();
+
+
+L_color__amber__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__amber__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__amber__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__amber__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__amber__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__amber__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__amber__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__amber__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__amber__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__amber__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("yellow");  
+box__x += L_space__24();
+
+
+L_color__yellow__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__yellow__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__yellow__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__yellow__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__yellow__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__yellow__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__yellow__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__yellow__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__yellow__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__yellow__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("lime");  
+box__x += L_space__24();
+
+
+L_color__lime__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__lime__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__lime__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__lime__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__lime__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__lime__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__lime__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__lime__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__lime__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__lime__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+);
+
+page == PAGE__COLORS__3 ? (
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("green");  
+box__x += L_space__24();
+
+
+L_color__green__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__green__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__green__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__green__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__green__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__green__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__green__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__green__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__green__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__green__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("emerald");  
+box__x += L_space__24();
+
+
+L_color__emerald__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__emerald__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__emerald__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__emerald__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__emerald__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__emerald__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__emerald__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__emerald__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__emerald__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__emerald__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("teal");  
+box__x += L_space__24();
+
+
+L_color__teal__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__teal__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__teal__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__teal__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__teal__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__teal__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__teal__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__teal__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__teal__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__teal__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("cyan");  
+box__x += L_space__24();
+
+
+L_color__cyan__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__cyan__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__cyan__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__cyan__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__cyan__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__cyan__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__cyan__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__cyan__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__cyan__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__cyan__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("sky");  
+box__x += L_space__24();
+
+
+L_color__sky__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__sky__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__sky__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__sky__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__sky__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__sky__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__sky__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__sky__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__sky__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__sky__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+);
+
+page == PAGE__COLORS__4 ? (
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("blue");  
+box__x += L_space__24();
+
+
+L_color__blue__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__blue__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__blue__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__blue__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__blue__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__blue__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__blue__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__blue__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__blue__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__blue__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("indigo");  
+box__x += L_space__24();
+
+
+L_color__indigo__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__indigo__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__indigo__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__indigo__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__indigo__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__indigo__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__indigo__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__indigo__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__indigo__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__indigo__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("violet");  
+box__x += L_space__24();
+
+
+L_color__violet__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__violet__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__violet__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__violet__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__violet__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__violet__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__violet__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__violet__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__violet__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__violet__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("purple");  
+box__x += L_space__24();
+
+
+L_color__purple__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__purple__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__purple__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__purple__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__purple__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__purple__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__purple__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__purple__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__purple__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__purple__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("fuchsia");  
+box__x += L_space__24();
+
+
+L_color__fuchsia__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__fuchsia__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__fuchsia__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__fuchsia__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__fuchsia__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__fuchsia__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__fuchsia__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__fuchsia__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__fuchsia__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__fuchsia__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+);
+
+page == PAGE__COLORS__5 ? (
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("pink");  
+box__x += L_space__24();
+
+
+L_color__pink__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__pink__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__pink__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__pink__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__pink__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__pink__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__pink__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__pink__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__pink__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__pink__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y;
+gfx_drawstr("rose");  
+box__x += L_space__24();
+
+
+L_color__rose__50();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("50", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__rose__100();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("100", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__rose__200();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("200", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__rose__300();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("300", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__rose__400();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("400", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__rose__500();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("500", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__rose__600();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("600", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__rose__700();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("700", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__rose__800();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("800", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+L_color__rose__900();
+_rounded_rectangle_fill(box__x, box__y, box__palette_box__width, box__palette_box__height, L_border_radius__base());
+
+L_color__gray__warm__700();
+gfx_x = box__x; gfx_y = box__y + box__palette_box__height + box__label__margin_top;
+gfx_drawstr("900", L_TEXT_ALIGN__HORIZONTAL__CENTER, gfx_x + box__palette_box__width, gfx_y + box__label__height);
+
+box__x += box__palette_box__width + L_space__4();
+
+
+box__x = L_space__4();
+box__y += box__palette_box__height + box__label__margin_top + box__label__height + L_space__4();
+
+);
+*/
