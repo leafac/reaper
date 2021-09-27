@@ -1,7 +1,5 @@
 /*
 data structures
-  Struct
-  Enum
   Array
   Circular buffer
 
@@ -35,8 +33,40 @@ Document
 
 // DATA STRUCTURES
 
-L_current_enumeration = 0;
-function L_enumeration() ( L_current_enumeration += 1; );
+L_memory__index = 0;
+function L_memory__begin(memory__index) (
+  L_memory__index = memory__index;
+);
+function L_memory__allocate(size) local(memory__index) (
+  memory__index = L_memory__index;
+  L_memory__index += size;
+  memory__index;
+);
+function L_memory__end() (
+  freembuf(L_memory__index);
+  L_memory__index;
+);
+
+L_enumeration__index = -1;
+function L_enumeration__define() (
+  L_enumeration__index = -1;
+);
+function L_enumeration__constant() (
+  L_enumeration__index += 1;
+);
+
+L_struct__index = 0;
+function L_struct__define() (
+  L_enumeration__define();
+  L_struct__index = L_memory__allocate(1);
+);
+function L_struct__field() (
+  L_struct__index[0] += 1;
+  L_enumeration__constant();
+);
+function L_struct__new(Struct) (
+  L_memory__allocate(Struct[0]);
+);
 
 // DESIGN SYSTEM
 // https://github.com/leafac/css/blob/f1fb7bdc73f1cf7afcffcc61222c36f1c1ff0702/source/index.ts
@@ -104,7 +134,10 @@ function L_text_align__horizontal__right() ( 2 );
 function L_text_align__vertical__top() ( 0 );
 function L_text_align__vertical__center() ( 4 );
 function L_text_align__vertical__bottom() ( 8 );
-function L_text_align__overflow__visible() ( 256 );
+
+function L_text_overflow__hidden() ( 0 );
+function L_text_overflow__visible() ( 256 );
+
 
 function L_width__0() ( gfx_ext_retina * 0 );
 function L_width__extra_small() ( gfx_ext_retina * 320 );
@@ -430,6 +463,30 @@ function L_font(size, style) ( gfx_setfont(1, "Arial", size, style); );
 function L_background_color(color) ( gfx_clear = gfx_r * 255 + gfx_g * 255 * 256 + gfx_b * 255 * 65536; );
 
 // DRAWING FUNCTIONS
+
+function L_print(
+  string,
+  font_size,
+  font_style,
+  text_align__horizontal,
+  text_align__vertical,
+  text_overflow,
+  color,
+  x,
+  y,
+  width,
+  height
+) (
+  L_font(font_size, font_style);
+  gfx_x = x;
+  gfx_y = y;
+  gfx_drawstr(
+    string,
+    text_align__horizontal | text_align__vertical | text_overflow,
+    x + width,
+    y + height
+  );
+);
 
 function L_rounded_rectangle_fill(x, y, width, height, radius) (
   radius = min(min(radius, width / 2), height / 2);
