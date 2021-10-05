@@ -1,0 +1,548 @@
+slider1:page=0<0,0,4{l_color 1,l_color 2,l_color 3,l_color 4,l_color 5,Data Structures}>Page
+
+import leafac_l.jsfx-inc
+
+@init
+
+l_memory__begin();
+
+memory_chunk = l_memory__allocate(20);
+
+l_enumeration__define();
+page__l_color__1 = l_enumeration__constant();
+page__l_color__2 = l_enumeration__constant();
+page__l_color__3 = l_enumeration__constant();
+page__l_color__4 = l_enumeration__constant();
+page__l_color__5 = l_enumeration__constant();
+page__data_structures = l_enumeration__constant();
+
+l_enumeration__define();
+filter_type__low_pass = l_enumeration__constant();
+filter_type__high_pass = l_enumeration__constant();
+filter_type__band_pass = l_enumeration__constant();
+filter_type__notch = l_enumeration__constant();
+
+l_enumeration__define();
+compressor__detector_input__main = l_enumeration__constant();
+compressor__detector_input__side_chain = l_enumeration__constant();
+compressor__detector_input__feedback = l_enumeration__constant();
+
+coordinate__struct = l_struct__define();
+coordinate__x = l_struct__field();
+coordinate__y = l_struct__field();
+
+label_position = l_struct__new(coordinate__struct);
+
+// coefficients = l_array__new(4);
+
+l_memory__end();
+
+function assert(boolean) (
+  l_print(
+    boolean ? "PASS " : "FAIL ",
+    l_font_size__extra_small(),
+    l_font_style__regular(),
+    l_text_align__horizontal__left(),
+    l_text_align__vertical__top(),
+    l_text_overflow__visible(),
+    l_color__gray__warm__900(),
+    gfx_x,
+    gfx_y,
+    l_space__0(),
+    l_space__0()
+  );
+);
+
+//   l_width__extra_large__2() l_width__small()
+@gfx 672                       384
+
+l_background_color(l_color__gray__reaper());
+l_color__gray__warm__50();
+l_rounded_rectangle_fill(
+  0,
+  0,
+  l_width__extra_large__2() - l_space__2(),
+  l_width__small() - l_space__2(),
+  l_border_radius__large()
+);
+
+body__padding = l_space__4();
+body__gap = l_space__2();
+
+title__height = l_line_height__extra_small();
+
+l_print(
+  page == page__l_color__1 ||
+  page == page__l_color__2 ||
+  page == page__l_color__3 ||
+  page == page__l_color__4 ||
+  page == page__l_color__5 ?
+  "l_color" :
+  page == page__data_structures ?
+  "Data Structures",
+  l_font_size__extra_small(),
+  l_font_style__bold(),
+  l_text_align__horizontal__left(),
+  l_text_align__vertical__top(),
+  l_text_overflow__visible(),
+  l_color__gray__warm__900(),
+  body__padding,
+  body__padding,
+  l_space__0(),
+  l_space__0()
+);
+
+page == page__l_color__1 ||
+page == page__l_color__2 ||
+page == page__l_color__3 ||
+page == page__l_color__4 ||
+page == page__l_color__5 ? (
+  l_print(
+    "for example, l_color__gray__warm__700()",
+    l_font_size__extra_small(),
+    l_font_style__regular(),
+    l_text_align__horizontal__left(),
+    l_text_align__vertical__top(),
+    l_text_overflow__visible(),
+    l_color__gray__warm__700(),
+    body__padding + l_space__24(),
+    body__padding,
+    l_space__0(),
+    l_space__0()
+  );
+
+  palette__item__box__width = l_space__8();
+  palette__item__box__height = l_space__8();
+  palette__item__gap = l_space__1();
+  palette__item__label__width = palette__item__box__width;
+  palette__item__label__height = l_line_height__extra_small();
+  palette__item__width = palette__item__box__width;
+  palette__item__height = palette__item__box__height + palette__item__gap + palette__item__label__height;
+  palette__label__width = l_space__20();
+  palette__label__height = palette__item__box__height;
+  palette__gap = l_space__4();
+
+  palette_y = body__padding + title__height + body__gap - (palette__item__height + palette__gap);
+  color_index = -1; loop(5, color_index += 1;
+    palette_y += palette__item__height + palette__gap;
+
+    l_print(
+      page == page__l_color__1 ? (
+        color_index == 0 ? "gray__blue" :
+        color_index == 1 ? "gray__cool" :
+        color_index == 2 ? "gray__medium" :
+        color_index == 3 ? "gray__true" :
+        color_index == 4 ? "gray__warm"
+      ) :
+      page == page__l_color__2 ? (
+        color_index == 0 ? "red" :
+        color_index == 1 ? "orange" :
+        color_index == 2 ? "amber" :
+        color_index == 3 ? "yellow" :
+        color_index == 4 ? "lime"
+      ) :
+      page == page__l_color__3 ? (
+        color_index == 0 ? "green" :
+        color_index == 1 ? "emerald" :
+        color_index == 2 ? "teal" :
+        color_index == 3 ? "cyan" :
+        color_index == 4 ? "sky"
+      ) :
+      page == page__l_color__4? (
+        color_index == 0 ? "blue" :
+        color_index == 1 ? "indigo" :
+        color_index == 2 ? "violet" :
+        color_index == 3 ? "purple" :
+        color_index == 4 ? "fuchsia"
+      ) :
+      page == page__l_color__5 ? (
+        color_index == 0 ? "pink" :
+        color_index == 1 ? "rose" :
+        color_index == 2 ? "gray__reaper" :
+        color_index == 3 ? "black" :
+        color_index == 4 ? "white"
+      ),
+      l_font_size__extra_small(),
+      l_font_style__regular(),
+      l_text_align__horizontal__left(),
+      l_text_align__vertical__center(),
+      l_text_overflow__visible(),
+      l_color__gray__warm__700(),
+      palette__gap,
+      palette_y,
+      palette__label__width,
+      palette__label__height
+    );
+
+    shadeless =
+      page == page__l_color__5 && (
+        color_index == 2 ||
+        color_index == 3 ||
+        color_index == 4
+      );
+
+    palette_x = palette__gap + palette__label__width - palette__item__width;
+    color_shade_index = -1; loop(shadeless ? 1 : 10, color_shade_index += 1;
+      palette_x += palette__item__width + palette__gap;
+
+      page == page__l_color__1 ? (
+        color_index == 0 ? (
+          color_shade_index == 0 ? l_color__gray__blue__50() :
+          color_shade_index == 1 ? l_color__gray__blue__100() :
+          color_shade_index == 2 ? l_color__gray__blue__200() :
+          color_shade_index == 3 ? l_color__gray__blue__300() :
+          color_shade_index == 4 ? l_color__gray__blue__400() :
+          color_shade_index == 5 ? l_color__gray__blue__500() :
+          color_shade_index == 6 ? l_color__gray__blue__600() :
+          color_shade_index == 7 ? l_color__gray__blue__700() :
+          color_shade_index == 8 ? l_color__gray__blue__800() :
+          color_shade_index == 9 ? l_color__gray__blue__900();
+        ) :
+        color_index == 1 ? (
+          color_shade_index == 0 ? l_color__gray__cool__50() :
+          color_shade_index == 1 ? l_color__gray__cool__100() :
+          color_shade_index == 2 ? l_color__gray__cool__200() :
+          color_shade_index == 3 ? l_color__gray__cool__300() :
+          color_shade_index == 4 ? l_color__gray__cool__400() :
+          color_shade_index == 5 ? l_color__gray__cool__500() :
+          color_shade_index == 6 ? l_color__gray__cool__600() :
+          color_shade_index == 7 ? l_color__gray__cool__700() :
+          color_shade_index == 8 ? l_color__gray__cool__800() :
+          color_shade_index == 9 ? l_color__gray__cool__900();
+        ) :
+        color_index == 2 ? (
+          color_shade_index == 0 ? l_color__gray__medium__50() :
+          color_shade_index == 1 ? l_color__gray__medium__100() :
+          color_shade_index == 2 ? l_color__gray__medium__200() :
+          color_shade_index == 3 ? l_color__gray__medium__300() :
+          color_shade_index == 4 ? l_color__gray__medium__400() :
+          color_shade_index == 5 ? l_color__gray__medium__500() :
+          color_shade_index == 6 ? l_color__gray__medium__600() :
+          color_shade_index == 7 ? l_color__gray__medium__700() :
+          color_shade_index == 8 ? l_color__gray__medium__800() :
+          color_shade_index == 9 ? l_color__gray__medium__900();
+        ) :
+        color_index == 3 ? (
+          color_shade_index == 0 ? l_color__gray__true__50() :
+          color_shade_index == 1 ? l_color__gray__true__100() :
+          color_shade_index == 2 ? l_color__gray__true__200() :
+          color_shade_index == 3 ? l_color__gray__true__300() :
+          color_shade_index == 4 ? l_color__gray__true__400() :
+          color_shade_index == 5 ? l_color__gray__true__500() :
+          color_shade_index == 6 ? l_color__gray__true__600() :
+          color_shade_index == 7 ? l_color__gray__true__700() :
+          color_shade_index == 8 ? l_color__gray__true__800() :
+          color_shade_index == 9 ? l_color__gray__true__900();
+        ) :
+        color_index == 4 ? (
+          color_shade_index == 0 ? l_color__gray__warm__50() :
+          color_shade_index == 1 ? l_color__gray__warm__100() :
+          color_shade_index == 2 ? l_color__gray__warm__200() :
+          color_shade_index == 3 ? l_color__gray__warm__300() :
+          color_shade_index == 4 ? l_color__gray__warm__400() :
+          color_shade_index == 5 ? l_color__gray__warm__500() :
+          color_shade_index == 6 ? l_color__gray__warm__600() :
+          color_shade_index == 7 ? l_color__gray__warm__700() :
+          color_shade_index == 8 ? l_color__gray__warm__800() :
+          color_shade_index == 9 ? l_color__gray__warm__900();
+        );
+      ) :
+      page == page__l_color__2 ? (
+        color_index == 0 ? (
+          color_shade_index == 0 ? l_color__red__50() :
+          color_shade_index == 1 ? l_color__red__100() :
+          color_shade_index == 2 ? l_color__red__200() :
+          color_shade_index == 3 ? l_color__red__300() :
+          color_shade_index == 4 ? l_color__red__400() :
+          color_shade_index == 5 ? l_color__red__500() :
+          color_shade_index == 6 ? l_color__red__600() :
+          color_shade_index == 7 ? l_color__red__700() :
+          color_shade_index == 8 ? l_color__red__800() :
+          color_shade_index == 9 ? l_color__red__900();
+        ) :
+        color_index == 1 ? (
+          color_shade_index == 0 ? l_color__orange__50() :
+          color_shade_index == 1 ? l_color__orange__100() :
+          color_shade_index == 2 ? l_color__orange__200() :
+          color_shade_index == 3 ? l_color__orange__300() :
+          color_shade_index == 4 ? l_color__orange__400() :
+          color_shade_index == 5 ? l_color__orange__500() :
+          color_shade_index == 6 ? l_color__orange__600() :
+          color_shade_index == 7 ? l_color__orange__700() :
+          color_shade_index == 8 ? l_color__orange__800() :
+          color_shade_index == 9 ? l_color__orange__900();
+        ) :
+        color_index == 2 ? (
+          color_shade_index == 0 ? l_color__amber__50() :
+          color_shade_index == 1 ? l_color__amber__100() :
+          color_shade_index == 2 ? l_color__amber__200() :
+          color_shade_index == 3 ? l_color__amber__300() :
+          color_shade_index == 4 ? l_color__amber__400() :
+          color_shade_index == 5 ? l_color__amber__500() :
+          color_shade_index == 6 ? l_color__amber__600() :
+          color_shade_index == 7 ? l_color__amber__700() :
+          color_shade_index == 8 ? l_color__amber__800() :
+          color_shade_index == 9 ? l_color__amber__900();
+        ) :
+        color_index == 3 ? (
+          color_shade_index == 0 ? l_color__yellow__50() :
+          color_shade_index == 1 ? l_color__yellow__100() :
+          color_shade_index == 2 ? l_color__yellow__200() :
+          color_shade_index == 3 ? l_color__yellow__300() :
+          color_shade_index == 4 ? l_color__yellow__400() :
+          color_shade_index == 5 ? l_color__yellow__500() :
+          color_shade_index == 6 ? l_color__yellow__600() :
+          color_shade_index == 7 ? l_color__yellow__700() :
+          color_shade_index == 8 ? l_color__yellow__800() :
+          color_shade_index == 9 ? l_color__yellow__900();
+        ) :
+        color_index == 4 ? (
+          color_shade_index == 0 ? l_color__lime__50() :
+          color_shade_index == 1 ? l_color__lime__100() :
+          color_shade_index == 2 ? l_color__lime__200() :
+          color_shade_index == 3 ? l_color__lime__300() :
+          color_shade_index == 4 ? l_color__lime__400() :
+          color_shade_index == 5 ? l_color__lime__500() :
+          color_shade_index == 6 ? l_color__lime__600() :
+          color_shade_index == 7 ? l_color__lime__700() :
+          color_shade_index == 8 ? l_color__lime__800() :
+          color_shade_index == 9 ? l_color__lime__900();
+        );
+      ) :
+      page == page__l_color__3 ? (
+        color_index == 0 ? (
+          color_shade_index == 0 ? l_color__green__50() :
+          color_shade_index == 1 ? l_color__green__100() :
+          color_shade_index == 2 ? l_color__green__200() :
+          color_shade_index == 3 ? l_color__green__300() :
+          color_shade_index == 4 ? l_color__green__400() :
+          color_shade_index == 5 ? l_color__green__500() :
+          color_shade_index == 6 ? l_color__green__600() :
+          color_shade_index == 7 ? l_color__green__700() :
+          color_shade_index == 8 ? l_color__green__800() :
+          color_shade_index == 9 ? l_color__green__900();
+        ) :
+        color_index == 1 ? (
+          color_shade_index == 0 ? l_color__emerald__50() :
+          color_shade_index == 1 ? l_color__emerald__100() :
+          color_shade_index == 2 ? l_color__emerald__200() :
+          color_shade_index == 3 ? l_color__emerald__300() :
+          color_shade_index == 4 ? l_color__emerald__400() :
+          color_shade_index == 5 ? l_color__emerald__500() :
+          color_shade_index == 6 ? l_color__emerald__600() :
+          color_shade_index == 7 ? l_color__emerald__700() :
+          color_shade_index == 8 ? l_color__emerald__800() :
+          color_shade_index == 9 ? l_color__emerald__900();
+        ) :
+        color_index == 2 ? (
+          color_shade_index == 0 ? l_color__teal__50() :
+          color_shade_index == 1 ? l_color__teal__100() :
+          color_shade_index == 2 ? l_color__teal__200() :
+          color_shade_index == 3 ? l_color__teal__300() :
+          color_shade_index == 4 ? l_color__teal__400() :
+          color_shade_index == 5 ? l_color__teal__500() :
+          color_shade_index == 6 ? l_color__teal__600() :
+          color_shade_index == 7 ? l_color__teal__700() :
+          color_shade_index == 8 ? l_color__teal__800() :
+          color_shade_index == 9 ? l_color__teal__900();
+        ) :
+        color_index == 3 ? (
+          color_shade_index == 0 ? l_color__cyan__50() :
+          color_shade_index == 1 ? l_color__cyan__100() :
+          color_shade_index == 2 ? l_color__cyan__200() :
+          color_shade_index == 3 ? l_color__cyan__300() :
+          color_shade_index == 4 ? l_color__cyan__400() :
+          color_shade_index == 5 ? l_color__cyan__500() :
+          color_shade_index == 6 ? l_color__cyan__600() :
+          color_shade_index == 7 ? l_color__cyan__700() :
+          color_shade_index == 8 ? l_color__cyan__800() :
+          color_shade_index == 9 ? l_color__cyan__900();
+        ) :
+        color_index == 4 ? (
+          color_shade_index == 0 ? l_color__sky__50() :
+          color_shade_index == 1 ? l_color__sky__100() :
+          color_shade_index == 2 ? l_color__sky__200() :
+          color_shade_index == 3 ? l_color__sky__300() :
+          color_shade_index == 4 ? l_color__sky__400() :
+          color_shade_index == 5 ? l_color__sky__500() :
+          color_shade_index == 6 ? l_color__sky__600() :
+          color_shade_index == 7 ? l_color__sky__700() :
+          color_shade_index == 8 ? l_color__sky__800() :
+          color_shade_index == 9 ? l_color__sky__900();
+        );
+      ) :
+      page == page__l_color__4? (
+        color_index == 0 ? (
+          color_shade_index == 0 ? l_color__blue__50() :
+          color_shade_index == 1 ? l_color__blue__100() :
+          color_shade_index == 2 ? l_color__blue__200() :
+          color_shade_index == 3 ? l_color__blue__300() :
+          color_shade_index == 4 ? l_color__blue__400() :
+          color_shade_index == 5 ? l_color__blue__500() :
+          color_shade_index == 6 ? l_color__blue__600() :
+          color_shade_index == 7 ? l_color__blue__700() :
+          color_shade_index == 8 ? l_color__blue__800() :
+          color_shade_index == 9 ? l_color__blue__900();
+        ) :
+        color_index == 1 ? (
+          color_shade_index == 0 ? l_color__indigo__50() :
+          color_shade_index == 1 ? l_color__indigo__100() :
+          color_shade_index == 2 ? l_color__indigo__200() :
+          color_shade_index == 3 ? l_color__indigo__300() :
+          color_shade_index == 4 ? l_color__indigo__400() :
+          color_shade_index == 5 ? l_color__indigo__500() :
+          color_shade_index == 6 ? l_color__indigo__600() :
+          color_shade_index == 7 ? l_color__indigo__700() :
+          color_shade_index == 8 ? l_color__indigo__800() :
+          color_shade_index == 9 ? l_color__indigo__900();
+        ) :
+        color_index == 2 ? (
+          color_shade_index == 0 ? l_color__violet__50() :
+          color_shade_index == 1 ? l_color__violet__100() :
+          color_shade_index == 2 ? l_color__violet__200() :
+          color_shade_index == 3 ? l_color__violet__300() :
+          color_shade_index == 4 ? l_color__violet__400() :
+          color_shade_index == 5 ? l_color__violet__500() :
+          color_shade_index == 6 ? l_color__violet__600() :
+          color_shade_index == 7 ? l_color__violet__700() :
+          color_shade_index == 8 ? l_color__violet__800() :
+          color_shade_index == 9 ? l_color__violet__900();
+        ) :
+        color_index == 3 ? (
+          color_shade_index == 0 ? l_color__purple__50() :
+          color_shade_index == 1 ? l_color__purple__100() :
+          color_shade_index == 2 ? l_color__purple__200() :
+          color_shade_index == 3 ? l_color__purple__300() :
+          color_shade_index == 4 ? l_color__purple__400() :
+          color_shade_index == 5 ? l_color__purple__500() :
+          color_shade_index == 6 ? l_color__purple__600() :
+          color_shade_index == 7 ? l_color__purple__700() :
+          color_shade_index == 8 ? l_color__purple__800() :
+          color_shade_index == 9 ? l_color__purple__900();
+        ) :
+        color_index == 4 ? (
+          color_shade_index == 0 ? l_color__fuchsia__50() :
+          color_shade_index == 1 ? l_color__fuchsia__100() :
+          color_shade_index == 2 ? l_color__fuchsia__200() :
+          color_shade_index == 3 ? l_color__fuchsia__300() :
+          color_shade_index == 4 ? l_color__fuchsia__400() :
+          color_shade_index == 5 ? l_color__fuchsia__500() :
+          color_shade_index == 6 ? l_color__fuchsia__600() :
+          color_shade_index == 7 ? l_color__fuchsia__700() :
+          color_shade_index == 8 ? l_color__fuchsia__800() :
+          color_shade_index == 9 ? l_color__fuchsia__900();
+        );
+      ) :
+      page == page__l_color__5 ? (
+        color_index == 0 ? (
+          color_shade_index == 0 ? l_color__pink__50() :
+          color_shade_index == 1 ? l_color__pink__100() :
+          color_shade_index == 2 ? l_color__pink__200() :
+          color_shade_index == 3 ? l_color__pink__300() :
+          color_shade_index == 4 ? l_color__pink__400() :
+          color_shade_index == 5 ? l_color__pink__500() :
+          color_shade_index == 6 ? l_color__pink__600() :
+          color_shade_index == 7 ? l_color__pink__700() :
+          color_shade_index == 8 ? l_color__pink__800() :
+          color_shade_index == 9 ? l_color__pink__900();
+        ) :
+        color_index == 1 ? (
+          color_shade_index == 0 ? l_color__rose__50() :
+          color_shade_index == 1 ? l_color__rose__100() :
+          color_shade_index == 2 ? l_color__rose__200() :
+          color_shade_index == 3 ? l_color__rose__300() :
+          color_shade_index == 4 ? l_color__rose__400() :
+          color_shade_index == 5 ? l_color__rose__500() :
+          color_shade_index == 6 ? l_color__rose__600() :
+          color_shade_index == 7 ? l_color__rose__700() :
+          color_shade_index == 8 ? l_color__rose__800() :
+          color_shade_index == 9 ? l_color__rose__900();
+        ) :
+        color_index == 2 ? (
+          l_color__gray__reaper();
+        ) :
+        color_index == 3 ? (
+          l_color__black();
+        ) :
+        color_index == 4 ? (
+          l_color__white();
+        );
+      );
+      l_rounded_rectangle_fill(
+        palette_x,
+        palette_y,
+        palette__item__box__width,
+        palette__item__box__height,
+        l_border_radius__base()
+      );
+
+      !shadeless ? l_print(
+        color_shade_index == 0 ?  "50" :
+        color_shade_index == 1 ? "100" :
+        color_shade_index == 2 ? "200" :
+        color_shade_index == 3 ? "300" :
+        color_shade_index == 4 ? "400" :
+        color_shade_index == 5 ? "500" :
+        color_shade_index == 6 ? "600" :
+        color_shade_index == 7 ? "700" :
+        color_shade_index == 8 ? "800" :
+        color_shade_index == 9 ? "900",
+        l_font_size__extra_small(),
+        l_font_style__regular(),
+        l_text_align__horizontal__center(),
+        l_text_align__vertical__top(),
+        l_text_overflow__visible(),
+        l_color__gray__warm__700(),
+        palette_x,
+        palette_y + palette__item__box__height + palette__item__gap,
+        palette__item__label__width,
+        palette__item__label__height
+      );
+    );
+  );
+) :
+page == page__data_structures ? (
+  gfx_x = body__padding;
+  gfx_y = body__padding + title__height + body__gap;
+
+  memory_chunk[0] = 1000;
+  memory_chunk[1] = 1001;
+  memory_chunk[2] = 1002;
+  memory_chunk[3] = 1003;
+  memory_chunk[4] = 1004;
+  memory_chunk[5] = 1005;
+  memory_chunk[6] = 1006;
+  memory_chunk[7] = 1007;
+  memory_chunk[8] = 1008;
+  memory_chunk[9] = 1009;
+  memory_chunk[10] = 1010;
+  memory_chunk[11] = 1011;
+  memory_chunk[12] = 1012;
+  memory_chunk[13] = 1013;
+  memory_chunk[14] = 1014;
+  memory_chunk[15] = 1015;
+  memory_chunk[16] = 1016;
+  memory_chunk[17] = 1017;
+  memory_chunk[18] = 1018;
+  memory_chunk[19] = 1019;
+  assert(memory_chunk[9] == 1009);
+
+  filter_type = filter_type__high_pass;
+  assert(filter_type == filter_type__high_pass);
+
+  assert(l_struct__set(label_position, coordinate__x, 10) == 10);
+  assert(l_struct__set(label_position, coordinate__y, 11) == 11);
+  assert(l_struct__set(label_position, coordinate__y + 1, 12) == l_error);
+  assert(l_struct__get(label_position, coordinate__x) == 10);
+  assert(l_struct__get(label_position, coordinate__y) == 11);
+  assert(l_struct__get(label_position, coordinate__y + 1) == l_error);
+
+  // l_array__set(coefficients, 0, 1);
+  // l_array__set(coefficients, 1, 2);
+  // l_array__set(coefficients, 2, 3);
+  // l_array__set(coefficients, 3, 4);
+  // l_array__set(coefficients, 4, 5);
+
+  // assert(l_array__get(coefficients, 2) == 3);
+  // assert(l_array__get(coefficients, 4) == l_error);
+);

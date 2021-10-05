@@ -1,0 +1,543 @@
+/*
+data structures
+  Array
+  Circular buffer
+
+border-width
+opacity
+rotate
+scale
+brightness
+contrast
+saturate
+animations
+  transition-duration
+  transition-timing-function
+colorpicker???
+Basic algorithms
+  Sorting
+    Smallest
+    Find the median
+    Largest
+  Searching
+  Bézier
+  Hyperbolic trigonometric functions
+  Noise generation of various colors
+  Random distributions
+    Uniform
+    Gaussian
+  db_to_amplitude
+  amplitude_to_db
+  DFT
+Document
+  Dimensions for the @gfx block can’t use functions
+  You must call the initializers
+  How to manage different font sizes/styles/decoration
+  why always arial (because of retina + operating system font support)
+    workaround (render every text in the interface as images)
+  Enumerations
+  _rounded_rectangle_fill can’t be used with opacity < 1
+*/
+
+@init
+
+// DATA STRUCTURES
+
+l_undefined = -99998;
+l_error = -99999;
+
+// FIXME: How do we initialize memory to 0s?
+l_memory__index = 0;
+function l_memory__begin(memory__index) (
+  l_memory__index = memory__index;
+);
+function l_memory__allocate(size) local(memory__index) (
+  memory__index = l_memory__index;
+  l_memory__index += size;
+  memory__index;
+);
+function l_memory__end() (
+  freembuf(l_memory__index);
+  l_memory__index;
+);
+
+l_enumeration__index = l_undefined;
+function l_enumeration__define() (
+  l_enumeration__index = -1;
+);
+function l_enumeration__constant() (
+  l_enumeration__index += 1;
+);
+
+l_struct__definition = l_undefined;
+l_enumeration__define();
+l_struct__definition__size = l_enumeration__constant();
+l_enumeration__define();
+l_struct__size = l_enumeration__constant();
+l_struct__fields = l_enumeration__constant();
+function l_struct__define() (
+  l_enumeration__define();
+  l_struct__definition = l_memory__allocate(1);
+  l_struct__definition[l_struct__definition__size] = 0;
+  l_struct__definition;
+);
+function l_struct__field() (
+  l_struct__definition[l_struct__definition__size] += 1;
+  l_enumeration__constant();
+);
+function l_struct__new(struct__definition) local(struct__definition__size, struct) (
+  struct__definition__size = struct__definition[l_struct__definition__size];
+  struct = l_memory__allocate(1 + struct__definition__size);
+  struct[l_struct__size] = struct__definition__size;
+  struct;
+);
+function l__struct__is_valid_field(struct, field) (
+  field < struct[l_struct__size];
+);
+function l__struct__field_index(field) (
+  l_struct__fields + field;
+);
+function l_struct__set(struct, field, value) (
+  !l__struct__is_valid_field(struct, field)
+  ? l_error
+  : struct[l__struct__field_index(field)] = value;
+);
+function l_struct__get(struct, field) (
+  !l__struct__is_valid_field(struct, field)
+  ? l_error
+  : struct[l__struct__field_index(field)];
+);
+
+// DESIGN SYSTEM
+// https://github.com/leafac/css/blob/f1fb7bdc73f1cf7afcffcc61222c36f1c1ff0702/source/index.ts
+/*
+// rem → px
+`___`.replace(/([\d.]+)rem/g, (_, rem) => Number(rem) * 16);
+
+// Colors
+for (const color of `
+    --color--gray--reaper: #e9e9e9;
+    ...
+  `
+  .trim()
+  .split("\n")) {
+  const [_, name, red, green, blue] = color
+    .trim()
+    .match(/^--(.*?): #([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2});$/);
+  console.log(
+    `function l_${name.replaceAll("-", "_")}() ( gfx_r = ${
+      parseInt(red, 16) / 255
+    }; gfx_g = ${parseInt(green, 16) / 255}; gfx_b = ${
+      parseInt(blue, 16) / 255
+    }; );`
+  );
+}
+*/
+
+function l_font_size__extra_small__2() ( gfx_ext_retina * 10 );
+function l_line_height__extra_small__2() ( gfx_ext_retina * 14 );
+function l_font_size__extra_small() ( gfx_ext_retina * 12 );
+function l_line_height__extra_small() ( gfx_ext_retina * 16 );
+function l_font_size__small() ( gfx_ext_retina * 14 );
+function l_line_height__small() ( gfx_ext_retina * 20 );
+function l_font_size__base() ( gfx_ext_retina * 16 );
+function l_line_height__base() ( gfx_ext_retina * 24 );
+function l_font_size__large() ( gfx_ext_retina * 18 );
+function l_line_height__large() ( gfx_ext_retina * 28 );
+function l_font_size__extra_large() ( gfx_ext_retina * 20 );
+function l_line_height__extra_large() ( gfx_ext_retina * 28 );
+function l_font_size__extra_large__2() ( gfx_ext_retina * 24 );
+function l_line_height__extra_large__2() ( gfx_ext_retina * 32 );
+function l_font_size__extra_large__3() ( gfx_ext_retina * 30 );
+function l_line_height__extra_large__3() ( gfx_ext_retina * 36 );
+function l_font_size__extra_large__4() ( gfx_ext_retina * 36 );
+function l_line_height__extra_large__4() ( gfx_ext_retina * 40 );
+function l_font_size__extra_large__5() ( gfx_ext_retina * 48 );
+function l_line_height__extra_large__5() ( gfx_ext_retina * 1 );
+function l_font_size__extra_large__6() ( gfx_ext_retina * 60 );
+function l_line_height__extra_large__6() ( gfx_ext_retina * 1 );
+function l_font_size__extra_large__7() ( gfx_ext_retina * 72 );
+function l_line_height__extra_large__7() ( gfx_ext_retina * 1 );
+function l_font_size__extra_large__8() ( gfx_ext_retina * 96 );
+function l_line_height__extra_large__8() ( gfx_ext_retina * 1 );
+function l_font_size__extra_large__9() ( gfx_ext_retina * 128 );
+function l_line_height__extra_large__9() ( gfx_ext_retina * 1 );
+
+function l_font_style__regular() ( '' );
+function l_font_style__bold() ( 'b' );
+function l_font_style__italic() ( 'i' );
+function l_font_style__bold_italic() ( 'bi' );
+
+function l_text_align__horizontal__left() ( 0 );
+function l_text_align__horizontal__center() ( 1 );
+function l_text_align__horizontal__right() ( 2 );
+function l_text_align__vertical__top() ( 0 );
+function l_text_align__vertical__center() ( 4 );
+function l_text_align__vertical__bottom() ( 8 );
+
+function l_text_overflow__hidden() ( 0 );
+function l_text_overflow__visible() ( 256 );
+
+
+function l_width__0() ( gfx_ext_retina * 0 );
+function l_width__extra_small() ( gfx_ext_retina * 320 );
+function l_width__small() ( gfx_ext_retina * 384 );
+function l_width__medium() ( gfx_ext_retina * 448 );
+function l_width__large() ( gfx_ext_retina * 512 );
+function l_width__extra_large() ( gfx_ext_retina * 576 );
+function l_width__extra_large__2() ( gfx_ext_retina * 672 );
+function l_width__extra_large__3() ( gfx_ext_retina * 768 );
+function l_width__extra_large__4() ( gfx_ext_retina * 896 );
+function l_width__extra_large__5() ( gfx_ext_retina * 1024 );
+function l_width__extra_large__6() ( gfx_ext_retina * 1152 );
+function l_width__extra_large__7() ( gfx_ext_retina * 1280 );
+function l_width__prose() ( gfx_ext_retina * 546 );
+
+function l_space___96() ( gfx_ext_retina * -384 );
+function l_space___80() ( gfx_ext_retina * -320 );
+function l_space___72() ( gfx_ext_retina * -288 );
+function l_space___64() ( gfx_ext_retina * -256 );
+function l_space___60() ( gfx_ext_retina * -240 );
+function l_space___56() ( gfx_ext_retina * -224 );
+function l_space___52() ( gfx_ext_retina * -208 );
+function l_space___48() ( gfx_ext_retina * -192 );
+function l_space___44() ( gfx_ext_retina * -176 );
+function l_space___40() ( gfx_ext_retina * -160 );
+function l_space___36() ( gfx_ext_retina * -144 );
+function l_space___32() ( gfx_ext_retina * -128 );
+function l_space___28() ( gfx_ext_retina * -112 );
+function l_space___24() ( gfx_ext_retina * -96 );
+function l_space___20() ( gfx_ext_retina * -80 );
+function l_space___16() ( gfx_ext_retina * -64 );
+function l_space___14() ( gfx_ext_retina * -56 );
+function l_space___12() ( gfx_ext_retina * -48 );
+function l_space___11() ( gfx_ext_retina * -44 );
+function l_space___10() ( gfx_ext_retina * -40 );
+function l_space___9() ( gfx_ext_retina * -36 );
+function l_space___8() ( gfx_ext_retina * -32 );
+function l_space___7() ( gfx_ext_retina * -28 );
+function l_space___6() ( gfx_ext_retina * -24 );
+function l_space___5() ( gfx_ext_retina * -20 );
+function l_space___4() ( gfx_ext_retina * -16 );
+function l_space___3_5() ( gfx_ext_retina * -14 );
+function l_space___3() ( gfx_ext_retina * -12 );
+function l_space___2_5() ( gfx_ext_retina * -10 );
+function l_space___2() ( gfx_ext_retina * -8 );
+function l_space___1_5() ( gfx_ext_retina * -6 );
+function l_space___1() ( gfx_ext_retina * -4 );
+function l_space___0_5() ( gfx_ext_retina * -2 );
+function l_space___px() ( gfx_ext_retina * -1 );
+function l_space__0() ( gfx_ext_retina * 0 );
+function l_space__px() ( gfx_ext_retina * 1 );
+function l_space__0_5() ( gfx_ext_retina * 2 );
+function l_space__1() ( gfx_ext_retina * 4 );
+function l_space__1_5() ( gfx_ext_retina * 6 );
+function l_space__2() ( gfx_ext_retina * 8 );
+function l_space__2_5() ( gfx_ext_retina * 10 );
+function l_space__3() ( gfx_ext_retina * 12 );
+function l_space__3_5() ( gfx_ext_retina * 14 );
+function l_space__4() ( gfx_ext_retina * 16 );
+function l_space__5() ( gfx_ext_retina * 20 );
+function l_space__6() ( gfx_ext_retina * 24 );
+function l_space__7() ( gfx_ext_retina * 28 );
+function l_space__8() ( gfx_ext_retina * 32 );
+function l_space__9() ( gfx_ext_retina * 36 );
+function l_space__10() ( gfx_ext_retina * 40 );
+function l_space__11() ( gfx_ext_retina * 44 );
+function l_space__12() ( gfx_ext_retina * 48 );
+function l_space__14() ( gfx_ext_retina * 56 );
+function l_space__16() ( gfx_ext_retina * 64 );
+function l_space__20() ( gfx_ext_retina * 80 );
+function l_space__24() ( gfx_ext_retina * 96 );
+function l_space__28() ( gfx_ext_retina * 112 );
+function l_space__32() ( gfx_ext_retina * 128 );
+function l_space__36() ( gfx_ext_retina * 144 );
+function l_space__40() ( gfx_ext_retina * 160 );
+function l_space__44() ( gfx_ext_retina * 176 );
+function l_space__48() ( gfx_ext_retina * 192 );
+function l_space__52() ( gfx_ext_retina * 208 );
+function l_space__56() ( gfx_ext_retina * 224 );
+function l_space__60() ( gfx_ext_retina * 240 );
+function l_space__64() ( gfx_ext_retina * 256 );
+function l_space__72() ( gfx_ext_retina * 288 );
+function l_space__80() ( gfx_ext_retina * 320 );
+function l_space__96() ( gfx_ext_retina * 384 );
+
+function l_border_radius__none() ( gfx_ext_retina * 0 );
+function l_border_radius__small() ( gfx_ext_retina * 2 );
+function l_border_radius__base() ( gfx_ext_retina * 4 );
+function l_border_radius__medium() ( gfx_ext_retina * 6 );
+function l_border_radius__large() ( gfx_ext_retina * 8 );
+function l_border_radius__extra_large() ( gfx_ext_retina * 12 );
+function l_border_radius__extra_large__2() ( gfx_ext_retina * 16 );
+function l_border_radius__extra_large__3() ( gfx_ext_retina * 24 );
+function l_border_radius__full() ( gfx_ext_retina * 9999 );
+
+function l_color__gray__reaper() ( gfx_r = 0.9137254901960784; gfx_g = 0.9137254901960784; gfx_b = 0.9137254901960784; );
+function l_color__black() ( gfx_r = 0; gfx_g = 0; gfx_b = 0; );
+function l_color__white() ( gfx_r = 1; gfx_g = 1; gfx_b = 1; );
+function l_color__gray__blue__50() ( gfx_r = 0.9725490196078431; gfx_g = 0.9803921568627451; gfx_b = 0.9882352941176471; );
+function l_color__gray__blue__100() ( gfx_r = 0.9450980392156862; gfx_g = 0.9607843137254902; gfx_b = 0.9764705882352941; );
+function l_color__gray__blue__200() ( gfx_r = 0.8862745098039215; gfx_g = 0.9098039215686274; gfx_b = 0.9411764705882353; );
+function l_color__gray__blue__300() ( gfx_r = 0.796078431372549; gfx_g = 0.8352941176470589; gfx_b = 0.8823529411764706; );
+function l_color__gray__blue__400() ( gfx_r = 0.5803921568627451; gfx_g = 0.6392156862745098; gfx_b = 0.7215686274509804; );
+function l_color__gray__blue__500() ( gfx_r = 0.39215686274509803; gfx_g = 0.4549019607843137; gfx_b = 0.5450980392156862; );
+function l_color__gray__blue__600() ( gfx_r = 0.2784313725490196; gfx_g = 0.3333333333333333; gfx_b = 0.4117647058823529; );
+function l_color__gray__blue__700() ( gfx_r = 0.2; gfx_g = 0.2549019607843137; gfx_b = 0.3333333333333333; );
+function l_color__gray__blue__800() ( gfx_r = 0.11764705882352941; gfx_g = 0.1607843137254902; gfx_b = 0.23137254901960785; );
+function l_color__gray__blue__900() ( gfx_r = 0.058823529411764705; gfx_g = 0.09019607843137255; gfx_b = 0.16470588235294117; );
+function l_color__gray__cool__50() ( gfx_r = 0.9764705882352941; gfx_g = 0.9803921568627451; gfx_b = 0.984313725490196; );
+function l_color__gray__cool__100() ( gfx_r = 0.9529411764705882; gfx_g = 0.9568627450980393; gfx_b = 0.9647058823529412; );
+function l_color__gray__cool__200() ( gfx_r = 0.8980392156862745; gfx_g = 0.9058823529411765; gfx_b = 0.9215686274509803; );
+function l_color__gray__cool__300() ( gfx_r = 0.8196078431372549; gfx_g = 0.8352941176470589; gfx_b = 0.8588235294117647; );
+function l_color__gray__cool__400() ( gfx_r = 0.611764705882353; gfx_g = 0.6392156862745098; gfx_b = 0.6862745098039216; );
+function l_color__gray__cool__500() ( gfx_r = 0.4196078431372549; gfx_g = 0.4470588235294118; gfx_b = 0.5019607843137255; );
+function l_color__gray__cool__600() ( gfx_r = 0.29411764705882354; gfx_g = 0.3333333333333333; gfx_b = 0.38823529411764707; );
+function l_color__gray__cool__700() ( gfx_r = 0.21568627450980393; gfx_g = 0.2549019607843137; gfx_b = 0.3176470588235294; );
+function l_color__gray__cool__800() ( gfx_r = 0.12156862745098039; gfx_g = 0.1607843137254902; gfx_b = 0.21568627450980393; );
+function l_color__gray__cool__900() ( gfx_r = 0.06666666666666667; gfx_g = 0.09411764705882353; gfx_b = 0.15294117647058825; );
+function l_color__gray__medium__50() ( gfx_r = 0.9803921568627451; gfx_g = 0.9803921568627451; gfx_b = 0.9803921568627451; );
+function l_color__gray__medium__100() ( gfx_r = 0.9568627450980393; gfx_g = 0.9568627450980393; gfx_b = 0.9607843137254902; );
+function l_color__gray__medium__200() ( gfx_r = 0.8941176470588236; gfx_g = 0.8941176470588236; gfx_b = 0.9058823529411765; );
+function l_color__gray__medium__300() ( gfx_r = 0.8313725490196079; gfx_g = 0.8313725490196079; gfx_b = 0.8470588235294118; );
+function l_color__gray__medium__400() ( gfx_r = 0.6313725490196078; gfx_g = 0.6313725490196078; gfx_b = 0.6666666666666666; );
+function l_color__gray__medium__500() ( gfx_r = 0.44313725490196076; gfx_g = 0.44313725490196076; gfx_b = 0.47843137254901963; );
+function l_color__gray__medium__600() ( gfx_r = 0.3215686274509804; gfx_g = 0.3215686274509804; gfx_b = 0.3568627450980392; );
+function l_color__gray__medium__700() ( gfx_r = 0.24705882352941178; gfx_g = 0.24705882352941178; gfx_b = 0.27450980392156865; );
+function l_color__gray__medium__800() ( gfx_r = 0.15294117647058825; gfx_g = 0.15294117647058825; gfx_b = 0.16470588235294117; );
+function l_color__gray__medium__900() ( gfx_r = 0.09411764705882353; gfx_g = 0.09411764705882353; gfx_b = 0.10588235294117647; );
+function l_color__gray__true__50() ( gfx_r = 0.9803921568627451; gfx_g = 0.9803921568627451; gfx_b = 0.9803921568627451; );
+function l_color__gray__true__100() ( gfx_r = 0.9607843137254902; gfx_g = 0.9607843137254902; gfx_b = 0.9607843137254902; );
+function l_color__gray__true__200() ( gfx_r = 0.8980392156862745; gfx_g = 0.8980392156862745; gfx_b = 0.8980392156862745; );
+function l_color__gray__true__300() ( gfx_r = 0.8313725490196079; gfx_g = 0.8313725490196079; gfx_b = 0.8313725490196079; );
+function l_color__gray__true__400() ( gfx_r = 0.6392156862745098; gfx_g = 0.6392156862745098; gfx_b = 0.6392156862745098; );
+function l_color__gray__true__500() ( gfx_r = 0.45098039215686275; gfx_g = 0.45098039215686275; gfx_b = 0.45098039215686275; );
+function l_color__gray__true__600() ( gfx_r = 0.3215686274509804; gfx_g = 0.3215686274509804; gfx_b = 0.3215686274509804; );
+function l_color__gray__true__700() ( gfx_r = 0.25098039215686274; gfx_g = 0.25098039215686274; gfx_b = 0.25098039215686274; );
+function l_color__gray__true__800() ( gfx_r = 0.14901960784313725; gfx_g = 0.14901960784313725; gfx_b = 0.14901960784313725; );
+function l_color__gray__true__900() ( gfx_r = 0.09019607843137255; gfx_g = 0.09019607843137255; gfx_b = 0.09019607843137255; );
+function l_color__gray__warm__50() ( gfx_r = 0.9803921568627451; gfx_g = 0.9803921568627451; gfx_b = 0.9764705882352941; );
+function l_color__gray__warm__100() ( gfx_r = 0.9607843137254902; gfx_g = 0.9607843137254902; gfx_b = 0.9568627450980393; );
+function l_color__gray__warm__200() ( gfx_r = 0.9058823529411765; gfx_g = 0.8980392156862745; gfx_b = 0.8941176470588236; );
+function l_color__gray__warm__300() ( gfx_r = 0.8392156862745098; gfx_g = 0.8274509803921568; gfx_b = 0.8196078431372549; );
+function l_color__gray__warm__400() ( gfx_r = 0.6588235294117647; gfx_g = 0.6352941176470588; gfx_b = 0.6196078431372549; );
+function l_color__gray__warm__500() ( gfx_r = 0.47058823529411764; gfx_g = 0.44313725490196076; gfx_b = 0.4235294117647059; );
+function l_color__gray__warm__600() ( gfx_r = 0.3411764705882353; gfx_g = 0.3254901960784314; gfx_b = 0.3058823529411765; );
+function l_color__gray__warm__700() ( gfx_r = 0.26666666666666666; gfx_g = 0.25098039215686274; gfx_b = 0.23529411764705882; );
+function l_color__gray__warm__800() ( gfx_r = 0.1607843137254902; gfx_g = 0.1450980392156863; gfx_b = 0.1411764705882353; );
+function l_color__gray__warm__900() ( gfx_r = 0.10980392156862745; gfx_g = 0.09803921568627451; gfx_b = 0.09019607843137255; );
+function l_color__red__50() ( gfx_r = 0.996078431372549; gfx_g = 0.9490196078431372; gfx_b = 0.9490196078431372; );
+function l_color__red__100() ( gfx_r = 0.996078431372549; gfx_g = 0.8862745098039215; gfx_b = 0.8862745098039215; );
+function l_color__red__200() ( gfx_r = 0.996078431372549; gfx_g = 0.792156862745098; gfx_b = 0.792156862745098; );
+function l_color__red__300() ( gfx_r = 0.9882352941176471; gfx_g = 0.6470588235294118; gfx_b = 0.6470588235294118; );
+function l_color__red__400() ( gfx_r = 0.9725490196078431; gfx_g = 0.44313725490196076; gfx_b = 0.44313725490196076; );
+function l_color__red__500() ( gfx_r = 0.9372549019607843; gfx_g = 0.26666666666666666; gfx_b = 0.26666666666666666; );
+function l_color__red__600() ( gfx_r = 0.8627450980392157; gfx_g = 0.14901960784313725; gfx_b = 0.14901960784313725; );
+function l_color__red__700() ( gfx_r = 0.7254901960784313; gfx_g = 0.10980392156862745; gfx_b = 0.10980392156862745; );
+function l_color__red__800() ( gfx_r = 0.6; gfx_g = 0.10588235294117647; gfx_b = 0.10588235294117647; );
+function l_color__red__900() ( gfx_r = 0.4980392156862745; gfx_g = 0.11372549019607843; gfx_b = 0.11372549019607843; );
+function l_color__orange__50() ( gfx_r = 1; gfx_g = 0.9686274509803922; gfx_b = 0.9294117647058824; );
+function l_color__orange__100() ( gfx_r = 1; gfx_g = 0.9294117647058824; gfx_b = 0.8352941176470589; );
+function l_color__orange__200() ( gfx_r = 0.996078431372549; gfx_g = 0.8431372549019608; gfx_b = 0.6666666666666666; );
+function l_color__orange__300() ( gfx_r = 0.9921568627450981; gfx_g = 0.7294117647058823; gfx_b = 0.4549019607843137; );
+function l_color__orange__400() ( gfx_r = 0.984313725490196; gfx_g = 0.5725490196078431; gfx_b = 0.23529411764705882; );
+function l_color__orange__500() ( gfx_r = 0.9764705882352941; gfx_g = 0.45098039215686275; gfx_b = 0.08627450980392157; );
+function l_color__orange__600() ( gfx_r = 0.9176470588235294; gfx_g = 0.34509803921568627; gfx_b = 0.047058823529411764; );
+function l_color__orange__700() ( gfx_r = 0.7607843137254902; gfx_g = 0.2549019607843137; gfx_b = 0.047058823529411764; );
+function l_color__orange__800() ( gfx_r = 0.6039215686274509; gfx_g = 0.20392156862745098; gfx_b = 0.07058823529411765; );
+function l_color__orange__900() ( gfx_r = 0.48627450980392156; gfx_g = 0.17647058823529413; gfx_b = 0.07058823529411765; );
+function l_color__amber__50() ( gfx_r = 1; gfx_g = 0.984313725490196; gfx_b = 0.9215686274509803; );
+function l_color__amber__100() ( gfx_r = 0.996078431372549; gfx_g = 0.9529411764705882; gfx_b = 0.7803921568627451; );
+function l_color__amber__200() ( gfx_r = 0.9921568627450981; gfx_g = 0.9019607843137255; gfx_b = 0.5411764705882353; );
+function l_color__amber__300() ( gfx_r = 0.9882352941176471; gfx_g = 0.8274509803921568; gfx_b = 0.30196078431372547; );
+function l_color__amber__400() ( gfx_r = 0.984313725490196; gfx_g = 0.7490196078431373; gfx_b = 0.1411764705882353; );
+function l_color__amber__500() ( gfx_r = 0.9607843137254902; gfx_g = 0.6196078431372549; gfx_b = 0.043137254901960784; );
+function l_color__amber__600() ( gfx_r = 0.8509803921568627; gfx_g = 0.4666666666666667; gfx_b = 0.023529411764705882; );
+function l_color__amber__700() ( gfx_r = 0.7058823529411765; gfx_g = 0.3254901960784314; gfx_b = 0.03529411764705882; );
+function l_color__amber__800() ( gfx_r = 0.5725490196078431; gfx_g = 0.25098039215686274; gfx_b = 0.054901960784313725; );
+function l_color__amber__900() ( gfx_r = 0.47058823529411764; gfx_g = 0.20784313725490197; gfx_b = 0.058823529411764705; );
+function l_color__yellow__50() ( gfx_r = 0.996078431372549; gfx_g = 0.9882352941176471; gfx_b = 0.9098039215686274; );
+function l_color__yellow__100() ( gfx_r = 0.996078431372549; gfx_g = 0.9764705882352941; gfx_b = 0.7647058823529411; );
+function l_color__yellow__200() ( gfx_r = 0.996078431372549; gfx_g = 0.9411764705882353; gfx_b = 0.5411764705882353; );
+function l_color__yellow__300() ( gfx_r = 0.9921568627450981; gfx_g = 0.8784313725490196; gfx_b = 0.2784313725490196; );
+function l_color__yellow__400() ( gfx_r = 0.9803921568627451; gfx_g = 0.8; gfx_b = 0.08235294117647059; );
+function l_color__yellow__500() ( gfx_r = 0.9176470588235294; gfx_g = 0.7019607843137254; gfx_b = 0.03137254901960784; );
+function l_color__yellow__600() ( gfx_r = 0.792156862745098; gfx_g = 0.5411764705882353; gfx_b = 0.01568627450980392; );
+function l_color__yellow__700() ( gfx_r = 0.6313725490196078; gfx_g = 0.3843137254901961; gfx_b = 0.027450980392156862; );
+function l_color__yellow__800() ( gfx_r = 0.5215686274509804; gfx_g = 0.30196078431372547; gfx_b = 0.054901960784313725; );
+function l_color__yellow__900() ( gfx_r = 0.44313725490196076; gfx_g = 0.24705882352941178; gfx_b = 0.07058823529411765; );
+function l_color__lime__50() ( gfx_r = 0.9686274509803922; gfx_g = 0.996078431372549; gfx_b = 0.9058823529411765; );
+function l_color__lime__100() ( gfx_r = 0.9254901960784314; gfx_g = 0.9882352941176471; gfx_b = 0.796078431372549; );
+function l_color__lime__200() ( gfx_r = 0.8509803921568627; gfx_g = 0.9764705882352941; gfx_b = 0.615686274509804; );
+function l_color__lime__300() ( gfx_r = 0.7450980392156863; gfx_g = 0.9490196078431372; gfx_b = 0.39215686274509803; );
+function l_color__lime__400() ( gfx_r = 0.6392156862745098; gfx_g = 0.9019607843137255; gfx_b = 0.20784313725490197; );
+function l_color__lime__500() ( gfx_r = 0.5176470588235295; gfx_g = 0.8; gfx_b = 0.08627450980392157; );
+function l_color__lime__600() ( gfx_r = 0.396078431372549; gfx_g = 0.6392156862745098; gfx_b = 0.050980392156862744; );
+function l_color__lime__700() ( gfx_r = 0.30196078431372547; gfx_g = 0.48627450980392156; gfx_b = 0.058823529411764705; );
+function l_color__lime__800() ( gfx_r = 0.24705882352941178; gfx_g = 0.3843137254901961; gfx_b = 0.07058823529411765; );
+function l_color__lime__900() ( gfx_r = 0.21176470588235294; gfx_g = 0.3254901960784314; gfx_b = 0.0784313725490196; );
+function l_color__green__50() ( gfx_r = 0.9411764705882353; gfx_g = 0.9921568627450981; gfx_b = 0.9568627450980393; );
+function l_color__green__100() ( gfx_r = 0.8627450980392157; gfx_g = 0.9882352941176471; gfx_b = 0.9058823529411765; );
+function l_color__green__200() ( gfx_r = 0.7333333333333333; gfx_g = 0.9686274509803922; gfx_b = 0.8156862745098039; );
+function l_color__green__300() ( gfx_r = 0.5254901960784314; gfx_g = 0.9372549019607843; gfx_b = 0.6745098039215687; );
+function l_color__green__400() ( gfx_r = 0.2901960784313726; gfx_g = 0.8705882352941177; gfx_b = 0.5019607843137255; );
+function l_color__green__500() ( gfx_r = 0.13333333333333333; gfx_g = 0.7725490196078432; gfx_b = 0.3686274509803922; );
+function l_color__green__600() ( gfx_r = 0.08627450980392157; gfx_g = 0.6392156862745098; gfx_b = 0.2901960784313726; );
+function l_color__green__700() ( gfx_r = 0.08235294117647059; gfx_g = 0.5019607843137255; gfx_b = 0.23921568627450981; );
+function l_color__green__800() ( gfx_r = 0.08627450980392157; gfx_g = 0.396078431372549; gfx_b = 0.20392156862745098; );
+function l_color__green__900() ( gfx_r = 0.0784313725490196; gfx_g = 0.3254901960784314; gfx_b = 0.17647058823529413; );
+function l_color__emerald__50() ( gfx_r = 0.9254901960784314; gfx_g = 0.9921568627450981; gfx_b = 0.9607843137254902; );
+function l_color__emerald__100() ( gfx_r = 0.8196078431372549; gfx_g = 0.9803921568627451; gfx_b = 0.8980392156862745; );
+function l_color__emerald__200() ( gfx_r = 0.6549019607843137; gfx_g = 0.9529411764705882; gfx_b = 0.8156862745098039; );
+function l_color__emerald__300() ( gfx_r = 0.43137254901960786; gfx_g = 0.9058823529411765; gfx_b = 0.7176470588235294; );
+function l_color__emerald__400() ( gfx_r = 0.20392156862745098; gfx_g = 0.8274509803921568; gfx_b = 0.6; );
+function l_color__emerald__500() ( gfx_r = 0.06274509803921569; gfx_g = 0.7254901960784313; gfx_b = 0.5058823529411764; );
+function l_color__emerald__600() ( gfx_r = 0.0196078431372549; gfx_g = 0.5882352941176471; gfx_b = 0.4117647058823529; );
+function l_color__emerald__700() ( gfx_r = 0.01568627450980392; gfx_g = 0.47058823529411764; gfx_b = 0.3411764705882353; );
+function l_color__emerald__800() ( gfx_r = 0.023529411764705882; gfx_g = 0.37254901960784315; gfx_b = 0.27450980392156865; );
+function l_color__emerald__900() ( gfx_r = 0.023529411764705882; gfx_g = 0.3058823529411765; gfx_b = 0.23137254901960785; );
+function l_color__teal__50() ( gfx_r = 0.9411764705882353; gfx_g = 0.9921568627450981; gfx_b = 0.9803921568627451; );
+function l_color__teal__100() ( gfx_r = 0.8; gfx_g = 0.984313725490196; gfx_b = 0.9450980392156862; );
+function l_color__teal__200() ( gfx_r = 0.6; gfx_g = 0.9647058823529412; gfx_b = 0.8941176470588236; );
+function l_color__teal__300() ( gfx_r = 0.3686274509803922; gfx_g = 0.9176470588235294; gfx_b = 0.8313725490196079; );
+function l_color__teal__400() ( gfx_r = 0.17647058823529413; gfx_g = 0.8313725490196079; gfx_b = 0.7490196078431373; );
+function l_color__teal__500() ( gfx_r = 0.0784313725490196; gfx_g = 0.7215686274509804; gfx_b = 0.6509803921568628; );
+function l_color__teal__600() ( gfx_r = 0.050980392156862744; gfx_g = 0.5803921568627451; gfx_b = 0.5333333333333333; );
+function l_color__teal__700() ( gfx_r = 0.058823529411764705; gfx_g = 0.4627450980392157; gfx_b = 0.43137254901960786; );
+function l_color__teal__800() ( gfx_r = 0.06666666666666667; gfx_g = 0.3686274509803922; gfx_b = 0.34901960784313724; );
+function l_color__teal__900() ( gfx_r = 0.07450980392156863; gfx_g = 0.3058823529411765; gfx_b = 0.2901960784313726; );
+function l_color__cyan__50() ( gfx_r = 0.9254901960784314; gfx_g = 0.996078431372549; gfx_b = 1; );
+function l_color__cyan__100() ( gfx_r = 0.8117647058823529; gfx_g = 0.9803921568627451; gfx_b = 0.996078431372549; );
+function l_color__cyan__200() ( gfx_r = 0.6470588235294118; gfx_g = 0.9529411764705882; gfx_b = 0.9882352941176471; );
+function l_color__cyan__300() ( gfx_r = 0.403921568627451; gfx_g = 0.9098039215686274; gfx_b = 0.9764705882352941; );
+function l_color__cyan__400() ( gfx_r = 0.13333333333333333; gfx_g = 0.8274509803921568; gfx_b = 0.9333333333333333; );
+function l_color__cyan__500() ( gfx_r = 0.023529411764705882; gfx_g = 0.7137254901960784; gfx_b = 0.8313725490196079; );
+function l_color__cyan__600() ( gfx_r = 0.03137254901960784; gfx_g = 0.5686274509803921; gfx_b = 0.6980392156862745; );
+function l_color__cyan__700() ( gfx_r = 0.054901960784313725; gfx_g = 0.4549019607843137; gfx_b = 0.5647058823529412; );
+function l_color__cyan__800() ( gfx_r = 0.08235294117647059; gfx_g = 0.3686274509803922; gfx_b = 0.4588235294117647; );
+function l_color__cyan__900() ( gfx_r = 0.08627450980392157; gfx_g = 0.3058823529411765; gfx_b = 0.38823529411764707; );
+function l_color__sky__50() ( gfx_r = 0.9411764705882353; gfx_g = 0.9764705882352941; gfx_b = 1; );
+function l_color__sky__100() ( gfx_r = 0.8784313725490196; gfx_g = 0.9490196078431372; gfx_b = 0.996078431372549; );
+function l_color__sky__200() ( gfx_r = 0.7294117647058823; gfx_g = 0.9019607843137255; gfx_b = 0.9921568627450981; );
+function l_color__sky__300() ( gfx_r = 0.49019607843137253; gfx_g = 0.8274509803921568; gfx_b = 0.9882352941176471; );
+function l_color__sky__400() ( gfx_r = 0.2196078431372549; gfx_g = 0.7411764705882353; gfx_b = 0.9725490196078431; );
+function l_color__sky__500() ( gfx_r = 0.054901960784313725; gfx_g = 0.6470588235294118; gfx_b = 0.9137254901960784; );
+function l_color__sky__600() ( gfx_r = 0.00784313725490196; gfx_g = 0.5176470588235295; gfx_b = 0.7803921568627451; );
+function l_color__sky__700() ( gfx_r = 0.011764705882352941; gfx_g = 0.4117647058823529; gfx_b = 0.6313725490196078; );
+function l_color__sky__800() ( gfx_r = 0.027450980392156862; gfx_g = 0.34901960784313724; gfx_b = 0.5215686274509804; );
+function l_color__sky__900() ( gfx_r = 0.047058823529411764; gfx_g = 0.2901960784313726; gfx_b = 0.43137254901960786; );
+function l_color__blue__50() ( gfx_r = 0.9372549019607843; gfx_g = 0.9647058823529412; gfx_b = 1; );
+function l_color__blue__100() ( gfx_r = 0.8588235294117647; gfx_g = 0.9176470588235294; gfx_b = 0.996078431372549; );
+function l_color__blue__200() ( gfx_r = 0.7490196078431373; gfx_g = 0.8588235294117647; gfx_b = 0.996078431372549; );
+function l_color__blue__300() ( gfx_r = 0.5764705882352941; gfx_g = 0.7725490196078432; gfx_b = 0.9921568627450981; );
+function l_color__blue__400() ( gfx_r = 0.3764705882352941; gfx_g = 0.6470588235294118; gfx_b = 0.9803921568627451; );
+function l_color__blue__500() ( gfx_r = 0.23137254901960785; gfx_g = 0.5098039215686274; gfx_b = 0.9647058823529412; );
+function l_color__blue__600() ( gfx_r = 0.1450980392156863; gfx_g = 0.38823529411764707; gfx_b = 0.9215686274509803; );
+function l_color__blue__700() ( gfx_r = 0.11372549019607843; gfx_g = 0.3058823529411765; gfx_b = 0.8470588235294118; );
+function l_color__blue__800() ( gfx_r = 0.11764705882352941; gfx_g = 0.25098039215686274; gfx_b = 0.6862745098039216; );
+function l_color__blue__900() ( gfx_r = 0.11764705882352941; gfx_g = 0.22745098039215686; gfx_b = 0.5411764705882353; );
+function l_color__indigo__50() ( gfx_r = 0.9333333333333333; gfx_g = 0.9490196078431372; gfx_b = 1; );
+function l_color__indigo__100() ( gfx_r = 0.8784313725490196; gfx_g = 0.9058823529411765; gfx_b = 1; );
+function l_color__indigo__200() ( gfx_r = 0.7803921568627451; gfx_g = 0.8235294117647058; gfx_b = 0.996078431372549; );
+function l_color__indigo__300() ( gfx_r = 0.6470588235294118; gfx_g = 0.7058823529411765; gfx_b = 0.9882352941176471; );
+function l_color__indigo__400() ( gfx_r = 0.5058823529411764; gfx_g = 0.5490196078431373; gfx_b = 0.9725490196078431; );
+function l_color__indigo__500() ( gfx_r = 0.38823529411764707; gfx_g = 0.4; gfx_b = 0.9450980392156862; );
+function l_color__indigo__600() ( gfx_r = 0.30980392156862746; gfx_g = 0.27450980392156865; gfx_b = 0.8980392156862745; );
+function l_color__indigo__700() ( gfx_r = 0.2627450980392157; gfx_g = 0.2196078431372549; gfx_b = 0.792156862745098; );
+function l_color__indigo__800() ( gfx_r = 0.21568627450980393; gfx_g = 0.18823529411764706; gfx_b = 0.6392156862745098; );
+function l_color__indigo__900() ( gfx_r = 0.19215686274509805; gfx_g = 0.1803921568627451; gfx_b = 0.5058823529411764; );
+function l_color__violet__50() ( gfx_r = 0.9607843137254902; gfx_g = 0.9529411764705882; gfx_b = 1; );
+function l_color__violet__100() ( gfx_r = 0.9294117647058824; gfx_g = 0.9137254901960784; gfx_b = 0.996078431372549; );
+function l_color__violet__200() ( gfx_r = 0.8666666666666667; gfx_g = 0.8392156862745098; gfx_b = 0.996078431372549; );
+function l_color__violet__300() ( gfx_r = 0.7686274509803922; gfx_g = 0.7098039215686275; gfx_b = 0.9921568627450981; );
+function l_color__violet__400() ( gfx_r = 0.6549019607843137; gfx_g = 0.5450980392156862; gfx_b = 0.9803921568627451; );
+function l_color__violet__500() ( gfx_r = 0.5450980392156862; gfx_g = 0.3607843137254902; gfx_b = 0.9647058823529412; );
+function l_color__violet__600() ( gfx_r = 0.48627450980392156; gfx_g = 0.22745098039215686; gfx_b = 0.9294117647058824; );
+function l_color__violet__700() ( gfx_r = 0.42745098039215684; gfx_g = 0.1568627450980392; gfx_b = 0.8509803921568627; );
+function l_color__violet__800() ( gfx_r = 0.3568627450980392; gfx_g = 0.12941176470588237; gfx_b = 0.7137254901960784; );
+function l_color__violet__900() ( gfx_r = 0.2980392156862745; gfx_g = 0.11372549019607843; gfx_b = 0.5843137254901961; );
+function l_color__purple__50() ( gfx_r = 0.9803921568627451; gfx_g = 0.9607843137254902; gfx_b = 1; );
+function l_color__purple__100() ( gfx_r = 0.9529411764705882; gfx_g = 0.9098039215686274; gfx_b = 1; );
+function l_color__purple__200() ( gfx_r = 0.9137254901960784; gfx_g = 0.8352941176470589; gfx_b = 1; );
+function l_color__purple__300() ( gfx_r = 0.8470588235294118; gfx_g = 0.7058823529411765; gfx_b = 0.996078431372549; );
+function l_color__purple__400() ( gfx_r = 0.7529411764705882; gfx_g = 0.5176470588235295; gfx_b = 0.9882352941176471; );
+function l_color__purple__500() ( gfx_r = 0.6588235294117647; gfx_g = 0.3333333333333333; gfx_b = 0.9686274509803922; );
+function l_color__purple__600() ( gfx_r = 0.5764705882352941; gfx_g = 0.2; gfx_b = 0.9176470588235294; );
+function l_color__purple__700() ( gfx_r = 0.49411764705882355; gfx_g = 0.13333333333333333; gfx_b = 0.807843137254902; );
+function l_color__purple__800() ( gfx_r = 0.4196078431372549; gfx_g = 0.12941176470588237; gfx_b = 0.6588235294117647; );
+function l_color__purple__900() ( gfx_r = 0.34509803921568627; gfx_g = 0.10980392156862745; gfx_b = 0.5294117647058824; );
+function l_color__fuchsia__50() ( gfx_r = 0.9921568627450981; gfx_g = 0.9568627450980393; gfx_b = 1; );
+function l_color__fuchsia__100() ( gfx_r = 0.9803921568627451; gfx_g = 0.9098039215686274; gfx_b = 1; );
+function l_color__fuchsia__200() ( gfx_r = 0.9607843137254902; gfx_g = 0.8156862745098039; gfx_b = 0.996078431372549; );
+function l_color__fuchsia__300() ( gfx_r = 0.9411764705882353; gfx_g = 0.6705882352941176; gfx_b = 0.9882352941176471; );
+function l_color__fuchsia__400() ( gfx_r = 0.9098039215686274; gfx_g = 0.4745098039215686; gfx_b = 0.9764705882352941; );
+function l_color__fuchsia__500() ( gfx_r = 0.8509803921568627; gfx_g = 0.27450980392156865; gfx_b = 0.9372549019607843; );
+function l_color__fuchsia__600() ( gfx_r = 0.7529411764705882; gfx_g = 0.14901960784313725; gfx_b = 0.8274509803921568; );
+function l_color__fuchsia__700() ( gfx_r = 0.6352941176470588; gfx_g = 0.10980392156862745; gfx_b = 0.6862745098039216; );
+function l_color__fuchsia__800() ( gfx_r = 0.5254901960784314; gfx_g = 0.09803921568627451; gfx_b = 0.5607843137254902; );
+function l_color__fuchsia__900() ( gfx_r = 0.4392156862745098; gfx_g = 0.10196078431372549; gfx_b = 0.4588235294117647; );
+function l_color__pink__50() ( gfx_r = 0.9921568627450981; gfx_g = 0.9490196078431372; gfx_b = 0.9725490196078431; );
+function l_color__pink__100() ( gfx_r = 0.9882352941176471; gfx_g = 0.9058823529411765; gfx_b = 0.9529411764705882; );
+function l_color__pink__200() ( gfx_r = 0.984313725490196; gfx_g = 0.8117647058823529; gfx_b = 0.9098039215686274; );
+function l_color__pink__300() ( gfx_r = 0.9764705882352941; gfx_g = 0.6588235294117647; gfx_b = 0.8313725490196079; );
+function l_color__pink__400() ( gfx_r = 0.9568627450980393; gfx_g = 0.4470588235294118; gfx_b = 0.7137254901960784; );
+function l_color__pink__500() ( gfx_r = 0.9254901960784314; gfx_g = 0.2823529411764706; gfx_b = 0.6; );
+function l_color__pink__600() ( gfx_r = 0.8588235294117647; gfx_g = 0.15294117647058825; gfx_b = 0.4666666666666667; );
+function l_color__pink__700() ( gfx_r = 0.7450980392156863; gfx_g = 0.09411764705882353; gfx_b = 0.36470588235294116; );
+function l_color__pink__800() ( gfx_r = 0.615686274509804; gfx_g = 0.09019607843137255; gfx_b = 0.30196078431372547; );
+function l_color__pink__900() ( gfx_r = 0.5137254901960784; gfx_g = 0.09411764705882353; gfx_b = 0.2627450980392157; );
+function l_color__rose__50() ( gfx_r = 1; gfx_g = 0.9450980392156862; gfx_b = 0.9490196078431372; );
+function l_color__rose__100() ( gfx_r = 1; gfx_g = 0.8941176470588236; gfx_b = 0.9019607843137255; );
+function l_color__rose__200() ( gfx_r = 0.996078431372549; gfx_g = 0.803921568627451; gfx_b = 0.8274509803921568; );
+function l_color__rose__300() ( gfx_r = 0.9921568627450981; gfx_g = 0.6431372549019608; gfx_b = 0.6862745098039216; );
+function l_color__rose__400() ( gfx_r = 0.984313725490196; gfx_g = 0.44313725490196076; gfx_b = 0.5215686274509804; );
+function l_color__rose__500() ( gfx_r = 0.9568627450980393; gfx_g = 0.24705882352941178; gfx_b = 0.3686274509803922; );
+function l_color__rose__600() ( gfx_r = 0.8823529411764706; gfx_g = 0.11372549019607843; gfx_b = 0.2823529411764706; );
+function l_color__rose__700() ( gfx_r = 0.7450980392156863; gfx_g = 0.07058823529411765; gfx_b = 0.23529411764705882; );
+function l_color__rose__800() ( gfx_r = 0.6235294117647059; gfx_g = 0.07058823529411765; gfx_b = 0.2235294117647059; );
+function l_color__rose__900() ( gfx_r = 0.5333333333333333; gfx_g = 0.07450980392156863; gfx_b = 0.21568627450980393; );
+
+// STYLES SETTERS
+
+function l_font(size, style) ( gfx_setfont(1, "Arial", size, style); );
+function l_background_color(color) ( gfx_clear = gfx_r * 255 + gfx_g * 255 * 256 + gfx_b * 255 * 65536; );
+
+// DRAWING FUNCTIONS
+
+function l_print(
+  string,
+  font_size,
+  font_style,
+  text_align__horizontal,
+  text_align__vertical,
+  text_overflow,
+  color,
+  x,
+  y,
+  width,
+  height
+) (
+  l_font(font_size, font_style);
+  gfx_x = x;
+  gfx_y = y;
+  gfx_drawstr(
+    string,
+    text_align__horizontal | text_align__vertical | text_overflow,
+    x + width,
+    y + height
+  );
+);
+
+function l_rounded_rectangle_fill(x, y, width, height, radius) (
+  radius = min(min(radius, width / 2), height / 2);
+  gfx_rect(x + radius, y, width - radius * 2, height);
+  gfx_rect(x, y + radius, width, height - radius * 2);
+  gfx_circle(x + radius, y + radius, radius, 1);
+  gfx_circle(x + width - radius - 1, y + radius, radius, 1);
+  gfx_circle(x + radius, y + height - radius - 1, radius, 1);
+  gfx_circle(x + width - radius - 1, y + height - radius - 1, radius, 1);
+);
+
+// INITIALIZERS
+
+gfx_ext_retina = 1;
