@@ -4,38 +4,35 @@ import leafac_l.jsfx-inc
 
 @init
 
-l_memory__begin();
-
 memory_chunk = l_memory__allocate(20);
 
-l_enumeration__define();
-page__l_color__1 = l_enumeration__constant();
-page__l_color__2 = l_enumeration__constant();
-page__l_color__3 = l_enumeration__constant();
-page__l_color__4 = l_enumeration__constant();
-page__l_color__5 = l_enumeration__constant();
-page__data_structures = l_enumeration__constant();
+page__l_color__1 = 0;
+page__l_color__2 = 1;
+page__l_color__3 = 2;
+page__l_color__4 = 3;
+page__l_color__5 = 4;
+page__data_structures = 5;
 
-l_enumeration__define();
 filter_type__low_pass = l_enumeration__constant();
 filter_type__high_pass = l_enumeration__constant();
 filter_type__band_pass = l_enumeration__constant();
 filter_type__notch = l_enumeration__constant();
 
-l_enumeration__define();
 compressor__detector_input__main = l_enumeration__constant();
 compressor__detector_input__side_chain = l_enumeration__constant();
 compressor__detector_input__feedback = l_enumeration__constant();
 
-coordinate__struct = l_struct__define();
-coordinate__x = l_struct__field();
-coordinate__y = l_struct__field();
+counter = l_box__new(256);
 
-label_position = l_struct__new(coordinate__struct);
+struct__coordinate = l_struct__define();
+struct__coordinate__x = l_struct__field();
+struct__coordinate__y = l_struct__field();
 
-// coefficients = l_array__new(4);
+label_position = l_struct__new(struct__coordinate);
 
-l_memory__end();
+coefficients = l_array__new(4);
+
+circular_counter = l_circular_counter__new(13, 10, 15, 1);
 
 function assert(boolean) (
   l_print(
@@ -530,19 +527,29 @@ page == page__data_structures ? (
   filter_type = filter_type__high_pass;
   assert(filter_type == filter_type__high_pass);
 
-  assert(l_struct__set(label_position, coordinate__x, 10) == 10);
-  assert(l_struct__set(label_position, coordinate__y, 11) == 11);
-  assert(l_struct__set(label_position, coordinate__y + 1, 12) == l_error);
-  assert(l_struct__get(label_position, coordinate__x) == 10);
-  assert(l_struct__get(label_position, coordinate__y) == 11);
-  assert(l_struct__get(label_position, coordinate__y + 1) == l_error);
+  assert(l_box__set(counter, 3745) == 3745);
+  assert(l_box__get(counter) == 3745);
 
-  // l_array__set(coefficients, 0, 1);
-  // l_array__set(coefficients, 1, 2);
-  // l_array__set(coefficients, 2, 3);
-  // l_array__set(coefficients, 3, 4);
-  // l_array__set(coefficients, 4, 5);
+  assert(l_struct__set(label_position, struct__coordinate__x, 10) == 10);
+  assert(l_struct__set(label_position, struct__coordinate__y, 11) == 11);
+  assert(l_struct__set(label_position, struct__coordinate__y + 1, 12) == l_error);
+  assert(l_struct__get(label_position, struct__coordinate__x) == 10);
+  assert(l_struct__get(label_position, struct__coordinate__y) == 11);
+  assert(l_struct__get(label_position, struct__coordinate__y + 1) == l_error);
 
-  // assert(l_array__get(coefficients, 2) == 3);
-  // assert(l_array__get(coefficients, 4) == l_error);
+  assert(l_array__set(coefficients, 0, 1) == 1);
+  assert(l_array__set(coefficients, 1, 2) == 2);
+  assert(l_array__set(coefficients, 2, 3) == 3);
+  assert(l_array__set(coefficients, 3, 4) == 4);
+  assert(l_array__set(coefficients, 4, 5) == l_error);
+
+  assert(l_array__get(coefficients, 2) == 3);
+  assert(l_array__get(coefficients, 4) == l_error);
+
+  assert(l_circular_counter__reset(circular_counter) == 13);
+  assert(l_circular_counter__step(circular_counter) == 14);
+  assert(l_circular_counter__step(circular_counter) == 10);
+  assert(l_circular_counter__step(circular_counter) == 11);
+
+  // TODO: Test circular buffer that aren’t integers and that step down (negative steps).
 );
