@@ -1,6 +1,7 @@
 /*
 data structures
-  Circular buffer
+  Delay line
+  Matrix
 
 border-width
 opacity
@@ -46,21 +47,45 @@ Document
 
 @init
 
+// MATHEMATICAL FUNCTIONS
+
+function wrap(value, start, end) local(range, range_sign) (
+  range = end - start;
+  range_sign = sign(range);
+  while (
+    (range_sign == +1 && value >= end) ||
+    (range_sign == -1 && value <= end)
+  ) (
+    value -= range;
+  );
+  while (
+    (range_sign == +1 && value < start) ||
+    (range_sign == -1 && value > start)
+  ) (
+    value += range;
+  );
+  value;
+);
+
 // DATA STRUCTURES
 
-l_undefined = -99998;
-l_error = -99999;
+l_undefined = -9000;
+l_error = -9001;
 
 l__memory__next_available_address = 0;
-function l_memory__allocate(size) local(address) (
-  address = l__memory__next_available_address;
-  l__memory__next_available_address += size;
-  memset(address, l_undefined, size);
-  address;
+function l_memory(size) local(address) (
+  size <= 0
+  ? l_error
+  : (
+    address = l__memory__next_available_address;
+    l__memory__next_available_address += size;
+    memset(address, l_undefined, size);
+    address;
+  );
 );
 
 l_enumeration__index = -1;
-function l_enumeration__constant() (
+function l_enumeration() (
   l_enumeration__index += 1;
 );
 
@@ -71,7 +96,7 @@ function l_box__get(box) (
   box[0];
 );
 function l_box__new(value) local(box) (
-  box = l_memory__allocate(1);
+  box = l_memory(1);
   l_box__set(box, value);
   box;
 );
@@ -80,16 +105,20 @@ l__struct__current_definition = l_undefined;
 function l_struct__define() (
   l__struct__current_definition = l_box__new(0);
 );
-function l_struct__field() local(field_index) (
+function l_struct__define__field() local(field_index) (
   field_index = l_box__get(l__struct__current_definition);
-  l_box__set(l__struct__current_definition, l_box__get(l__struct__current_definition) + 1);
+  l_box__set(l__struct__current_definition, field_index + 1);
   field_index;
 );
 function l_struct__new(struct__definition) local(struct__definition__size, struct) (
   struct__definition__size = l_box__get(struct__definition);
-  struct = l_memory__allocate(1 + struct__definition__size);
-  struct[0] = struct__definition__size;
-  struct;
+  struct__definition__size == 0
+  ? l_error
+  : (
+    struct = l_memory(1 + struct__definition__size);
+    struct[0] = struct__definition__size;
+    struct;
+  );
 );
 function l__struct__is_valid_field(struct, field) (
   field < struct[0];
@@ -108,60 +137,115 @@ function l_struct__get(struct, field) (
   : struct[l__struct__field_index(field)];
 );
 
-l__struct__array_definition = l_struct__define();
-l__struct__array_definition__size = l_struct__field();
-l__struct__array_definition__values = l_struct__field();
+l__struct__array = l_struct__define();
+l__struct__array__size = l_struct__define__field();
+l__struct__array__values = l_struct__define__field();
 function l_array__new(size) local(array) (
-  array = l_struct__new(l__struct__array_definition);
-  l_struct__set(array, l__struct__array_definition__size, size);
-  l_struct__set(array, l__struct__array_definition__values, l_memory__allocate(size));
-  array;
+  size <= 0
+  ? l_error
+  : (
+    array = l_struct__new(l__struct__array);
+    l_struct__set(array, l__struct__array__size, size);
+    l_struct__set(array, l__struct__array__values, l_memory(size));
+    array;
+  );
+);
+function l_array__size(array) (
+  l_struct__get(array, l__struct__array__size);
 );
 function l__array_is_valid_index(array, index) (
-  index < l_struct__get(array, l__struct__array_definition__size);
+  index < l_array__size(array);
 );
 function l_array__set(array, index, value) (
   !l__array_is_valid_index(array, index)
   ? l_error
-  : l_struct__get(array, l__struct__array_definition__values)[index] = value;
+  : l_struct__get(array, l__struct__array__values)[index] = value;
 );
 function l_array__get(array, index) (
   !l__array_is_valid_index(array, index)
   ? l_error
-  : l_struct__get(array, l__struct__array_definition__values)[index];
+  : l_struct__get(array, l__struct__array__values)[index];
 );
 
-l__struct__circular_counter_definition = l_struct__define();
-l__struct__circular_counter_definition__current_value = l_struct__field();
-l__struct__circular_counter_definition__initial_value = l_struct__field();
-l__struct__circular_counter_definition__start = l_struct__field();
-l__struct__circular_counter_definition__end = l_struct__field();
-l__struct__circular_counter_definition__step = l_struct__field();
+l__struct__circular_counter = l_struct__define();
+l__struct__circular_counter__current_value = l_struct__define__field();
+l__struct__circular_counter__initial_value = l_struct__define__field();
+l__struct__circular_counter__start = l_struct__define__field();
+l__struct__circular_counter__end = l_struct__define__field();
+l__struct__circular_counter__step = l_struct__define__field();
 function l_circular_counter__new(initial_value, start, end, step) local(circular_counter) (
-  circular_counter = l_struct__new(l__struct__circular_counter_definition);
-  l_struct__set(circular_counter, l__struct__circular_counter_definition__current_value, initial_value);
-  l_struct__set(circular_counter, l__struct__circular_counter_definition__initial_value, initial_value);
-  l_struct__set(circular_counter, l__struct__circular_counter_definition__start, start);
-  l_struct__set(circular_counter, l__struct__circular_counter_definition__end, end);
-  l_struct__set(circular_counter, l__struct__circular_counter_definition__step, step);
-  circular_counter;
+  step == 0 || (
+    sign(step) == +1 && !(
+      start <= initial_value && initial_value < end
+    )
+  ) || (
+    sign(step) == -1 && !(
+      start >= initial_value && initial_value > end
+    )
+  )
+  ? l_error
+  : (
+    circular_counter = l_struct__new(l__struct__circular_counter);
+    l_struct__set(circular_counter, l__struct__circular_counter__current_value, initial_value);
+    l_struct__set(circular_counter, l__struct__circular_counter__initial_value, initial_value);
+    l_struct__set(circular_counter, l__struct__circular_counter__start, start);
+    l_struct__set(circular_counter, l__struct__circular_counter__end, end);
+    l_struct__set(circular_counter, l__struct__circular_counter__step, step);
+    circular_counter;
+  );
 );
 function l_circular_counter__reset(circular_counter) (
   l_struct__set(
     circular_counter,
-    l__struct__circular_counter_definition__current_value,
-    l_struct__get(circular_counter, l__struct__circular_counter_definition__initial_value)
+    l__struct__circular_counter__current_value,
+    l_struct__get(circular_counter, l__struct__circular_counter__initial_value)
   );
 );
-function l_circular_counter__step(circular_counter) local(current_value, start, end, range) (
-  current_value = l_struct__get(circular_counter, l__struct__circular_counter_definition__current_value);
-  start = l_struct__get(circular_counter, l__struct__circular_counter_definition__start);
-  end = l_struct__get(circular_counter, l__struct__circular_counter_definition__end);
-  range = end - start;
-  current_value += l_struct__get(circular_counter, l__struct__circular_counter_definition__step);
-  while (current_value >= end) ( current_value -= range; );
-  while (current_value < start) ( current_value += range; );
-  l_struct__set(circular_counter, l__struct__circular_counter_definition__current_value, current_value);
+function l_circular_counter__current_value(circular_counter) (
+  l_struct__get(circular_counter, l__struct__circular_counter__current_value);
+);
+function l_circular_counter__step(circular_counter) local(current_value) (
+  current_value = l_circular_counter__current_value(circular_counter);
+  current_value += l_struct__get(circular_counter, l__struct__circular_counter__step);
+  current_value = wrap(
+    current_value,
+    l_struct__get(circular_counter, l__struct__circular_counter__start),
+    l_struct__get(circular_counter, l__struct__circular_counter__end)
+  );
+  l_struct__set(circular_counter, l__struct__circular_counter__current_value, current_value);
+);
+
+l__struct__circular_buffer = l_struct__define();
+l__struct__circular_buffer__array = l_struct__define__field();
+l__struct__circular_buffer__circular_counter = l_struct__define__field();
+function l_circular_buffer__new(size) local(circular_buffer) (
+  size <= 0
+  ? l_error
+  : (
+    circular_buffer = l_struct__new(l__struct__circular_buffer);
+    l_struct__set(circular_buffer, l__struct__circular_buffer__array, l_array__new(size));
+    l_struct__set(circular_buffer, l__struct__circular_buffer__circular_counter, l_circular_counter__new(0, 0, size, 1));
+    circular_buffer;
+  );
+);
+function l_circular_buffer__set(circular_buffer, value) (
+  l_array__set(
+    l_struct__get(circular_buffer, l__struct__circular_buffer__array),
+    l_circular_counter__step(l_struct__get(circular_buffer, l__struct__circular_buffer__circular_counter)),
+    value
+  );
+);
+function l_circular_buffer__get(circular_buffer, index) local(array, array_size, array_index) (
+  array = l_struct__get(circular_buffer, l__struct__circular_buffer__array);
+  array_size = l_array__size(array);
+  index > 0 || index <= -array_size
+  ? l_error
+  : (
+    array_index = l_circular_counter__current_value(l_struct__get(circular_buffer, l__struct__circular_buffer__circular_counter));
+    array_index += index;
+    array_index = wrap(array_index, 0, array_size);
+    l_array__get(array, array_index);
+  );
 );
 
 // DESIGN SYSTEM
@@ -592,6 +676,24 @@ function l_rounded_rectangle_fill(x, y, width, height, radius) (
   gfx_circle(x + width - radius - 1, y + radius, radius, 1);
   gfx_circle(x + radius, y + height - radius - 1, radius, 1);
   gfx_circle(x + width - radius - 1, y + height - radius - 1, radius, 1);
+);
+
+// UNIT TESTING
+
+function assert(boolean) (
+  l_print(
+    boolean ? "." : "F",
+    l_font_size__extra_small(),
+    l_font_style__regular(),
+    l_text_align__horizontal__left(),
+    l_text_align__vertical__top(),
+    l_text_overflow__visible(),
+    l_color__gray__warm__900(),
+    gfx_x,
+    gfx_y,
+    l_space__0(),
+    l_space__0()
+  );
 );
 
 // INITIALIZERS

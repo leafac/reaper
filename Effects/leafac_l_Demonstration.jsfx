@@ -1,54 +1,38 @@
-slider1:page=0<0,0,4{l_color 1,l_color 2,l_color 3,l_color 4,l_color 5,Data Structures}>Page
+slider1:page=0<0,0,5{Tests,l_color 1,l_color 2,l_color 3,l_color 4,l_color 5}>Page
 
 import leafac_l.jsfx-inc
 
 @init
 
-memory_chunk = l_memory__allocate(20);
+page__tests = 0;
+page__l_color__1 = 1;
+page__l_color__2 = 2;
+page__l_color__3 = 3;
+page__l_color__4 = 4;
+page__l_color__5 = 5;
 
-page__l_color__1 = 0;
-page__l_color__2 = 1;
-page__l_color__3 = 2;
-page__l_color__4 = 3;
-page__l_color__5 = 4;
-page__data_structures = 5;
+memory = l_memory(20);
 
-filter_type__low_pass = l_enumeration__constant();
-filter_type__high_pass = l_enumeration__constant();
-filter_type__band_pass = l_enumeration__constant();
-filter_type__notch = l_enumeration__constant();
+filter_type__low_pass = l_enumeration();
+filter_type__high_pass = l_enumeration();
 
-compressor__detector_input__main = l_enumeration__constant();
-compressor__detector_input__side_chain = l_enumeration__constant();
-compressor__detector_input__feedback = l_enumeration__constant();
-
-counter = l_box__new(256);
+box = l_box__new(256);
 
 struct__coordinate = l_struct__define();
-struct__coordinate__x = l_struct__field();
-struct__coordinate__y = l_struct__field();
+struct__coordinate__x = l_struct__define__field();
+struct__coordinate__y = l_struct__define__field();
 
-label_position = l_struct__new(struct__coordinate);
+struct__empty = l_struct__define();
 
-coefficients = l_array__new(4);
+coordinate = l_struct__new(struct__coordinate);
 
-circular_counter = l_circular_counter__new(13, 10, 15, 1);
+array = l_array__new(4);
 
-function assert(boolean) (
-  l_print(
-    boolean ? "PASS " : "FAIL ",
-    l_font_size__extra_small(),
-    l_font_style__regular(),
-    l_text_align__horizontal__left(),
-    l_text_align__vertical__top(),
-    l_text_overflow__visible(),
-    l_color__gray__warm__900(),
-    gfx_x,
-    gfx_y,
-    l_space__0(),
-    l_space__0()
-  );
-);
+circular_counter__positive = l_circular_counter__new(13, 10, 15, 1);
+circular_counter__negative = l_circular_counter__new(13, 15, 10, -1);
+circular_counter__fractional = l_circular_counter__new(2.5, 2.1, 2.8, 0.1);
+
+circular_buffer = l_circular_buffer__new(5);
 
 //   l_width__extra_large__2() l_width__small()
 @gfx 672                       384
@@ -69,14 +53,14 @@ body__gap = l_space__2();
 title__height = l_line_height__extra_small();
 
 l_print(
-  page == page__l_color__1 ||
-  page == page__l_color__2 ||
-  page == page__l_color__3 ||
-  page == page__l_color__4 ||
-  page == page__l_color__5 ?
-  "l_color" :
-  page == page__data_structures ?
-  "Data Structures",
+  page == page__tests
+  ? "Tests"
+  : page == page__l_color__1 ||
+    page == page__l_color__2 ||
+    page == page__l_color__3 ||
+    page == page__l_color__4 ||
+    page == page__l_color__5
+  ? "l_color",
   l_font_size__extra_small(),
   l_font_style__bold(),
   l_text_align__horizontal__left(),
@@ -89,6 +73,108 @@ l_print(
   l_space__0()
 );
 
+page == page__tests ? (
+  gfx_x = body__padding;
+  gfx_y = body__padding + title__height + body__gap;
+
+  assert(wrap(0, 0, 10) == 0);
+  assert(wrap(5, 0, 10) == 5);
+  assert(wrap(10, 0, 10) == 0);
+  assert(wrap(11, 0, 10) == 1);
+  assert(wrap(21, 0, 10) == 1);
+  assert(wrap(-1, 0, 10) == 9);
+  assert(wrap(0, 10, 0) == 10);
+  assert(wrap(5, 10, 0) == 5);
+  assert(wrap(10, 10, 0) == 10);
+  assert(wrap(11, 10, 0) == 1);
+  assert(wrap(21, 10, 0) == 1);
+  assert(wrap(-1, 10, 0) == 9);
+
+  memory[0] = 1000;
+  memory[1] = 1001;
+  memory[2] = 1002;
+  memory[3] = 1003;
+  memory[4] = 1004;
+  memory[5] = 1005;
+  memory[6] = 1006;
+  memory[7] = 1007;
+  memory[8] = 1008;
+  memory[9] = 1009;
+  memory[10] = 1010;
+  memory[11] = 1011;
+  memory[12] = 1012;
+  memory[13] = 1013;
+  memory[14] = 1014;
+  memory[15] = 1015;
+  memory[16] = 1016;
+  memory[17] = 1017;
+  memory[18] = 1018;
+  memory[19] = 1019;
+  assert(memory[9] == 1009);
+  assert(l_memory(0) == l_error);
+
+  assert(filter_type__low_pass != filter_type__high_pass);
+
+  assert(l_box__set(box, 3745) == 3745);
+  assert(l_box__get(box) == 3745);
+
+  assert(l_struct__set(coordinate, struct__coordinate__x, 10) == 10);
+  assert(l_struct__set(coordinate, struct__coordinate__y, 11) == 11);
+  assert(l_struct__set(coordinate, struct__coordinate__y + 1, 12) == l_error);
+  assert(l_struct__get(coordinate, struct__coordinate__x) == 10);
+  assert(l_struct__get(coordinate, struct__coordinate__y) == 11);
+  assert(l_struct__get(coordinate, struct__coordinate__y + 1) == l_error);
+  assert(l_struct__new(struct__empty) == l_error);
+
+  assert(l_array__size(array) == 4);
+  assert(l_array__set(array, 0, 1) == 1);
+  assert(l_array__set(array, 1, 2) == 2);
+  assert(l_array__set(array, 2, 3) == 3);
+  assert(l_array__set(array, 3, 4) == 4);
+  assert(l_array__set(array, 4, 5) == l_error);
+  assert(l_array__get(array, 2) == 3);
+  assert(l_array__get(array, 4) == l_error);
+  assert(l_array__new(0) == l_error);
+
+  assert(l_circular_counter__reset(circular_counter__positive) == 13);
+  assert(l_circular_counter__current_value(circular_counter__positive) == 13);
+  assert(l_circular_counter__step(circular_counter__positive) == 14);
+  assert(l_circular_counter__step(circular_counter__positive) == 10);
+  assert(l_circular_counter__step(circular_counter__positive) == 11);
+  assert(l_circular_counter__reset(circular_counter__negative) == 13);
+  assert(l_circular_counter__step(circular_counter__negative) == 12);
+  assert(l_circular_counter__step(circular_counter__negative) == 11);
+  assert(l_circular_counter__step(circular_counter__negative) == 15);
+  assert(l_circular_counter__reset(circular_counter__fractional) == 2.5);
+  assert(l_circular_counter__step(circular_counter__fractional) == 2.6);
+  assert(l_circular_counter__step(circular_counter__fractional) == 2.7);
+  assert(l_circular_counter__step(circular_counter__fractional) == 2.1);
+  assert(l_circular_counter__new(0, 0, 4, 0) == l_error);
+  assert(l_circular_counter__new(-1, 0, 4, 1) == l_error);
+  assert(l_circular_counter__new(4, 0, 4, 1) == l_error);
+  assert(l_circular_counter__new(0, 4, 0, -1) == l_error);
+  assert(l_circular_counter__new(5, 4, 0, -1) == l_error);
+
+  assert(l_circular_buffer__set(circular_buffer, 1000) == 1000);
+  assert(l_circular_buffer__set(circular_buffer, 1001) == 1001);
+  assert(l_circular_buffer__set(circular_buffer, 1002) == 1002);
+  assert(l_circular_buffer__set(circular_buffer, 1003) == 1003);
+  assert(l_circular_buffer__set(circular_buffer, 1004) == 1004);
+  assert(l_circular_buffer__get(circular_buffer, 0) == 1004);
+  assert(l_circular_buffer__get(circular_buffer, -1) == 1003);
+  assert(l_circular_buffer__get(circular_buffer, -2) == 1002);
+  assert(l_circular_buffer__get(circular_buffer, -3) == 1001);
+  assert(l_circular_buffer__get(circular_buffer, -4) == 1000);
+  assert(l_circular_buffer__set(circular_buffer, 1005) == 1005);
+  assert(l_circular_buffer__get(circular_buffer, 0) == 1005);
+  assert(l_circular_buffer__get(circular_buffer, -1) == 1004);
+  assert(l_circular_buffer__get(circular_buffer, -2) == 1003);
+  assert(l_circular_buffer__get(circular_buffer, -3) == 1002);
+  assert(l_circular_buffer__get(circular_buffer, -4) == 1001);
+  assert(l_circular_buffer__get(circular_buffer, -5) == l_error);
+  assert(l_circular_buffer__get(circular_buffer, 1) == l_error);
+  assert(l_circular_buffer__new(0) == l_error);
+) :
 page == page__l_color__1 ||
 page == page__l_color__2 ||
 page == page__l_color__3 ||
@@ -497,59 +583,4 @@ page == page__l_color__5 ? (
       );
     );
   );
-) :
-page == page__data_structures ? (
-  gfx_x = body__padding;
-  gfx_y = body__padding + title__height + body__gap;
-
-  memory_chunk[0] = 1000;
-  memory_chunk[1] = 1001;
-  memory_chunk[2] = 1002;
-  memory_chunk[3] = 1003;
-  memory_chunk[4] = 1004;
-  memory_chunk[5] = 1005;
-  memory_chunk[6] = 1006;
-  memory_chunk[7] = 1007;
-  memory_chunk[8] = 1008;
-  memory_chunk[9] = 1009;
-  memory_chunk[10] = 1010;
-  memory_chunk[11] = 1011;
-  memory_chunk[12] = 1012;
-  memory_chunk[13] = 1013;
-  memory_chunk[14] = 1014;
-  memory_chunk[15] = 1015;
-  memory_chunk[16] = 1016;
-  memory_chunk[17] = 1017;
-  memory_chunk[18] = 1018;
-  memory_chunk[19] = 1019;
-  assert(memory_chunk[9] == 1009);
-
-  filter_type = filter_type__high_pass;
-  assert(filter_type == filter_type__high_pass);
-
-  assert(l_box__set(counter, 3745) == 3745);
-  assert(l_box__get(counter) == 3745);
-
-  assert(l_struct__set(label_position, struct__coordinate__x, 10) == 10);
-  assert(l_struct__set(label_position, struct__coordinate__y, 11) == 11);
-  assert(l_struct__set(label_position, struct__coordinate__y + 1, 12) == l_error);
-  assert(l_struct__get(label_position, struct__coordinate__x) == 10);
-  assert(l_struct__get(label_position, struct__coordinate__y) == 11);
-  assert(l_struct__get(label_position, struct__coordinate__y + 1) == l_error);
-
-  assert(l_array__set(coefficients, 0, 1) == 1);
-  assert(l_array__set(coefficients, 1, 2) == 2);
-  assert(l_array__set(coefficients, 2, 3) == 3);
-  assert(l_array__set(coefficients, 3, 4) == 4);
-  assert(l_array__set(coefficients, 4, 5) == l_error);
-
-  assert(l_array__get(coefficients, 2) == 3);
-  assert(l_array__get(coefficients, 4) == l_error);
-
-  assert(l_circular_counter__reset(circular_counter) == 13);
-  assert(l_circular_counter__step(circular_counter) == 14);
-  assert(l_circular_counter__step(circular_counter) == 10);
-  assert(l_circular_counter__step(circular_counter) == 11);
-
-  // TODO: Test circular buffer that aren’t integers and that step down (negative steps).
 );
