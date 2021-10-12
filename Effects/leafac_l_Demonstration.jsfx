@@ -11,28 +11,28 @@ page__l_color__3 = 3;
 page__l_color__4 = 4;
 page__l_color__5 = 5;
 
-memory = l_memory(20);
+enumeration__1 = l_enumeration();
+enumeration__2 = l_enumeration();
 
-filter_type__low_pass = l_enumeration();
-filter_type__high_pass = l_enumeration();
+memory = l_memory(2, l_undefined);
 
 box = l_box__new(256);
 
-struct__coordinate = l_struct__define();
-struct__coordinate__x = l_struct__define__field();
-struct__coordinate__y = l_struct__define__field();
-
+struct__with_fields = l_struct__define();
+struct__with_fields__field_1 = l_struct__define__field();
+struct__with_fields__field_2 = l_struct__define__field();
+struct_instance = l_struct__new(struct__with_fields);
 struct__empty = l_struct__define();
 
-coordinate = l_struct__new(struct__coordinate);
-
-array = l_array__new(4);
+array = l_array__new(4, l_undefined);
 
 circular_counter__positive = l_circular_counter__new(13, 10, 15, 1);
 circular_counter__negative = l_circular_counter__new(13, 15, 10, -1);
 circular_counter__fractional = l_circular_counter__new(2.5, 2.1, 2.8, 0.1);
 
-circular_buffer = l_circular_buffer__new(5);
+circular_buffer = l_circular_buffer__new(5, l_undefined);
+
+rbj_filter = l_rbj_filter__new();
 
 //   l_width__extra_large__2() l_width__small()
 @gfx 672                       384
@@ -77,6 +77,8 @@ page == page__tests ? (
   gfx_x = body__padding;
   gfx_y = body__padding + title__height + body__gap;
 
+  assert(enumeration__1 != enumeration__2);
+
   assert(wrap(0, 0, 10) == 0);
   assert(wrap(5, 0, 10) == 5);
   assert(wrap(10, 0, 10) == 0);
@@ -90,51 +92,29 @@ page == page__tests ? (
   assert(wrap(21, 10, 0) == 1);
   assert(wrap(-1, 10, 0) == 9);
 
-  memory[0] = 1000;
+  assert(memory[0] == l_undefined);
   memory[1] = 1001;
-  memory[2] = 1002;
-  memory[3] = 1003;
-  memory[4] = 1004;
-  memory[5] = 1005;
-  memory[6] = 1006;
-  memory[7] = 1007;
-  memory[8] = 1008;
-  memory[9] = 1009;
-  memory[10] = 1010;
-  memory[11] = 1011;
-  memory[12] = 1012;
-  memory[13] = 1013;
-  memory[14] = 1014;
-  memory[15] = 1015;
-  memory[16] = 1016;
-  memory[17] = 1017;
-  memory[18] = 1018;
-  memory[19] = 1019;
-  assert(memory[9] == 1009);
-  assert(l_memory(0) == l_error);
-
-  assert(filter_type__low_pass != filter_type__high_pass);
+  assert(memory[1] == 1001);
+  assert(l_memory(0, 5) == l_error);
 
   assert(l_box__set(box, 3745) == 3745);
   assert(l_box__get(box) == 3745);
 
-  assert(l_struct__set(coordinate, struct__coordinate__x, 10) == 10);
-  assert(l_struct__set(coordinate, struct__coordinate__y, 11) == 11);
-  assert(l_struct__set(coordinate, struct__coordinate__y + 1, 12) == l_error);
-  assert(l_struct__get(coordinate, struct__coordinate__x) == 10);
-  assert(l_struct__get(coordinate, struct__coordinate__y) == 11);
-  assert(l_struct__get(coordinate, struct__coordinate__y + 1) == l_error);
+  assert(l_struct__set(struct_instance, struct__with_fields__field_1, 10) == 10);
+  assert(l_struct__set(struct_instance, struct__with_fields__field_2, 11) == 11);
+  assert(l_struct__set(struct_instance, struct__with_fields__field_2 + 1, 12) == l_error);
+  assert(l_struct__get(struct_instance, struct__with_fields__field_1) == 10);
+  assert(l_struct__get(struct_instance, struct__with_fields__field_2) == 11);
+  assert(l_struct__get(struct_instance, struct__with_fields__field_2 + 1) == l_error);
   assert(l_struct__new(struct__empty) == l_error);
 
   assert(l_array__size(array) == 4);
-  assert(l_array__set(array, 0, 1) == 1);
   assert(l_array__set(array, 1, 2) == 2);
-  assert(l_array__set(array, 2, 3) == 3);
-  assert(l_array__set(array, 3, 4) == 4);
   assert(l_array__set(array, 4, 5) == l_error);
-  assert(l_array__get(array, 2) == 3);
+  assert(l_array__get(array, 0) == l_undefined);
+  assert(l_array__get(array, 1) == 2);
   assert(l_array__get(array, 4) == l_error);
-  assert(l_array__new(0) == l_error);
+  assert(l_array__new(0, 5) == l_error);
 
   assert(l_circular_counter__reset(circular_counter__positive) == 13);
   assert(l_circular_counter__current_value(circular_counter__positive) == 13);
@@ -173,7 +153,7 @@ page == page__tests ? (
   assert(l_circular_buffer__get(circular_buffer, -4) == 1001);
   assert(l_circular_buffer__get(circular_buffer, -5) == l_error);
   assert(l_circular_buffer__get(circular_buffer, 1) == l_error);
-  assert(l_circular_buffer__new(0) == l_error);
+  assert(l_circular_buffer__new(0, 5) == l_error);
 ) :
 page == page__l_color__1 ||
 page == page__l_color__2 ||

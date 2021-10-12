@@ -2,6 +2,7 @@
 data structures
   Delay line
   Matrix
+  Follower
 
 border-width
 opacity
@@ -47,58 +48,85 @@ Document
 
 @init
 
+// ENUMERATIONS
+
+l_enumeration__index = 990000;
+function l_enumeration() (
+  l_enumeration__index += 1;
+);
+
+l_undefined = l_enumeration();
+l_error = l_enumeration();
+
 // MATHEMATICAL FUNCTIONS
 
 function wrap(value, start, end) local(range, range_sign) (
-  range = end - start;
-  range_sign = sign(range);
-  while (
-    (range_sign == +1 && value >= end) ||
-    (range_sign == -1 && value <= end)
-  ) (
-    value -= range;
+  start == end
+  ? l_error
+  : (
+    range = end - start;
+    range_sign = sign(range);
+    while (
+      (range_sign == +1 && value >= end) ||
+      (range_sign == -1 && value <= end)
+    ) (
+      value -= range;
+    );
+    while (
+      (range_sign == +1 && value < start) ||
+      (range_sign == -1 && value > start)
+    ) (
+      value += range;
+    );
+    value;
   );
-  while (
-    (range_sign == +1 && value < start) ||
-    (range_sign == -1 && value > start)
-  ) (
-    value += range;
-  );
-  value;
+);
+
+// https://en.wikipedia.org/wiki/Hyperbolic_functions#Exponential_definitions
+
+// TODO: Tests.
+
+function l_sinh(x) (
+  (exp(x) - exp(-x)) / 2;
+);
+function l_cosh(x) (
+  (exp(x) + exp(-x)) / 2;
+);
+function l_tanh(x) (
+  (exp(2 * x) - 1) / (exp(2 * x) + 1);
+);
+function l_coth(x) (
+  (exp(2 * x) + 1) / (exp(2 * x) - 1);
+);
+function l_sech(x) (
+  2 / (exp(x) + exp(-x));
+);
+function l_csch(x) (
+  2 / (exp(x) - exp(-x));
 );
 
 // DATA STRUCTURES
 
-l_undefined = -9000;
-l_error = -9001;
-
 l__memory__next_available_address = 0;
-function l_memory(size) local(address) (
+function l_memory(size, initial_value) local(address) (
   size <= 0
   ? l_error
   : (
     address = l__memory__next_available_address;
     l__memory__next_available_address += size;
-    memset(address, l_undefined, size);
+    memset(address, initial_value, size);
     address;
   );
 );
 
-l_enumeration__index = -1;
-function l_enumeration() (
-  l_enumeration__index += 1;
+function l_box__new(initial_value) (
+  l_memory(1, initial_value);
 );
-
 function l_box__set(box, value) (
   box[0] = value;
 );
 function l_box__get(box) (
   box[0];
-);
-function l_box__new(value) local(box) (
-  box = l_memory(1);
-  l_box__set(box, value);
-  box;
 );
 
 l__struct__current_definition = l_undefined;
@@ -106,63 +134,58 @@ function l_struct__define() (
   l__struct__current_definition = l_box__new(0);
 );
 function l_struct__define__field() local(field_index) (
-  field_index = l_box__get(l__struct__current_definition);
-  l_box__set(l__struct__current_definition, field_index + 1);
-  field_index;
+  l__struct__current_definition == l_undefined
+  ? l_error
+  : (
+    field_index = l_box__get(l__struct__current_definition);
+    l_box__set(l__struct__current_definition, field_index + 1);
+    field_index;
+  );
 );
 function l_struct__new(struct__definition) local(struct__definition__size, struct) (
   struct__definition__size = l_box__get(struct__definition);
   struct__definition__size == 0
   ? l_error
   : (
-    struct = l_memory(1 + struct__definition__size);
+    struct = l_memory(1 + struct__definition__size, l_undefined);
     struct[0] = struct__definition__size;
     struct;
   );
 );
-function l__struct__is_valid_field(struct, field) (
-  field < struct[0];
-);
-function l__struct__field_index(field) (
-  1 + field;
-);
 function l_struct__set(struct, field, value) (
-  !l__struct__is_valid_field(struct, field)
+  field < 0 || field >= struct[0]
   ? l_error
-  : struct[l__struct__field_index(field)] = value;
+  : struct[1 + field] = value;
 );
 function l_struct__get(struct, field) (
-  !l__struct__is_valid_field(struct, field)
+  field < 0 || field >= struct[0]
   ? l_error
-  : struct[l__struct__field_index(field)];
+  : struct[1 + field];
 );
 
 l__struct__array = l_struct__define();
 l__struct__array__size = l_struct__define__field();
 l__struct__array__values = l_struct__define__field();
-function l_array__new(size) local(array) (
+function l_array__new(size, initial_value) local(array) (
   size <= 0
   ? l_error
   : (
     array = l_struct__new(l__struct__array);
     l_struct__set(array, l__struct__array__size, size);
-    l_struct__set(array, l__struct__array__values, l_memory(size));
+    l_struct__set(array, l__struct__array__values, l_memory(size, initial_value));
     array;
   );
 );
 function l_array__size(array) (
   l_struct__get(array, l__struct__array__size);
 );
-function l__array_is_valid_index(array, index) (
-  index < l_array__size(array);
-);
 function l_array__set(array, index, value) (
-  !l__array_is_valid_index(array, index)
+  index < 0 || index >= l_array__size(array)
   ? l_error
   : l_struct__get(array, l__struct__array__values)[index] = value;
 );
 function l_array__get(array, index) (
-  !l__array_is_valid_index(array, index)
+  index < 0 || index >= l_array__size(array)
   ? l_error
   : l_struct__get(array, l__struct__array__values)[index];
 );
@@ -175,12 +198,12 @@ l__struct__circular_counter__end = l_struct__define__field();
 l__struct__circular_counter__step = l_struct__define__field();
 function l_circular_counter__new(initial_value, start, end, step) local(circular_counter) (
   step == 0 || (
-    sign(step) == +1 && !(
-      start <= initial_value && initial_value < end
+    sign(step) == +1 && (
+      initial_value < start || initial_value >= end
     )
   ) || (
-    sign(step) == -1 && !(
-      start >= initial_value && initial_value > end
+    sign(step) == -1 && (
+      initial_value > start || initial_value <= end
     )
   )
   ? l_error
@@ -218,12 +241,12 @@ function l_circular_counter__step(circular_counter) local(current_value) (
 l__struct__circular_buffer = l_struct__define();
 l__struct__circular_buffer__array = l_struct__define__field();
 l__struct__circular_buffer__circular_counter = l_struct__define__field();
-function l_circular_buffer__new(size) local(circular_buffer) (
+function l_circular_buffer__new(size, initial_value) local(circular_buffer) (
   size <= 0
   ? l_error
   : (
     circular_buffer = l_struct__new(l__struct__circular_buffer);
-    l_struct__set(circular_buffer, l__struct__circular_buffer__array, l_array__new(size));
+    l_struct__set(circular_buffer, l__struct__circular_buffer__array, l_array__new(size, initial_value));
     l_struct__set(circular_buffer, l__struct__circular_buffer__circular_counter, l_circular_counter__new(0, 0, size, 1));
     circular_buffer;
   );
@@ -245,6 +268,131 @@ function l_circular_buffer__get(circular_buffer, index) local(array, array_size,
     array_index += index;
     array_index = wrap(array_index, 0, array_size);
     l_array__get(array, array_index);
+  );
+);
+
+// RBJ FILTERS
+
+// https://music.columbia.edu/pipermail/music-dsp/2001-March/041752.html
+// https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
+// https://www.musicdsp.org/en/latest/Filters/197-rbj-audio-eq-cookbook.html
+// https://www.w3.org/TR/audio-eq-cookbook/
+// https://shepazu.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
+// https://github.com/libaudioverse/libaudioverse/blob/master/audio%20eq%20cookbook.txt
+
+l_rbj_filter__type__low_pass = l_enumeration();
+l_rbj_filter__type__high_pass = l_enumeration();
+l_rbj_filter__type__band_pass__constant_skirt = l_enumeration();
+l_rbj_filter__type__band_pass__constant_peak = l_enumeration();
+l_rbj_filter__type__notch = l_enumeration();
+l_rbj_filter__type__all_pass = l_enumeration();
+l_rbj_filter__type__peaking = l_enumeration();
+l_rbj_filter__type__low_shelf = l_enumeration();
+l_rbj_filter__type__high_shelf = l_enumeration();
+
+l__rbj_filter__wideness_type__bandwidth = l_enumeration();
+l__rbj_filter__wideness_type__q = l_enumeration();
+l__rbj_filter__wideness_type__s = l_enumeration();
+
+l__struct__rbj_filter = l_struct__define();
+l__struct__rbj_filter__type = l_struct__define__field();
+l__struct__rbj_filter__frequency = l_struct__define__field();
+l__struct__rbj_filter__wideness__type = l_struct__define__field();
+l__struct__rbj_filter__wideness__value = l_struct__define__field();
+l__struct__rbj_filter__db_gain = l_struct__define__field();
+l__struct__rbj_filter__big_a = l_struct__define__field();
+l__struct__rbj_filter__omega = l_struct__define__field();
+l__struct__rbj_filter__sin = l_struct__define__field();
+l__struct__rbj_filter__cos = l_struct__define__field();
+l__struct__rbj_filter__alpha = l_struct__define__field();
+l__struct__rbj_filter__beta = l_struct__define__field();
+l__struct__rbj_filter__a = l_struct__define__field();
+l__struct__rbj_filter__b = l_struct__define__field();
+l__struct__rbj_filter__x = l_struct__define__field();
+l__struct__rbj_filter__y = l_struct__define__field();
+
+function l_rbj_filter__new() (
+  rbj_filter = l_struct__new(l__struct__rbj_filter);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__type, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__frequency, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__wideness__type, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__wideness__value, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__db_gain, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__big_a, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__omega, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__sin, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__cos, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__alpha, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__beta, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__a, l_array__new(2, l_undefined));
+  l_struct__set(rbj_filter, l__struct__rbj_filter__b, l_array__new(3, l_undefined));
+  l_struct__set(rbj_filter, l__struct__rbj_filter__x, l_circular_buffer__new(2, 0));
+  l_struct__set(rbj_filter, l__struct__rbj_filter__y, l_circular_buffer__new(2, 0));
+  rbj_filter;
+);
+function l_rbj_filter__configure(
+  type,
+  frequency,
+  wideness__type,
+  wideness__value,
+  db_gain
+) local(
+  big_a,
+  omega,
+  omega__sin,
+  omega__cos,
+) (
+  type != l_rbj_filter__type__peaking &&
+  type != l_rbj_filter__type__low_shelf &&
+  type != l_rbj_filter__type__high_shelf &&
+  db_gain != l_undefined
+  // TODO: Probably missing error checking related to alpha & beta.
+  ? l_error
+  : (
+    l_struct__set(rbj_filter, l__struct__rbj_filter__type, type);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__frequency, frequency);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__wideness__type, wideness__type);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__wideness__value, wideness__value);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__db_gain, db_gain);
+    big_a = type != l_rbj_filter__type__peaking &&
+      type != l_rbj_filter__type__low_shelf &&
+      type != l_rbj_filter__type__high_shelf
+      ? l_undefined
+      : 10^(db_gain / 40);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__big_a, big_a);
+    omega = 2 * $pi * frequency / srate;
+    l_struct__set(rbj_filter, l__struct__rbj_filter__omega, omega);
+    omega__sin = sin(omega);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__sin, omega__sin);
+    omega__cos = cos(omega);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__cos, omega__cos);
+    l_struct__set(
+      rbj_filter,
+      l__struct__rbj_filter__alpha,
+      type != l_rbj_filter__type__low_shelf &&
+      type != l_rbj_filter__type__high_shelf
+      ? (
+        wideness__type == l__rbj_filter__wideness_type__q
+        ? omega__sin / (2 * wideness__value)
+        : wideness__type == l__rbj_filter__wideness_type__bandwidth
+        ? omega__sin * l_sinh(log(2) / 2 * wideness__value * omega / omega__sin)
+      )
+      : l_undefined
+    );
+    // FIXME: Allow for shelves with bandwidth???
+    l_struct__set(
+      rbj_filter,
+      l__struct__rbj_filter__beta,
+      type != l_rbj_filter__type__low_shelf &&
+      type != l_rbj_filter__type__high_shelf
+      ? l_undefined
+      : (
+        wideness__type == l__rbj_filter__wideness_type__q
+        ? sqrt(big_a) / wideness__value
+        : wideness__type == l__rbj_filter__wideness_type__s
+        ? sqrt((sqr(big_a) + 1) / wideness__value - sqr(big_a - 1))
+      )
+    );
   );
 );
 
@@ -317,7 +465,6 @@ function l_text_align__vertical__bottom() ( 8 );
 
 function l_text_overflow__hidden() ( 0 );
 function l_text_overflow__visible() ( 256 );
-
 
 function l_width__0() ( gfx_ext_retina * 0 );
 function l_width__extra_small() ( gfx_ext_retina * 320 );
