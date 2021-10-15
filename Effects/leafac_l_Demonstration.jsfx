@@ -1,15 +1,23 @@
-slider1:page=0<0,0,5{Tests,l_color 1,l_color 2,l_color 3,l_color 4,l_color 5}>Page
+slider1:page=0<0,0,5{Tests,RBJ Filters,l_color 1,l_color 2,l_color 3,l_color 4,l_color 5}>Page
+
+slider3:rbj_filter__type__slider=0<0,0,8{Low-Pass,High-Pass,Band-Pass (Constant skirt),Band-Pass (Constant peak),Notch,All-Pass,Peaking,Low-Shelf,High-Shelf}>Type
+slider4:rbj_filter__frequency=
+slider5:rbj_filter__wideness__type=
+slider6:rbj_filter__wideness__value=
+slider7:rbj_filter__db_gain=
+
 
 import leafac_l.jsfx-inc
 
 @init
 
 page__tests = 0;
-page__l_color__1 = 1;
-page__l_color__2 = 2;
-page__l_color__3 = 3;
-page__l_color__4 = 4;
-page__l_color__5 = 5;
+page__rbj_filters = 1;
+page__l_color__1 = 2;
+page__l_color__2 = 3;
+page__l_color__3 = 4;
+page__l_color__4 = 5;
+page__l_color__5 = 6;
 
 enumeration__1 = l_enumeration();
 enumeration__2 = l_enumeration();
@@ -32,7 +40,55 @@ circular_counter__fractional = l_circular_counter__new(2.5, 2.1, 2.8, 0.1);
 
 circular_buffer = l_circular_buffer__new(5, l_undefined);
 
-rbj_filter = l_rbj_filter__new();
+rbj_filters = l_array__new(num_ch, l_undefined);
+channel = -1; loop(num_ch, channel += 1;
+  l_array__set(rbj_filters, channel, l_rbj_filter__new());
+);
+
+@slider
+
+rbj_filter__type =
+  rbj_filter__type__slider == 0
+  ? l_rbj_filter__configuration__type__low_pass
+  : rbj_filter__type__slider == 1
+  ? l_rbj_filter__configuration__type__high_pass
+  : rbj_filter__type__slider == 2
+  ? l_rbj_filter__configuration__type__band_pass__constant_skirt
+  : rbj_filter__type__slider == 3
+  ? l_rbj_filter__configuration__type__band_pass__constant_peak
+  : rbj_filter__type__slider == 4
+  ? l_rbj_filter__configuration__type__notch
+  : rbj_filter__type__slider == 5
+  ? l_rbj_filter__configuration__type__all_pass
+  : rbj_filter__type__slider == 6
+  ? l_rbj_filter__configuration__type__peaking
+  : rbj_filter__type__slider == 7
+  ? l_rbj_filter__configuration__type__low_shelf
+  : rbj_filter__type__slider == 8
+  ? l_rbj_filter__configuration__type__high_shelf;
+
+channel = -1; loop(num_ch, channel += 1;
+  l_rbj_filter__configure(
+    l_array__get(rbj_filters, channel),
+    rbj_filter__type,
+    1000,
+    l__rbj_filter__configuration__wideness_type__bandwidth,
+    2,
+    l_undefined
+  );
+);
+
+@serialize
+
+0;
+
+@sample
+
+page == page__rbj_filters ? (
+  channel = -1; loop(num_ch, channel += 1;
+    spl(channel) = l_rbj_filter__filter(l_array__get(rbj_filters, channel), spl(channel));
+  );
+);
 
 //   l_width__extra_large__2() l_width__small()
 @gfx 672                       384

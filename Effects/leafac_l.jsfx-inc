@@ -83,8 +83,9 @@ function wrap(value, start, end) local(range, range_sign) (
 );
 
 // https://en.wikipedia.org/wiki/Hyperbolic_functions#Exponential_definitions
+// https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions#Definitions_in_terms_of_logarithms
 
-// TODO: Tests.
+// TODO: Test.
 
 function l_sinh(x) (
   (exp(x) - exp(-x)) / 2;
@@ -96,13 +97,45 @@ function l_tanh(x) (
   (exp(2 * x) - 1) / (exp(2 * x) + 1);
 );
 function l_coth(x) (
-  (exp(2 * x) + 1) / (exp(2 * x) - 1);
+  x == 0
+  ? l_error
+  : (exp(2 * x) + 1) / (exp(2 * x) - 1);
 );
 function l_sech(x) (
   2 / (exp(x) + exp(-x));
 );
 function l_csch(x) (
-  2 / (exp(x) - exp(-x));
+  x == 0
+  ? l_error
+  : 2 / (exp(x) - exp(-x));
+);
+function l_asinh(x) (
+  log(x + sqrt(sqr(x) + 1));
+);
+function l_acosh(x) (
+  x < 1
+  ? l_error
+  : log(x + sqrt(sqr(x) - 1));
+);
+function l_atanh(x) (
+  x <= -1 || x >= 1
+  ? l_error
+  : log((1 + x) / (1 - x)) / 2;
+);
+function l_acoth(x) (
+  x >= -1 && x <= 1
+  ? l_error
+  : log((x + 1) / (x - 1)) / 2;
+);
+function l_asech(x) (
+  x <= 0 || x > 1
+  ? l_error
+  : log((1 + sqrt(1 - sqr(x))) / x);
+);
+function l_acsch(x) (
+  x == 0
+  ? l_error
+  : log(1 / x + sqrt(1 / sqr(x) + 1));
 );
 
 // DATA STRUCTURES
@@ -273,128 +306,257 @@ function l_circular_buffer__get(circular_buffer, index) local(array, array_size,
 
 // RBJ FILTERS
 
-// https://music.columbia.edu/pipermail/music-dsp/2001-March/041752.html
-// https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
+// Probably the canonical version:
 // https://www.musicdsp.org/en/latest/Filters/197-rbj-audio-eq-cookbook.html
+// More copies of the canonical version (typeset versions may be misleading—I think that the plaintext versions are better):
+// https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 // https://www.w3.org/TR/audio-eq-cookbook/
 // https://shepazu.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
+// Outdated version:
 // https://github.com/libaudioverse/libaudioverse/blob/master/audio%20eq%20cookbook.txt
+// https://music.columbia.edu/pipermail/music-dsp/2001-March/041752.html
 
-l_rbj_filter__type__low_pass = l_enumeration();
-l_rbj_filter__type__high_pass = l_enumeration();
-l_rbj_filter__type__band_pass__constant_skirt = l_enumeration();
-l_rbj_filter__type__band_pass__constant_peak = l_enumeration();
-l_rbj_filter__type__notch = l_enumeration();
-l_rbj_filter__type__all_pass = l_enumeration();
-l_rbj_filter__type__peaking = l_enumeration();
-l_rbj_filter__type__low_shelf = l_enumeration();
-l_rbj_filter__type__high_shelf = l_enumeration();
+l_rbj_filter__configuration__type__low_pass = l_enumeration(); // LPF
+l_rbj_filter__configuration__type__high_pass = l_enumeration(); // HPF
+l_rbj_filter__configuration__type__band_pass__constant_skirt = l_enumeration(); // BPF
+l_rbj_filter__configuration__type__band_pass__constant_peak = l_enumeration(); // BPF
+l_rbj_filter__configuration__type__notch = l_enumeration();
+l_rbj_filter__configuration__type__all_pass = l_enumeration(); // APF
+l_rbj_filter__configuration__type__peaking = l_enumeration(); // peakingEQ
+l_rbj_filter__configuration__type__low_shelf = l_enumeration();
+l_rbj_filter__configuration__type__high_shelf = l_enumeration();
 
-l__rbj_filter__wideness_type__bandwidth = l_enumeration();
-l__rbj_filter__wideness_type__q = l_enumeration();
-l__rbj_filter__wideness_type__s = l_enumeration();
+l__rbj_filter__configuration__wideness_type__q = l_enumeration();
+l__rbj_filter__configuration__wideness_type__bandwidth = l_enumeration(); // BW
+l__rbj_filter__configuration__wideness_type__slope = l_enumeration(); // S
 
 l__struct__rbj_filter = l_struct__define();
-l__struct__rbj_filter__type = l_struct__define__field();
-l__struct__rbj_filter__frequency = l_struct__define__field();
-l__struct__rbj_filter__wideness__type = l_struct__define__field();
-l__struct__rbj_filter__wideness__value = l_struct__define__field();
-l__struct__rbj_filter__db_gain = l_struct__define__field();
-l__struct__rbj_filter__big_a = l_struct__define__field();
-l__struct__rbj_filter__omega = l_struct__define__field();
-l__struct__rbj_filter__sin = l_struct__define__field();
-l__struct__rbj_filter__cos = l_struct__define__field();
-l__struct__rbj_filter__alpha = l_struct__define__field();
-l__struct__rbj_filter__beta = l_struct__define__field();
-l__struct__rbj_filter__a = l_struct__define__field();
-l__struct__rbj_filter__b = l_struct__define__field();
+l__struct__rbj_filter__configuration__type = l_struct__define__field();
+l__struct__rbj_filter__configuration__frequency = l_struct__define__field(); // f0
+l__struct__rbj_filter__configuration__wideness__type = l_struct__define__field();
+l__struct__rbj_filter__configuration__wideness__value = l_struct__define__field();
+l__struct__rbj_filter__configuration__db_gain = l_struct__define__field();
+l__struct__rbj_filter__intermediate_variable__big_a = l_struct__define__field(); // A
+l__struct__rbj_filter__intermediate_variable__omega = l_struct__define__field(); // w0
+l__struct__rbj_filter__intermediate_variable__omega__sin = l_struct__define__field(); // sin(w0)
+l__struct__rbj_filter__intermediate_variable__omega__cos = l_struct__define__field(); // cos(w0)
+l__struct__rbj_filter__intermediate_variable__alpha = l_struct__define__field();
+l__struct__rbj_filter__normalized_coefficients__b = l_struct__define__field();
+l__struct__rbj_filter__normalized_coefficients__a = l_struct__define__field();
 l__struct__rbj_filter__x = l_struct__define__field();
 l__struct__rbj_filter__y = l_struct__define__field();
 
 function l_rbj_filter__new() (
   rbj_filter = l_struct__new(l__struct__rbj_filter);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__type, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__frequency, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__wideness__type, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__wideness__value, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__db_gain, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__big_a, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__omega, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__sin, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__cos, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__alpha, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__beta, l_undefined);
-  l_struct__set(rbj_filter, l__struct__rbj_filter__a, l_array__new(2, l_undefined));
-  l_struct__set(rbj_filter, l__struct__rbj_filter__b, l_array__new(3, l_undefined));
-  l_struct__set(rbj_filter, l__struct__rbj_filter__x, l_circular_buffer__new(2, 0));
-  l_struct__set(rbj_filter, l__struct__rbj_filter__y, l_circular_buffer__new(2, 0));
+  l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__type, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__frequency, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__wideness__type, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__wideness__value, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__db_gain, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__big_a, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__omega, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__omega__sin, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__omega__cos, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__alpha, l_undefined);
+  l_struct__set(rbj_filter, l__struct__rbj_filter__normalized_coefficients__b, l_array__new(3, l_undefined));
+  l_struct__set(rbj_filter, l__struct__rbj_filter__normalized_coefficients__a, l_array__new(3, l_undefined));
+  l_struct__set(rbj_filter, l__struct__rbj_filter__x, l_circular_buffer__new(3, 0));
+  l_struct__set(rbj_filter, l__struct__rbj_filter__y, l_circular_buffer__new(3, 0));
   rbj_filter;
 );
 function l_rbj_filter__configure(
+  rbj_filter,
   type,
   frequency,
   wideness__type,
   wideness__value,
   db_gain
 ) local(
+  is_shelving,
+  is_peaking_or_shelving,
   big_a,
   omega,
   omega__sin,
   omega__cos,
+  alpha,
+  b0,
+  b1,
+  b2,
+  a0,
+  a1,
+  a2,
+  normalized_b,
+  normalized_a
 ) (
-  type != l_rbj_filter__type__peaking &&
-  type != l_rbj_filter__type__low_shelf &&
-  type != l_rbj_filter__type__high_shelf &&
-  db_gain != l_undefined
-  // TODO: Probably missing error checking related to alpha & beta.
+  is_shelving =
+    type == l_rbj_filter__configuration__type__low_shelf ||
+    type == l_rbj_filter__configuration__type__high_shelf;
+  is_peaking_or_shelving =
+    type == l_rbj_filter__configuration__type__peaking ||
+    is_shelving;
+  (
+    !is_shelving &&
+    wideness_type == l__rbj_filter__configuration__wideness_type__slope
+  ) || (
+    !is_peaking_or_shelving &&
+    db_gain != l_undefined
+  )
   ? l_error
   : (
-    l_struct__set(rbj_filter, l__struct__rbj_filter__type, type);
-    l_struct__set(rbj_filter, l__struct__rbj_filter__frequency, frequency);
-    l_struct__set(rbj_filter, l__struct__rbj_filter__wideness__type, wideness__type);
-    l_struct__set(rbj_filter, l__struct__rbj_filter__wideness__value, wideness__value);
-    l_struct__set(rbj_filter, l__struct__rbj_filter__db_gain, db_gain);
-    big_a = type != l_rbj_filter__type__peaking &&
-      type != l_rbj_filter__type__low_shelf &&
-      type != l_rbj_filter__type__high_shelf
-      ? l_undefined
-      : 10^(db_gain / 40);
-    l_struct__set(rbj_filter, l__struct__rbj_filter__big_a, big_a);
+    big_a = is_peaking_or_shelving ? 10^(db_gain / 40) : l_undefined;
     omega = 2 * $pi * frequency / srate;
-    l_struct__set(rbj_filter, l__struct__rbj_filter__omega, omega);
     omega__sin = sin(omega);
-    l_struct__set(rbj_filter, l__struct__rbj_filter__sin, omega__sin);
     omega__cos = cos(omega);
-    l_struct__set(rbj_filter, l__struct__rbj_filter__cos, omega__cos);
-    l_struct__set(
-      rbj_filter,
-      l__struct__rbj_filter__alpha,
-      type != l_rbj_filter__type__low_shelf &&
-      type != l_rbj_filter__type__high_shelf
-      ? (
-        wideness__type == l__rbj_filter__wideness_type__q
-        ? omega__sin / (2 * wideness__value)
-        : wideness__type == l__rbj_filter__wideness_type__bandwidth
-        ? omega__sin * l_sinh(log(2) / 2 * wideness__value * omega / omega__sin)
-      )
-      : l_undefined
+    alpha =
+      wideness__type == l__rbj_filter__configuration__wideness_type__q
+      ? omega__sin / (2 * wideness__value)
+      : wideness__type == l__rbj_filter__configuration__wideness_type__bandwidth
+      ? omega__sin * l_sinh(log(2) / 2 * wideness__value * omega / omega__sin)
+      : wideness__type == l__rbj_filter__configuration__wideness_type__slope
+      ? omega__sin / 2 * sqrt((big_a + 1 / big_a) * (1 / wideness__value - 1) + 2);
+    type == l_rbj_filter__configuration__type__low_pass
+    ? (
+      b0 = (1 - omega__cos) / 2;
+      b1 = 1 - omega__cos;
+      b2 = (1 - omega__cos) / 2;
+      a0 = 1 + alpha;
+      a1 = -2 * omega__cos;
+      a2 = 1 - alpha;
+    )
+    : type == l_rbj_filter__configuration__type__high_pass
+    ? (
+      b0 = (1 + omega__cos) / 2;
+      b1 = -(1 + omega__cos);
+      b2 = (1 + omega__cos) / 2;
+      a0 = 1 + alpha;
+      a1 = -2 * omega__cos;
+      a2 = 1 - alpha;
+    )
+    : type == l_rbj_filter__configuration__type__band_pass__constant_skirt
+    ? (
+      b0 = omega__sin / 2;
+      b1 = 0;
+      b2 = -omega__sin / 2;
+      a0 = 1 + alpha;
+      a1 = -2 * omega__cos;
+      a2 = 1 - alpha;
+    )
+    : type == l_rbj_filter__configuration__type__band_pass__constant_peak
+    ? (
+      b0 = alpha;
+      b1 = 0;
+      b2 = -alpha;
+      a0 = 1 + alpha;
+      a1 = -2 * omega__cos;
+      a2 = 1 - alpha;
+    )
+    : type == l_rbj_filter__configuration__type__notch
+    ? (
+      b0 = 1;
+      b1 = -2 * omega__cos;
+      b2 = 1;
+      a0 = 1 + alpha;
+      a1 = -2 * omega__cos;
+      a2 = 1 - alpha;
+    )
+    : type == l_rbj_filter__configuration__type__all_pass
+    ? (
+      b0 = 1 - alpha;
+      b1 = -2 * omega__cos;
+      b2 = 1 + alpha;
+      a0 = 1 + alpha;
+      a1 = -2 * omega__cos;
+      a2 = 1 - alpha;
+    )
+    : type == l_rbj_filter__configuration__type__peaking
+    ? (
+      b0 = 1 + alpha * big_a;
+      b1 = -2 * omega__cos;
+      b2 = 1 - alpha * big_a;
+      a0 = 1 + alpha / big_a;
+      a1 = -2 * omega__cos;
+      a2 = 1 - alpha / big_a;
+    )
+    : type == l_rbj_filter__configuration__type__low_shelf
+    ? (
+      b0 =     big_a * ((big_a + 1) - (big_a - 1) * omega__cos + 2 * sqrt(big_a) * alpha);
+      b1 = 2 * big_a * ((big_a - 1) - (big_a + 1) * omega__cos                          );
+      b2 =     big_a * ((big_a + 1) - (big_a - 1) * omega__cos - 2 * sqrt(big_a) * alpha);
+      a0 =              (big_a + 1) + (big_a - 1) * omega__cos + 2 * sqrt(big_a) * alpha;
+      a1 =        -2 * ((big_a - 1) + (big_a + 1) * omega__cos                          );
+      a2 =              (big_a + 1) + (big_a - 1) * omega__cos - 2 * sqrt(big_a) * alpha;
+    )
+    : type == l_rbj_filter__configuration__type__high_shelf
+    ? (
+      b0 =      big_a * ((big_a + 1) + (big_a - 1) * omega__cos + 2 * sqrt(big_a) * alpha);
+      b1 = -2 * big_a * ((big_a - 1) + (big_a + 1) * omega__cos                          );
+      b2 =      big_a * ((big_a + 1) + (big_a - 1) * omega__cos - 2 * sqrt(big_a) * alpha);
+      a0 =               (big_a + 1) - (big_a - 1) * omega__cos + 2 * sqrt(big_a) * alpha;
+      a1 =          2 * ((big_a - 1) - (big_a + 1) * omega__cos                          );
+      a2 =               (big_a + 1) - (big_a - 1) * omega__cos - 2 * sqrt(big_a) * alpha;
     );
-    // FIXME: Allow for shelves with bandwidth???
-    l_struct__set(
-      rbj_filter,
-      l__struct__rbj_filter__beta,
-      type != l_rbj_filter__type__low_shelf &&
-      type != l_rbj_filter__type__high_shelf
-      ? l_undefined
-      : (
-        wideness__type == l__rbj_filter__wideness_type__q
-        ? sqrt(big_a) / wideness__value
-        : wideness__type == l__rbj_filter__wideness_type__s
-        ? sqrt((sqr(big_a) + 1) / wideness__value - sqr(big_a - 1))
-      )
-    );
+
+    l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__type, type);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__frequency, frequency);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__wideness__type, wideness__type);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__wideness__value, wideness__value);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__configuration__db_gain, db_gain);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__big_a, big_a);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__omega, omega);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__omega__sin, omega__sin);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__omega__cos, omega__cos);
+    l_struct__set(rbj_filter, l__struct__rbj_filter__intermediate_variable__alpha, alpha);
+    normalized_b = l_struct__get(rbj_filter, l__struct__rbj_filter__normalized_coefficients__b);
+    normalized_a = l_struct__get(rbj_filter, l__struct__rbj_filter__normalized_coefficients__a);
+    l_array__set(normalized_b, 0, b0 / a0);
+    l_array__set(normalized_b, 1, b1 / a0);
+    l_array__set(normalized_b, 2, b2 / a0);
+    l_array__set(normalized_a, 0, a0);
+    l_array__set(normalized_a, 1, a1 / a0);
+    l_array__set(normalized_a, 2, a2 / a0);
   );
 );
+function l_rbj_filter__filter(
+  rbj_filter,
+  sample
+) local(
+  normalized_b,
+  normalized_a,
+  normalized_b0,
+  normalized_b1,
+  normalized_b2,
+  normalized_a1,
+  normalized_a2,
+  x,
+  y,
+  x_n_2,
+  x_n_1,
+  x_n,
+  y_n_2,
+  y_n_1,
+  y_n
+) (
+  normalized_b = l_struct__get(rbj_filter, l__struct__rbj_filter__normalized_coefficients__b);
+  normalized_a = l_struct__get(rbj_filter, l__struct__rbj_filter__normalized_coefficients__a);
+  normalized_b0 = l_array__get(normalized_b, 0);
+  normalized_b1 = l_array__get(normalized_b, 1);
+  normalized_b2 = l_array__get(normalized_b, 2);
+  normalized_a1 = l_array__get(normalized_a, 1);
+  normalized_a2 = l_array__get(normalized_a, 2);
+  x = l_struct__get(rbj_filter, l__struct__rbj_filter__x);
+  y = l_struct__get(rbj_filter, l__struct__rbj_filter__y);
+  l_circular_buffer__set(x, sample);
+  x_n_2 = l_circular_buffer__get(x, -2);
+  x_n_1 = l_circular_buffer__get(x, -1);
+  x_n   = l_circular_buffer__get(x, -0);
+  y_n_2 = l_circular_buffer__get(y, -1);
+  y_n_1 = l_circular_buffer__get(y, -0);
+  y_n   = normalized_b0 * x_n + normalized_b1 * x_n_1 + normalized_b2 * x_n_2
+                              - normalized_a1 * y_n_1 - normalized_a2 * y_n_2;
+  l_circular_buffer__set(y, y_n);
+);
+
+// TODO: rbj__q_to_bandwidth
 
 // DESIGN SYSTEM
 // https://github.com/leafac/css/blob/f1fb7bdc73f1cf7afcffcc61222c36f1c1ff0702/source/index.ts
