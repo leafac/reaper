@@ -1,0 +1,336 @@
+slider1:page=0<0,4,1{Tests,Circular Buffer (Delay),RMS,Filters · Biquad,Discrete Fourier Transform}>Page
+
+slider3:delay.length=48000<0,48000,100>Delay Length (Samples)
+
+slider4:rms.slider=0<-90,12,0.1>RMS (dB)
+
+slider5:filter.biquad.type.slider=0<0,8,1{Low-Pass,High-Pass,Band-Pass (constant skirt gain / peak gain = Q),Band-Pass (constant 0 dB peak gain),Notch,All-Pass,Peaking,Low-Shelf,High-Shelf}>Type
+slider6:filter.biquad.frequency=1000<20,20000,100>Frequency (Hz)
+slider7:filter.biquad.gain=0<-24,24,0.1>Gain (dB)
+slider8:filter.biquad.width.type.non_shelving=0<0,1,1{Q,Bandwidth}>Width Type
+slider9:filter.biquad.width.type.shelving=0<0,2,1{Q,Bandwidth,S}>Width Type
+slider10:filter.biquad.width.value.Q=0.71<0.1,40,0.01}>Q
+slider11:filter.biquad.width.value.bandwidth=2<0.01,4,0.01}>Bandwidth
+slider12:filter.biquad.width.value.S=1<0.01,4,0.01}>S (dB/octave)
+
+import leafac.jsfx-inc
+
+@init
+
+_.init();
+
+page.tests = 0;
+page.circular_buffer = 1;
+page.rms = 2;
+page.filters.biquad = 3;
+page.filters.discrete_fourier_transform = 4;
+
+delay.length.maximum = 48000;
+
+#errors = "";
+
+_.milliseconds_to_samples(1000) != srate ||
+_.milliseconds_to_samples(500) != srate / 2 ||
+_.milliseconds_to_samples(0) != 0 ?
+#errors += "_.milliseconds_to_samples()\n";
+
+_.samples_to_milliseconds(srate) != 1000 ||
+_.samples_to_milliseconds(srate / 2) != 500 ||
+_.samples_to_milliseconds(0) != 0 ?
+#errors += "_.samples_to_milliseconds()\n";
+
+_.amplitude_to_db(0) != _.db.minimum ||
+_.amplitude_to_db(0.5) != -6.02059 ||
+_.amplitude_to_db(-0.5) != -6.02059 ||
+_.amplitude_to_db(1) != 0 ||
+_.amplitude_to_db(-1) != 0 ||
+_.amplitude_to_db(2) != 6.02059 ||
+_.amplitude_to_db(-2) != 6.02059 ?
+#errors += "_.amplitude_to_db()\n";
+
+_.db_to_amplitude(-6.02059) != 0.5 ||
+_.db_to_amplitude(0) != 1 ||
+_.db_to_amplitude(6.02059) != 2 ?
+#errors += "_.db_to_amplitude()\n";
+
+_.radians_to_degrees( 0   * $pi / 2) !=    0 ||
+_.radians_to_degrees( 1   * $pi / 2) !=   90 ||
+_.radians_to_degrees( 2   * $pi / 2) !=  180 ||
+_.radians_to_degrees( 3   * $pi / 2) !=  270 ||
+_.radians_to_degrees( 0.5 * $pi / 2) !=   45 ||
+_.radians_to_degrees(-0   * $pi / 2) != -  0 ||
+_.radians_to_degrees(-1   * $pi / 2) != - 90 ||
+_.radians_to_degrees(-2   * $pi / 2) != -180 ||
+_.radians_to_degrees(-3   * $pi / 2) != -270 ||
+_.radians_to_degrees(-0.5 * $pi / 2) != - 45 ?
+#errors += "_.radians_to_degrees()\n";
+
+_.degrees_to_radians(   0) !=  0   * $pi / 2 ||
+_.degrees_to_radians(  90) !=  1   * $pi / 2 ||
+_.degrees_to_radians( 180) !=  2   * $pi / 2 ||
+_.degrees_to_radians( 270) !=  3   * $pi / 2 ||
+_.degrees_to_radians(  45) !=  0.5 * $pi / 2 ||
+_.degrees_to_radians(-  0) != -0   * $pi / 2 ||
+_.degrees_to_radians(- 90) != -1   * $pi / 2 ||
+_.degrees_to_radians(-180) != -2   * $pi / 2 ||
+_.degrees_to_radians(-270) != -3   * $pi / 2 ||
+_.degrees_to_radians(- 45) != -0.5 * $pi / 2 ?
+#errors += "_.degrees_to_radians()\n";
+
+_.imaginary.magnitude( 1,  0) != 1 ||
+_.imaginary.magnitude( 0,  1) != 1 ||
+_.imaginary.magnitude(-1,  0) != 1 ||
+_.imaginary.magnitude( 0, -1) != 1 ||
+_.imaginary.magnitude( 3,  4) != 5 ?
+#errors += "_.imaginary.magnitude()\n";
+
+_.imaginary.phase( 1,  0) !=  0   * $pi / 2 ||
+_.imaginary.phase( 0,  1) !=  1   * $pi / 2 ||
+_.imaginary.phase(-1,  0) !=  2   * $pi / 2 ||
+_.imaginary.phase( 0, -1) != -1   * $pi / 2 ||
+_.imaginary.phase(-1, -1) != -1.5 * $pi / 2 ?
+#errors += "_.imaginary.phase()\n";
+
+_.sinh(10) != 11013.23287 ||
+_.cosh(10) != 11013.23292 ||
+_.tanh(10) != 0.99999 ||
+_.coth(10) != 1.00000 ||
+_.sech(10) != 0.00009 ||
+_.csch(10) != 0.00009 ?
+#errors += "Hyperbolic Functions\n";
+
+_.arsinh(10) != 2.99822 ||
+_.arcosh(10) != 2.99322 ||
+_.artanh(0.75) != 0.97295 ||
+_.arcoth(10) != 0.10033 ||
+_.arsech(0.75) != 0.79536 ||
+_.arcsch(10) != 0.09983 ?
+#errors += "Inverse Hyperbolic Functions\n";
+
+enumeration_1 = _.enumeration();
+enumeration_2 = _.enumeration();
+enumeration_1 == enumeration_2 ?
+#errors += "_.enumeration\n";
+
+memory = _.memory.new(3);
+memory[0] = 10;
+memory[1] = 11;
+memory[2] = 12;
+memory[0] != 10 ||
+memory[1] != 11 ||
+memory[2] != 12 ?
+#errors += "_.memory\n";
+
+box = _.box();
+box[] = 20;
+box[] != 20 ?
+#errors += "_.box\n";
+
+struct_definition = _.struct.define();
+struct_field_1 = _.struct.define.field(struct_definition);
+struct_field_2 = _.struct.define.field(struct_definition);
+struct = _.struct.new(struct_definition);
+struct[struct_field_1] = 101;
+struct[struct_field_2] = 102;
+struct[struct_field_1] != 101 ||
+struct[struct_field_2] != 102 ?
+#errors += "_.struct\n";
+
+array = _.array.new(3);
+array[_.array.struct.data][0] = 200;
+array[_.array.struct.data][1] = 201;
+array[_.array.struct.data][2] = 202;
+array[_.array.struct.size] !== 3 ||
+array[_.array.struct.data][0] != 200 ||
+array[_.array.struct.data][1] != 201 ||
+array[_.array.struct.data][2] != 202 ?
+#errors += "_.array\n";
+
+circular_buffer = _.circular_buffer.new(3);
+_.circular_buffer.push(circular_buffer, 110);
+_.circular_buffer.push(circular_buffer, 111);
+_.circular_buffer.push(circular_buffer, 112);
+_.circular_buffer.push(circular_buffer, 113);
+circular_buffer[_.circular_buffer.struct.index] != 1 ||
+_.circular_buffer.get(circular_buffer, -0) != 113 ||
+_.circular_buffer.get(circular_buffer, -1) != 112 ||
+_.circular_buffer.get(circular_buffer, -2) != 111 ?
+#errors += "_.circular_buffer\n";
+
+moving_average.simple = _.moving_average.simple.new(3);
+_.moving_average.simple.push(moving_average.simple, 100);
+_.moving_average.simple.push(moving_average.simple, 30);
+_.moving_average.simple.push(moving_average.simple, 50);
+_.moving_average.simple.push(moving_average.simple, 25);
+moving_average.simple[_.moving_average.simple.struct.sum] != 105 ||
+_.moving_average.simple.get(moving_average.simple) != 35 ?
+#errors += "_.moving_average.simple\n";
+
+rms = _.rms.new(3);
+_.rms.push(rms, 100);
+_.rms.push(rms, 30);
+_.rms.push(rms, 50);
+_.rms.push(rms, 25);
+rms[_.moving_average.simple.struct.sum] != sqr(30) + sqr(50) + sqr(25) ||
+_.rms.get(rms) != sqrt((sqr(30) + sqr(50) + sqr(25)) / 3) ?
+#errors += "_.rms\n";
+
+delay_lines = _.memory.new(num_ch);
+channel = -1; loop(num_ch, channel += 1;
+  delay_lines[channel] = _.circular_buffer.new(delay.length.maximum + 1);
+);
+
+rms = _.rms.new(_.milliseconds_to_samples(300));
+
+filters.biquad = _.memory.new(num_ch);
+channel = -1; loop(num_ch, channel += 1;
+  filters.biquad[channel] = _.filter.biquad.new();
+);
+
+dft.samples = _.circular_buffer.new(2048);
+dft.real = _.array.new(2048 / 2 + 1);
+dft.imaginary = _.array.new(2048 / 2 + 1);
+dft.magnitudes = _.array.new(2048 / 2 + 1);
+dft.phases = _.array.new(2048 / 2 + 1);
+
+@slider
+
+slider_show(delay.length, page == page.circular_buffer);
+
+slider_show(rms.slider, page == page.rms);
+
+slider_show(filter.biquad.type.slider, page == page.filters.biquad);
+filter.biquad.type =
+    filter.biquad.type.slider == 0 ? _.filter.biquad.struct.type.low_pass
+  : filter.biquad.type.slider == 1 ? _.filter.biquad.struct.type.high_pass
+  : filter.biquad.type.slider == 2 ? _.filter.biquad.struct.type.band_pass.constant_skirt
+  : filter.biquad.type.slider == 3 ? _.filter.biquad.struct.type.band_pass.constant_peak
+  : filter.biquad.type.slider == 4 ? _.filter.biquad.struct.type.notch
+  : filter.biquad.type.slider == 5 ? _.filter.biquad.struct.type.all_pass
+  : filter.biquad.type.slider == 6 ? _.filter.biquad.struct.type.peaking
+  : filter.biquad.type.slider == 7 ? _.filter.biquad.struct.type.low_shelf
+  : filter.biquad.type.slider == 8 ? _.filter.biquad.struct.type.high_shelf;
+slider_show(filter.biquad.frequency, page == page.filters.biquad);
+slider_show(
+  filter.biquad.gain,
+  page == page.filters.biquad && (
+    filter.biquad.type == _.filter.biquad.struct.type.peaking ||
+    filter.biquad.type == _.filter.biquad.struct.type.low_shelf ||
+    filter.biquad.type == _.filter.biquad.struct.type.high_shelf
+  )
+);
+slider_show(
+  filter.biquad.width.type.non_shelving,
+  page == page.filters.biquad && (
+    filter.biquad.type != _.filter.biquad.struct.type.low_shelf &&
+    filter.biquad.type != _.filter.biquad.struct.type.high_shelf
+  )
+);
+slider_show(
+  filter.biquad.width.type.shelving,
+  page == page.filters.biquad && (
+    filter.biquad.type == _.filter.biquad.struct.type.low_shelf ||
+    filter.biquad.type == _.filter.biquad.struct.type.high_shelf
+  )
+);
+filter.biquad.width.type.value =
+  filter.biquad.type != _.filter.biquad.struct.type.low_shelf &&
+  filter.biquad.type != _.filter.biquad.struct.type.high_shelf
+  ? filter.biquad.width.type.non_shelving
+  : filter.biquad.width.type.shelving;
+filter.biquad.width.type.non_shelving = min(filter.biquad.width.type.value, 1);
+filter.biquad.width.type.shelving = filter.biquad.width.type.value;
+filter.biquad.width.type =
+    filter.biquad.width.type.value == 0 ? _.filter.biquad.struct.width.type.Q
+  : filter.biquad.width.type.value == 1 ? _.filter.biquad.struct.width.type.bandwidth
+  : filter.biquad.width.type.value == 2 ? _.filter.biquad.struct.width.type.S;
+slider_show(
+  filter.biquad.width.value.Q,
+  page == page.filters.biquad && filter.biquad.width.type == _.filter.biquad.struct.width.type.Q
+);
+slider_show(
+  filter.biquad.width.value.bandwidth,
+  page == page.filters.biquad && filter.biquad.width.type == _.filter.biquad.struct.width.type.bandwidth
+);
+slider_show(
+  filter.biquad.width.value.S,
+  page == page.filters.biquad && filter.biquad.width.type == _.filter.biquad.struct.width.type.S
+);
+filter.biquad.width.value =
+    filter.biquad.width.type == _.filter.biquad.struct.width.type.Q ? filter.biquad.width.value.Q
+  : filter.biquad.width.type == _.filter.biquad.struct.width.type.bandwidth ? filter.biquad.width.value.bandwidth
+  : filter.biquad.width.type == _.filter.biquad.struct.width.type.S ? filter.biquad.width.value.S;
+channel = -1; loop(num_ch, channel += 1;
+  _.filter.biquad.configure(
+    filters.biquad[channel],
+    filter.biquad.type,
+    filter.biquad.frequency,
+    filter.biquad.gain,
+    filter.biquad.width.type,
+    filter.biquad.width.value
+  );
+);
+
+@serialize
+
+"NOOP: Necessary to force some values into existence, for example, ‘num_ch’ in the ‘@init’ block";
+
+@sample
+
+page == page.circular_buffer ? (
+  channel = -1; loop(num_ch, channel += 1;
+    sample = spl(channel);
+    delay_line = delay_lines[channel];
+    _.circular_buffer.push(delay_line, sample);
+    old_sample = _.circular_buffer.get(delay_line, -delay.length);
+    spl(channel) = (sample + old_sample) * 0.5;
+  );
+)
+: page == page.rms ? (
+  _.rms.push(rms, spl0);
+  rms.slider = _.amplitude_to_db(_.rms.get(rms));
+)
+: page == page.filters.biquad ? (
+  channel = -1; loop(num_ch, channel += 1;
+    spl(channel) = _.filter.biquad.filter(filters.biquad[channel], spl(channel));
+  );
+)
+: page == page.filters.discrete_fourier_transform ? (
+  _.circular_buffer.push(dft.samples, spl0);
+);
+
+@gfx
+
+page == page.tests ? (
+  gfx_set(1);
+  gfx_x = 10; gfx_y = 10;
+  gfx_drawstr(#errors);
+)
+: page == page.circular_buffer ? (
+  gfx_set(1);
+  _.graphs.line(delay_line, 10, 10, 200, 100, 1);
+): page == page.filters.discrete_fourier_transform ? (
+  _.dft(dft.samples, dft.real, dft.imaginary);
+  _.imaginary.rectangular_to_polar(dft.real, dft.imaginary, dft.magnitudes, dft.phases);
+  data = dft.magnitudes[_.array.struct.data];
+  data_size = dft.magnitudes[_.array.struct.size];
+  x = 0;
+  y = 0;
+  width = gfx_w;
+  height = gfx_h;
+  thickness = 3;
+  data_point_width = width / data_size;
+  height_half = height / 2;
+  height_midpoint = y + height_half;
+  line.x = x + width;
+  line.y = data[0];
+  index = 0; loop(data_size - 1, index += 1;
+    line.x.next = line.x - data_point_width;
+    line.y.next = height_midpoint - data[index] * height_half;
+    thickness.index = -1; loop(thickness, thickness.index += 1;
+      gfx_line(line.x, line.y + thickness.index, line.x.next, line.y.next + thickness.index, 1);
+    );
+    line.x = line.x.next;
+    line.y = line.y.next;
+  );
+);
