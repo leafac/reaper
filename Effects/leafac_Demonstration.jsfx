@@ -1,17 +1,19 @@
-slider1:page=0<0,4,1{Tests,Circular Buffer (Delay),RMS,Filters · Biquad,Discrete Fourier Transform}>Page
+desc:leafac_Demonstration
 
-slider3:delay.length=48000<0,48000,100>Delay Length (Samples)
+slider1:slider.page=0<0,10,1{Bézier Curves,_.color 1,_.color 2,_.color 3,_.color 4,_.color 5,Tests,Circular Buffer (Delay),RMS,Filters · Biquad,Discrete Fourier Transform}>Page
 
-slider4:rms.slider=0<-90,12,0.1>RMS (dB)
+slider3:slider.delay.length=48000<0,48000,100>Delay Length (Samples)
 
-slider5:filter.biquad.type.slider=0<0,8,1{Low-Pass,High-Pass,Band-Pass (constant skirt gain / peak gain = Q),Band-Pass (constant 0 dB peak gain),Notch,All-Pass,Peaking,Low-Shelf,High-Shelf}>Type
-slider6:filter.biquad.frequency=1000<20,20000,100>Frequency (Hz)
-slider7:filter.biquad.gain=0<-24,24,0.1>Gain (dB)
-slider8:filter.biquad.width.type.non_shelving=0<0,1,1{Q,Bandwidth}>Width Type
-slider9:filter.biquad.width.type.shelving=0<0,2,1{Q,Bandwidth,S}>Width Type
-slider10:filter.biquad.width.value.Q=0.71<0.1,40,0.01}>Q
-slider11:filter.biquad.width.value.bandwidth=2<0.01,4,0.01}>Bandwidth
-slider12:filter.biquad.width.value.S=1<0.01,4,0.01}>S (dB/octave)
+slider4:slider.rms=0<-90,12,0.1>RMS (dB)
+
+slider5:slider.filter.biquad.type=0<0,8,1{Low-Pass,High-Pass,Band-Pass (constant skirt gain / peak gain = Q),Band-Pass (constant 0 dB peak gain),Notch,All-Pass,Peaking,Low-Shelf,High-Shelf}>Type
+slider6:slider.filter.biquad.frequency=1000<20,20000,100>Frequency (Hz)
+slider7:slider.filter.biquad.gain=0<-24,24,0.1>Gain (dB)
+slider8:slider.filter.biquad.width.type.non_shelving=0<0,1,1{Q,Bandwidth}>Width Type
+slider9:slider.filter.biquad.width.type.shelving=0<0,2,1{Q,Bandwidth,S}>Width Type
+slider10:slider.filter.biquad.width.value.Q=0.71<0.1,40,0.01}>Q
+slider11:slider.filter.biquad.width.value.bandwidth=2<0.01,4,0.01}>Bandwidth
+slider12:slider.filter.biquad.width.value.S=1<0.01,4,0.01}>S (dB/octave)
 
 import leafac.jsfx-inc
 
@@ -19,255 +21,308 @@ import leafac.jsfx-inc
 
 _.init();
 
-page.tests = 0;
-page.circular_buffer = 1;
-page.rms = 2;
-page.filters.biquad = 3;
-page.filters.discrete_fourier_transform = 4;
+slider.page.bezier_curves = 0;
+slider.page.color.1 = 1;
+slider.page.color.2 = 2;
+slider.page.color.3 = 3;
+slider.page.color.4 = 4;
+slider.page.color.5 = 5;
+slider.page.tests = 6;
+slider.page.circular_buffer = 7;
+slider.page.rms = 8;
+slider.page.filters.biquad = 9;
+slider.page.discrete_fourier_transform = 10;
 
-delay.length.maximum = 48000;
+constant.delay.length.maximum = 48000;
 
-#errors = "";
+#instance.tests = "";
 
-_.milliseconds_to_samples(1000) != srate ||
-_.milliseconds_to_samples(500) != srate / 2 ||
-_.milliseconds_to_samples(0) != 0 ?
-#errors += "_.milliseconds_to_samples()\n";
+#instance.tests += "_.milliseconds_to_samples(): ";
+_.milliseconds_to_samples(1000) == srate &&
+_.milliseconds_to_samples(500) == srate / 2 &&
+_.milliseconds_to_samples(0) == 0
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-_.samples_to_milliseconds(srate) != 1000 ||
-_.samples_to_milliseconds(srate / 2) != 500 ||
-_.samples_to_milliseconds(0) != 0 ?
-#errors += "_.samples_to_milliseconds()\n";
+#instance.tests += "_.samples_to_milliseconds(): ";
+_.samples_to_milliseconds(srate) == 1000 &&
+_.samples_to_milliseconds(srate / 2) == 500 &&
+_.samples_to_milliseconds(0) == 0
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-_.amplitude_to_db(0) != _.db.minimum ||
-_.amplitude_to_db(0.5) != -6.02059 ||
-_.amplitude_to_db(-0.5) != -6.02059 ||
-_.amplitude_to_db(1) != 0 ||
-_.amplitude_to_db(-1) != 0 ||
-_.amplitude_to_db(2) != 6.02059 ||
-_.amplitude_to_db(-2) != 6.02059 ?
-#errors += "_.amplitude_to_db()\n";
+#instance.tests += "_.amplitude_to_db(): ";
+_.amplitude_to_db(0) == _.db.minimum &&
+_.amplitude_to_db(0.5) == -6.02059 &&
+_.amplitude_to_db(-0.5) == -6.02059 &&
+_.amplitude_to_db(1) == 0 &&
+_.amplitude_to_db(-1) == 0 &&
+_.amplitude_to_db(2) == 6.02059 &&
+_.amplitude_to_db(-2) == 6.02059
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-_.db_to_amplitude(-6.02059) != 0.5 ||
-_.db_to_amplitude(0) != 1 ||
-_.db_to_amplitude(6.02059) != 2 ?
-#errors += "_.db_to_amplitude()\n";
+#instance.tests += "_.db_to_amplitude(): ";
+_.db_to_amplitude(-6.02059) == 0.5 &&
+_.db_to_amplitude(0) == 1 &&
+_.db_to_amplitude(6.02059) == 2
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-_.radians_to_degrees( 0   * $pi / 2) !=    0 ||
-_.radians_to_degrees( 1   * $pi / 2) !=   90 ||
-_.radians_to_degrees( 2   * $pi / 2) !=  180 ||
-_.radians_to_degrees( 3   * $pi / 2) !=  270 ||
-_.radians_to_degrees( 0.5 * $pi / 2) !=   45 ||
-_.radians_to_degrees(-0   * $pi / 2) != -  0 ||
-_.radians_to_degrees(-1   * $pi / 2) != - 90 ||
-_.radians_to_degrees(-2   * $pi / 2) != -180 ||
-_.radians_to_degrees(-3   * $pi / 2) != -270 ||
-_.radians_to_degrees(-0.5 * $pi / 2) != - 45 ?
-#errors += "_.radians_to_degrees()\n";
+#instance.tests += "_.radians_to_degrees(): ";
+_.radians_to_degrees( 0   * $pi / 2) ==    0 &&
+_.radians_to_degrees( 1   * $pi / 2) ==   90 &&
+_.radians_to_degrees( 2   * $pi / 2) ==  180 &&
+_.radians_to_degrees( 3   * $pi / 2) ==  270 &&
+_.radians_to_degrees( 0.5 * $pi / 2) ==   45 &&
+_.radians_to_degrees(-0   * $pi / 2) == -  0 &&
+_.radians_to_degrees(-1   * $pi / 2) == - 90 &&
+_.radians_to_degrees(-2   * $pi / 2) == -180 &&
+_.radians_to_degrees(-3   * $pi / 2) == -270 &&
+_.radians_to_degrees(-0.5 * $pi / 2) == - 45
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-_.degrees_to_radians(   0) !=  0   * $pi / 2 ||
-_.degrees_to_radians(  90) !=  1   * $pi / 2 ||
-_.degrees_to_radians( 180) !=  2   * $pi / 2 ||
-_.degrees_to_radians( 270) !=  3   * $pi / 2 ||
-_.degrees_to_radians(  45) !=  0.5 * $pi / 2 ||
-_.degrees_to_radians(-  0) != -0   * $pi / 2 ||
-_.degrees_to_radians(- 90) != -1   * $pi / 2 ||
-_.degrees_to_radians(-180) != -2   * $pi / 2 ||
-_.degrees_to_radians(-270) != -3   * $pi / 2 ||
-_.degrees_to_radians(- 45) != -0.5 * $pi / 2 ?
-#errors += "_.degrees_to_radians()\n";
+#instance.tests += "_.degrees_to_radians(): ";
+_.degrees_to_radians(   0) ==  0   * $pi / 2 &&
+_.degrees_to_radians(  90) ==  1   * $pi / 2 &&
+_.degrees_to_radians( 180) ==  2   * $pi / 2 &&
+_.degrees_to_radians( 270) ==  3   * $pi / 2 &&
+_.degrees_to_radians(  45) ==  0.5 * $pi / 2 &&
+_.degrees_to_radians(-  0) == -0   * $pi / 2 &&
+_.degrees_to_radians(- 90) == -1   * $pi / 2 &&
+_.degrees_to_radians(-180) == -2   * $pi / 2 &&
+_.degrees_to_radians(-270) == -3   * $pi / 2 &&
+_.degrees_to_radians(- 45) == -0.5 * $pi / 2
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-_.imaginary.magnitude( 1,  0) != 1 ||
-_.imaginary.magnitude( 0,  1) != 1 ||
-_.imaginary.magnitude(-1,  0) != 1 ||
-_.imaginary.magnitude( 0, -1) != 1 ||
-_.imaginary.magnitude( 3,  4) != 5 ?
-#errors += "_.imaginary.magnitude()\n";
+#instance.tests += "_.imaginary.magnitude(): ";
+_.imaginary.magnitude( 1,  0) == 1 &&
+_.imaginary.magnitude( 0,  1) == 1 &&
+_.imaginary.magnitude(-1,  0) == 1 &&
+_.imaginary.magnitude( 0, -1) == 1 &&
+_.imaginary.magnitude( 3,  4) == 5
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-_.imaginary.phase( 1,  0) !=  0   * $pi / 2 ||
-_.imaginary.phase( 0,  1) !=  1   * $pi / 2 ||
-_.imaginary.phase(-1,  0) !=  2   * $pi / 2 ||
-_.imaginary.phase( 0, -1) != -1   * $pi / 2 ||
-_.imaginary.phase(-1, -1) != -1.5 * $pi / 2 ?
-#errors += "_.imaginary.phase()\n";
+#instance.tests += "_.imaginary.phase(): ";
+_.imaginary.phase( 1,  0) ==  0   * $pi / 2 &&
+_.imaginary.phase( 0,  1) ==  1   * $pi / 2 &&
+_.imaginary.phase(-1,  0) ==  2   * $pi / 2 &&
+_.imaginary.phase( 0, -1) == -1   * $pi / 2 &&
+_.imaginary.phase(-1, -1) == -1.5 * $pi / 2
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-_.sinh(10) != 11013.23287 ||
-_.cosh(10) != 11013.23292 ||
-_.tanh(10) != 0.99999 ||
-_.coth(10) != 1.00000 ||
-_.sech(10) != 0.00009 ||
-_.csch(10) != 0.00009 ?
-#errors += "Hyperbolic Functions\n";
+#instance.tests += "Hyperbolic Functions: ";
+_.sinh(10) == 11013.23287 &&
+_.cosh(10) == 11013.23292 &&
+_.tanh(10) == 0.99999 &&
+_.coth(10) == 1.00000 &&
+_.sech(10) == 0.00009 &&
+_.csch(10) == 0.00009
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-_.arsinh(10) != 2.99822 ||
-_.arcosh(10) != 2.99322 ||
-_.artanh(0.75) != 0.97295 ||
-_.arcoth(10) != 0.10033 ||
-_.arsech(0.75) != 0.79536 ||
-_.arcsch(10) != 0.09983 ?
-#errors += "Inverse Hyperbolic Functions\n";
+#instance.tests += "Inverse Hyperbolic Functions: ";
+_.arsinh(10) == 2.99822 &&
+_.arcosh(10) == 2.99322 &&
+_.artanh(0.75) == 0.97295 &&
+_.arcoth(10) == 0.10033 &&
+_.arsech(0.75) == 0.79536 &&
+_.arcsch(10) == 0.09983
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-enumeration_1 = _.enumeration();
-enumeration_2 = _.enumeration();
-enumeration_1 == enumeration_2 ?
-#errors += "_.enumeration\n";
+#instance.tests += "_.distance.euclidian(): ";
+_.distance.euclidian(6, 5, 3, 9) == 5
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-memory = _.memory.new(3);
-memory[0] = 10;
-memory[1] = 11;
-memory[2] = 12;
-memory[0] != 10 ||
-memory[1] != 11 ||
-memory[2] != 12 ?
-#errors += "_.memory\n";
+#instance.tests += "_.enumeration: ";
+init.enumeration_1 = _.enumeration();
+init.enumeration_2 = _.enumeration();
+init.enumeration_1 != init.enumeration_2
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-box = _.box();
-box[] = 20;
-box[] != 20 ?
-#errors += "_.box\n";
+#instance.tests += "_.memory: ";
+init.memory = _.memory.new(3);
+init.memory[0] = 10;
+init.memory[1] = 11;
+init.memory[2] = 12;
+init.memory[0] == 10 &&
+init.memory[1] == 11 &&
+init.memory[2] == 12
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-struct_definition = _.struct.define();
-struct_field_1 = _.struct.define.field(struct_definition);
-struct_field_2 = _.struct.define.field(struct_definition);
-struct = _.struct.new(struct_definition);
-struct[struct_field_1] = 101;
-struct[struct_field_2] = 102;
-struct[struct_field_1] != 101 ||
-struct[struct_field_2] != 102 ?
-#errors += "_.struct\n";
+#instance.tests += "_.box: ";
+init.box = _.box();
+init.box[] = 20;
+init.box[] == 20
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-array = _.array.new(3);
-array[_.array.struct.data][0] = 200;
-array[_.array.struct.data][1] = 201;
-array[_.array.struct.data][2] = 202;
-array[_.array.struct.size] !== 3 ||
-array[_.array.struct.data][0] != 200 ||
-array[_.array.struct.data][1] != 201 ||
-array[_.array.struct.data][2] != 202 ?
-#errors += "_.array\n";
+#instance.tests += "_.struct: ";
+init.struct_definition = _.struct.define();
+init.struct_definition.field_1 = _.struct.define.field(init.struct_definition);
+init.struct_definition.field_2 = _.struct.define.field(init.struct_definition);
+init.struct = _.struct.new(init.struct_definition);
+init.struct[init.struct_definition.field_1] = 101;
+init.struct[init.struct_definition.field_2] = 102;
+init.struct[init.struct_definition.field_1] == 101 &&
+init.struct[init.struct_definition.field_2] == 102
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-circular_buffer = _.circular_buffer.new(3);
-_.circular_buffer.push(circular_buffer, 110);
-_.circular_buffer.push(circular_buffer, 111);
-_.circular_buffer.push(circular_buffer, 112);
-_.circular_buffer.push(circular_buffer, 113);
-circular_buffer[_.circular_buffer.struct.index] != 1 ||
-_.circular_buffer.get(circular_buffer, -0) != 113 ||
-_.circular_buffer.get(circular_buffer, -1) != 112 ||
-_.circular_buffer.get(circular_buffer, -2) != 111 ?
-#errors += "_.circular_buffer\n";
+#instance.tests += "_.array: ";
+init.array = _.array.new(3);
+init.array[_.array.struct.data][0] = 200;
+init.array[_.array.struct.data][1] = 201;
+init.array[_.array.struct.data][2] = 202;
+init.array[_.array.struct.size] === 3 &&
+init.array[_.array.struct.data][0] == 200 &&
+init.array[_.array.struct.data][1] == 201 &&
+init.array[_.array.struct.data][2] == 202
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-moving_average.simple = _.moving_average.simple.new(3);
-_.moving_average.simple.push(moving_average.simple, 100);
-_.moving_average.simple.push(moving_average.simple, 30);
-_.moving_average.simple.push(moving_average.simple, 50);
-_.moving_average.simple.push(moving_average.simple, 25);
-moving_average.simple[_.moving_average.simple.struct.sum] != 105 ||
-_.moving_average.simple.get(moving_average.simple) != 35 ?
-#errors += "_.moving_average.simple\n";
+#instance.tests += "_.circular_buffer: ";
+init.circular_buffer = _.circular_buffer.new(3);
+init.circular_buffer.array = _.array.new(3);
+_.circular_buffer.push(init.circular_buffer, 110);
+_.circular_buffer.push(init.circular_buffer, 111);
+_.circular_buffer.push(init.circular_buffer, 112);
+_.circular_buffer.push(init.circular_buffer, 113);
+_.circular_buffer.to_array(init.circular_buffer, init.circular_buffer.array);
+init.circular_buffer[_.circular_buffer.struct.index] == 1 &&
+_.circular_buffer.get(init.circular_buffer, -0) == 113 &&
+_.circular_buffer.get(init.circular_buffer, -1) == 112 &&
+_.circular_buffer.get(init.circular_buffer, -2) == 111 &&
+init.circular_buffer.array[_.array.struct.data][0] == 111 &&
+init.circular_buffer.array[_.array.struct.data][1] == 112 &&
+init.circular_buffer.array[_.array.struct.data][2] == 113
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-rms = _.rms.new(3);
-_.rms.push(rms, 100);
-_.rms.push(rms, 30);
-_.rms.push(rms, 50);
-_.rms.push(rms, 25);
-rms[_.moving_average.simple.struct.sum] != sqr(30) + sqr(50) + sqr(25) ||
-_.rms.get(rms) != sqrt((sqr(30) + sqr(50) + sqr(25)) / 3) ?
-#errors += "_.rms\n";
+#instance.tests += "_.moving_average.simple: ";
+init.moving_average.simple = _.moving_average.simple.new(3);
+_.moving_average.simple.push(init.moving_average.simple, 100);
+_.moving_average.simple.push(init.moving_average.simple, 30);
+_.moving_average.simple.push(init.moving_average.simple, 50);
+_.moving_average.simple.push(init.moving_average.simple, 25);
+init.moving_average.simple[_.moving_average.simple.struct.sum] == 105 &&
+_.moving_average.simple.get(init.moving_average.simple) == 35
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
 
-delay_lines = _.memory.new(num_ch);
-channel = -1; loop(num_ch, channel += 1;
-  delay_lines[channel] = _.circular_buffer.new(delay.length.maximum + 1);
+#instance.tests += "_.rms: ";
+init.rms = _.rms.new(3);
+_.rms.push(init.rms, 100);
+_.rms.push(init.rms, 30);
+_.rms.push(init.rms, 50);
+_.rms.push(init.rms, 25);
+init.rms[_.moving_average.simple.struct.sum] == sqr(30) + sqr(50) + sqr(25) &&
+_.rms.get(init.rms) == sqrt((sqr(30) + sqr(50) + sqr(25)) / 3)
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
+
+instance.delay_lines = _.memory.new(num_ch);
+init.channel = -1; loop(num_ch, init.channel += 1;
+  instance.delay_lines[init.channel] = _.circular_buffer.new(constant.delay.length.maximum + 1);
+);
+instance.delay_lines.array = _.array.new(constant.delay.length.maximum + 1);
+
+instance.rms = _.rms.new(_.milliseconds_to_samples(300));
+
+instance.filters.biquad = _.memory.new(num_ch);
+init.channel = -1; loop(num_ch, init.channel += 1;
+  instance.filters.biquad[init.channel] = _.filter.biquad.new();
 );
 
-rms = _.rms.new(_.milliseconds_to_samples(300));
-
-filters.biquad = _.memory.new(num_ch);
-channel = -1; loop(num_ch, channel += 1;
-  filters.biquad[channel] = _.filter.biquad.new();
-);
-
-dft.samples = _.circular_buffer.new(2048);
-dft.real = _.array.new(2048 / 2 + 1);
-dft.imaginary = _.array.new(2048 / 2 + 1);
-dft.magnitudes = _.array.new(2048 / 2 + 1);
-dft.phases = _.array.new(2048 / 2 + 1);
+instance.dft.samples = _.circular_buffer.new(2048);
+instance.dft.reals = _.array.new(2048 / 2 + 1);
+instance.dft.imaginaries = _.array.new(2048 / 2 + 1);
+instance.dft.magnitudes = _.array.new(2048 / 2 + 1);
+instance.dft.phases = _.array.new(2048 / 2 + 1);
 
 @slider
 
-slider_show(delay.length, page == page.circular_buffer);
+slider_show(slider.delay.length, slider.page == slider.page.circular_buffer);
 
-slider_show(rms.slider, page == page.rms);
+slider_show(slider.rms, slider.page == slider.page.rms);
 
-slider_show(filter.biquad.type.slider, page == page.filters.biquad);
-filter.biquad.type =
-    filter.biquad.type.slider == 0 ? _.filter.biquad.struct.type.low_pass
-  : filter.biquad.type.slider == 1 ? _.filter.biquad.struct.type.high_pass
-  : filter.biquad.type.slider == 2 ? _.filter.biquad.struct.type.band_pass.constant_skirt
-  : filter.biquad.type.slider == 3 ? _.filter.biquad.struct.type.band_pass.constant_peak
-  : filter.biquad.type.slider == 4 ? _.filter.biquad.struct.type.notch
-  : filter.biquad.type.slider == 5 ? _.filter.biquad.struct.type.all_pass
-  : filter.biquad.type.slider == 6 ? _.filter.biquad.struct.type.peaking
-  : filter.biquad.type.slider == 7 ? _.filter.biquad.struct.type.low_shelf
-  : filter.biquad.type.slider == 8 ? _.filter.biquad.struct.type.high_shelf;
-slider_show(filter.biquad.frequency, page == page.filters.biquad);
+slider_show(slider.filter.biquad.type, slider.page == slider.page.filters.biquad);
+slider.filter.biquad.struct.type =
+    slider.filter.biquad.type == 0 ? _.filter.biquad.struct.type.low_pass
+  : slider.filter.biquad.type == 1 ? _.filter.biquad.struct.type.high_pass
+  : slider.filter.biquad.type == 2 ? _.filter.biquad.struct.type.band_pass.constant_skirt
+  : slider.filter.biquad.type == 3 ? _.filter.biquad.struct.type.band_pass.constant_peak
+  : slider.filter.biquad.type == 4 ? _.filter.biquad.struct.type.notch
+  : slider.filter.biquad.type == 5 ? _.filter.biquad.struct.type.all_pass
+  : slider.filter.biquad.type == 6 ? _.filter.biquad.struct.type.peaking
+  : slider.filter.biquad.type == 7 ? _.filter.biquad.struct.type.low_shelf
+  : slider.filter.biquad.type == 8 ? _.filter.biquad.struct.type.high_shelf;
+slider_show(slider.filter.biquad.frequency, slider.page == slider.page.filters.biquad);
 slider_show(
-  filter.biquad.gain,
-  page == page.filters.biquad && (
-    filter.biquad.type == _.filter.biquad.struct.type.peaking ||
-    filter.biquad.type == _.filter.biquad.struct.type.low_shelf ||
-    filter.biquad.type == _.filter.biquad.struct.type.high_shelf
+  slider.filter.biquad.gain,
+  slider.page == slider.page.filters.biquad && (
+    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.peaking ||
+    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.low_shelf ||
+    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.high_shelf
   )
 );
 slider_show(
-  filter.biquad.width.type.non_shelving,
-  page == page.filters.biquad && (
-    filter.biquad.type != _.filter.biquad.struct.type.low_shelf &&
-    filter.biquad.type != _.filter.biquad.struct.type.high_shelf
+  slider.filter.biquad.width.type.non_shelving,
+  slider.page == slider.page.filters.biquad && (
+    slider.filter.biquad.struct.type != _.filter.biquad.struct.type.low_shelf &&
+    slider.filter.biquad.struct.type != _.filter.biquad.struct.type.high_shelf
   )
 );
 slider_show(
-  filter.biquad.width.type.shelving,
-  page == page.filters.biquad && (
-    filter.biquad.type == _.filter.biquad.struct.type.low_shelf ||
-    filter.biquad.type == _.filter.biquad.struct.type.high_shelf
+  slider.filter.biquad.width.type.shelving,
+  slider.page == slider.page.filters.biquad && (
+    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.low_shelf ||
+    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.high_shelf
   )
 );
-filter.biquad.width.type.value =
-  filter.biquad.type != _.filter.biquad.struct.type.low_shelf &&
-  filter.biquad.type != _.filter.biquad.struct.type.high_shelf
-  ? filter.biquad.width.type.non_shelving
-  : filter.biquad.width.type.shelving;
-filter.biquad.width.type.non_shelving = min(filter.biquad.width.type.value, 1);
-filter.biquad.width.type.shelving = filter.biquad.width.type.value;
-filter.biquad.width.type =
-    filter.biquad.width.type.value == 0 ? _.filter.biquad.struct.width.type.Q
-  : filter.biquad.width.type.value == 1 ? _.filter.biquad.struct.width.type.bandwidth
-  : filter.biquad.width.type.value == 2 ? _.filter.biquad.struct.width.type.S;
+slider.filter.biquad.width.type.value =
+  slider.filter.biquad.struct.type != _.filter.biquad.struct.type.low_shelf &&
+  slider.filter.biquad.struct.type != _.filter.biquad.struct.type.high_shelf
+  ? slider.filter.biquad.width.type.non_shelving
+  : slider.filter.biquad.width.type.shelving;
+slider.filter.biquad.width.type.non_shelving = min(slider.filter.biquad.width.type.value, 1);
+slider.filter.biquad.width.type.shelving = slider.filter.biquad.width.type.value;
+slider.filter.biquad.width.type =
+    slider.filter.biquad.width.type.value == 0 ? _.filter.biquad.struct.width.type.Q
+  : slider.filter.biquad.width.type.value == 1 ? _.filter.biquad.struct.width.type.bandwidth
+  : slider.filter.biquad.width.type.value == 2 ? _.filter.biquad.struct.width.type.S;
 slider_show(
-  filter.biquad.width.value.Q,
-  page == page.filters.biquad && filter.biquad.width.type == _.filter.biquad.struct.width.type.Q
+  slider.filter.biquad.width.value.Q,
+  slider.page == slider.page.filters.biquad && slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.Q
 );
 slider_show(
-  filter.biquad.width.value.bandwidth,
-  page == page.filters.biquad && filter.biquad.width.type == _.filter.biquad.struct.width.type.bandwidth
+  slider.filter.biquad.width.value.bandwidth,
+  slider.page == slider.page.filters.biquad && slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.bandwidth
 );
 slider_show(
-  filter.biquad.width.value.S,
-  page == page.filters.biquad && filter.biquad.width.type == _.filter.biquad.struct.width.type.S
+  slider.filter.biquad.width.value.S,
+  slider.page == slider.page.filters.biquad && slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.S
 );
-filter.biquad.width.value =
-    filter.biquad.width.type == _.filter.biquad.struct.width.type.Q ? filter.biquad.width.value.Q
-  : filter.biquad.width.type == _.filter.biquad.struct.width.type.bandwidth ? filter.biquad.width.value.bandwidth
-  : filter.biquad.width.type == _.filter.biquad.struct.width.type.S ? filter.biquad.width.value.S;
-channel = -1; loop(num_ch, channel += 1;
+slider.filter.biquad.width.value =
+    slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.Q ? slider.filter.biquad.width.value.Q
+  : slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.bandwidth ? slider.filter.biquad.width.value.bandwidth
+  : slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.S ? slider.filter.biquad.width.value.S;
+slider.channel = -1; loop(num_ch, slider.channel += 1;
   _.filter.biquad.configure(
-    filters.biquad[channel],
-    filter.biquad.type,
-    filter.biquad.frequency,
-    filter.biquad.gain,
-    filter.biquad.width.type,
-    filter.biquad.width.value
+    instance.filters.biquad[slider.channel],
+    slider.filter.biquad.struct.type,
+    slider.filter.biquad.frequency,
+    slider.filter.biquad.gain,
+    slider.filter.biquad.width.type,
+    slider.filter.biquad.width.value
   );
 );
 
@@ -277,60 +332,618 @@ channel = -1; loop(num_ch, channel += 1;
 
 @sample
 
-page == page.circular_buffer ? (
-  channel = -1; loop(num_ch, channel += 1;
-    sample = spl(channel);
-    delay_line = delay_lines[channel];
-    _.circular_buffer.push(delay_line, sample);
-    old_sample = _.circular_buffer.get(delay_line, -delay.length);
-    spl(channel) = (sample + old_sample) * 0.5;
+slider.page == slider.page.circular_buffer ? (
+  sample.channel = -1; loop(num_ch, sample.channel += 1;
+    sample.sample = spl(sample.channel);
+    sample.delay_line = instance.delay_lines[sample.channel];
+    _.circular_buffer.push(sample.delay_line, sample.sample);
+    sample.old_sample = _.circular_buffer.get(sample.delay_line, -slider.delay.length);
+    spl(sample.channel) = (sample.sample + sample.old_sample) * 0.5;
   );
 )
-: page == page.rms ? (
-  _.rms.push(rms, spl0);
-  rms.slider = _.amplitude_to_db(_.rms.get(rms));
+: slider.page == slider.page.rms ? (
+  _.rms.push(instance.rms, spl0);
+  slider.rms = _.amplitude_to_db(_.rms.get(instance.rms));
 )
-: page == page.filters.biquad ? (
-  channel = -1; loop(num_ch, channel += 1;
-    spl(channel) = _.filter.biquad.filter(filters.biquad[channel], spl(channel));
+: slider.page == slider.page.filters.biquad ? (
+  sample.channel = -1; loop(num_ch, sample.channel += 1;
+    spl(sample.channel) = _.filter.biquad.filter(instance.filters.biquad[sample.channel], spl(sample.channel));
   );
 )
-: page == page.filters.discrete_fourier_transform ? (
-  _.circular_buffer.push(dft.samples, spl0);
+: slider.page == slider.page.discrete_fourier_transform ? (
+  _.circular_buffer.push(instance.dft.samples, spl0);
 );
 
-@gfx
+//   l_width__extra_large__2() l_width__small()
+@gfx 672                       384
 
-page == page.tests ? (
-  gfx_set(1);
-  gfx_x = 10; gfx_y = 10;
-  gfx_drawstr(#errors);
-)
-: page == page.circular_buffer ? (
-  gfx_set(1);
-  _.graphs.line(delay_line, 10, 10, 200, 100, 1);
-): page == page.filters.discrete_fourier_transform ? (
-  _.dft(dft.samples, dft.real, dft.imaginary);
-  _.imaginary.rectangular_to_polar(dft.real, dft.imaginary, dft.magnitudes, dft.phases);
-  data = dft.magnitudes[_.array.struct.data];
-  data_size = dft.magnitudes[_.array.struct.size];
-  x = 0;
-  y = 0;
-  width = gfx_w;
-  height = gfx_h;
-  thickness = 3;
-  data_point_width = width / data_size;
-  height_half = height / 2;
-  height_midpoint = y + height_half;
-  line.x = x + width;
-  line.y = data[0];
-  index = 0; loop(data_size - 1, index += 1;
-    line.x.next = line.x - data_point_width;
-    line.y.next = height_midpoint - data[index] * height_half;
-    thickness.index = -1; loop(thickness, thickness.index += 1;
-      gfx_line(line.x, line.y + thickness.index, line.x.next, line.y.next + thickness.index, 1);
-    );
-    line.x = line.x.next;
-    line.y = line.y.next;
+_.gfx();
+
+_.background_color(_.color.gray.reaper);
+_.color(_.color.gray.warm.50);
+_.rounded_rectangle_fill(
+  _.space.0,
+  _.space.0,
+  _.width.extra_large.2 - _.space.2,
+  _.width.small - _.space.2,
+  _.border_radius.large
+);
+
+gfx.body.padding = _.space.4;
+gfx.body.gap = _.space.2;
+
+gfx.title.height = _.line_height.extra_small;
+
+_.print(
+  slider.page == slider.page.bezier_curves
+    ? "Bézier Curves"
+    : slider.page == slider.page.color.1 ||
+      slider.page == slider.page.color.2 ||
+      slider.page == slider.page.color.3 ||
+      slider.page == slider.page.color.4 ||
+      slider.page == slider.page.color.5
+    ? "_.color"
+    : slider.page == slider.page.tests
+    ? "Tests"
+    : slider.page == slider.page.circular_buffer
+    ? "Circular Buffer (Delay)"
+    : slider.page == slider.page.rms
+    ? "RMS"
+    : slider.page == slider.page.filters.biquad
+    ? "Filters"
+    : slider.page == slider.page.discrete_fourier_transform
+    ? "Discrete Fourier Transform",
+  _.font_size.extra_small,
+  _.font_style.bold,
+  _.text_align.horizontal.left,
+  _.text_align.vertical.top,
+  _.text_overflow.visible,
+  _.color.gray.warm.900,
+  gfx.body.padding,
+  gfx.body.padding,
+  _.space.0,
+  _.space.0
+);
+
+slider.page == slider.page.bezier_curves ? (
+  gfx.padding = _.space.4;
+  gfx.label.width = _.space.40;
+
+  gfx.x = gfx.body.padding;
+  gfx.y = gfx.body.padding + gfx.title.height + gfx.padding;
+  _.print(
+    "_.bezier.linear.draw()",
+    _.font_size.extra_small,
+    _.font_style.regular,
+    _.text_align.horizontal.left,
+    _.text_align.vertical.top,
+    _.text_overflow.visible,
+    _.color.gray.warm.700,
+    gfx.x,
+    gfx.y,
+    _.space.0,
+    _.space.0
   );
+  _.bezier.linear.draw(
+    gfx.x + gfx.label.width, gfx.y,
+    gfx.x + gfx.label.width + _.space.8, gfx.y + _.space.8
+  );
+  
+  gfx.y += _.space.20;
+  _.print(
+    "_.bezier.quadratic.draw()",
+    _.font_size.extra_small,
+    _.font_style.regular,
+    _.text_align.horizontal.left,
+    _.text_align.vertical.top,
+    _.text_overflow.visible,
+    _.color.gray.warm.700,
+    gfx.x,
+    gfx.y,
+    _.space.0,
+    _.space.0
+  );
+  _.bezier.quadratic.draw(
+    gfx.x + gfx.label.width, gfx.y + _.space.10,
+    gfx.x + gfx.label.width + _.space.16, gfx.y - _.space.10,
+    gfx.x + gfx.label.width + _.space.32, gfx.y + _.space.10
+  );
+  
+  gfx.y += _.space.20;
+  _.print(
+    "_.bezier.cubic.draw()",
+    _.font_size.extra_small,
+    _.font_style.regular,
+    _.text_align.horizontal.left,
+    _.text_align.vertical.top,
+    _.text_overflow.visible,
+    _.color.gray.warm.700,
+    gfx.x,
+    gfx.y,
+    _.space.0,
+    _.space.0
+  );
+  _.bezier.cubic.draw(
+    gfx.x + gfx.label.width, gfx.y + _.space.10,
+    gfx.x + gfx.label.width - _.space.2, gfx.y - _.space.10,
+    gfx.x + gfx.label.width + _.space.20, gfx.y - _.space.10,
+    gfx.x + gfx.label.width + _.space.32, gfx.y + _.space.10
+  );
+)
+: slider.page == slider.page.color.1 ||
+  slider.page == slider.page.color.2 ||
+  slider.page == slider.page.color.3 ||
+  slider.page == slider.page.color.4 ||
+  slider.page == slider.page.color.5
+? (
+  _.print(
+    "for example, _.color.gray.warm.700",
+    _.font_size.extra_small,
+    _.font_style.regular,
+    _.text_align.horizontal.left,
+    _.text_align.vertical.top,
+    _.text_overflow.visible,
+    _.color.gray.warm.700,
+    gfx.body.padding + _.space.24,
+    gfx.body.padding,
+    _.space.0,
+    _.space.0
+  );
+
+  gfx.palette.item.box.width = _.space.8;
+  gfx.palette.item.box.height = _.space.8;
+  gfx.palette.item.gap = _.space.1;
+  gfx.palette.item.label.width = gfx.palette.item.box.width;
+  gfx.palette.item.label.height = _.line_height.extra_small;
+  gfx.palette.item.width = gfx.palette.item.box.width;
+  gfx.palette.item.height = gfx.palette.item.box.height + gfx.palette.item.gap + gfx.palette.item.label.height;
+  gfx.palette.label.width = _.space.20;
+  gfx.palette.label.height = gfx.palette.item.box.height;
+  gfx.palette.gap = _.space.4;
+
+  gfx.palette.y = gfx.body.padding + gfx.title.height + gfx.body.gap - (gfx.palette.item.height + gfx.palette.gap);
+  gfx.color.index = -1; loop(5, gfx.color.index += 1;
+    gfx.palette.y += gfx.palette.item.height + gfx.palette.gap;
+
+    _.print(
+      slider.page == slider.page.color.1 ? (
+        gfx.color.index == 0 ? "gray.blue" :
+        gfx.color.index == 1 ? "gray.cool" :
+        gfx.color.index == 2 ? "gray.medium" :
+        gfx.color.index == 3 ? "gray.true" :
+        gfx.color.index == 4 ? "gray.warm"
+      ) :
+      slider.page == slider.page.color.2 ? (
+        gfx.color.index == 0 ? "red" :
+        gfx.color.index == 1 ? "orange" :
+        gfx.color.index == 2 ? "amber" :
+        gfx.color.index == 3 ? "yellow" :
+        gfx.color.index == 4 ? "lime"
+      ) :
+      slider.page == slider.page.color.3 ? (
+        gfx.color.index == 0 ? "green" :
+        gfx.color.index == 1 ? "emerald" :
+        gfx.color.index == 2 ? "teal" :
+        gfx.color.index == 3 ? "cyan" :
+        gfx.color.index == 4 ? "sky"
+      ) :
+      slider.page == slider.page.color.4? (
+        gfx.color.index == 0 ? "blue" :
+        gfx.color.index == 1 ? "indigo" :
+        gfx.color.index == 2 ? "violet" :
+        gfx.color.index == 3 ? "purple" :
+        gfx.color.index == 4 ? "fuchsia"
+      ) :
+      slider.page == slider.page.color.5 ? (
+        gfx.color.index == 0 ? "pink" :
+        gfx.color.index == 1 ? "rose" :
+        gfx.color.index == 2 ? "gray.reaper" :
+        gfx.color.index == 3 ? "black" :
+        gfx.color.index == 4 ? "white"
+      ),
+      _.font_size.extra_small,
+      _.font_style.regular,
+      _.text_align.horizontal.left,
+      _.text_align.vertical.center,
+      _.text_overflow.visible,
+      _.color.gray.warm.700,
+      gfx.palette.gap,
+      gfx.palette.y,
+      gfx.palette.label.width,
+      gfx.palette.label.height
+    );
+
+    gfx.shadeless =
+      slider.page == slider.page.color.5 && (
+        gfx.color.index == 2 ||
+        gfx.color.index == 3 ||
+        gfx.color.index == 4
+      );
+
+    gfx.palette.x = gfx.palette.gap + gfx.palette.label.width - gfx.palette.item.width;
+    gfx.color.shade.index = -1; loop(gfx.shadeless ? 1 : 10, gfx.color.shade.index += 1;
+      gfx.palette.x += gfx.palette.item.width + gfx.palette.gap;
+
+      _.color(
+        slider.page == slider.page.color.1 ? (
+          gfx.color.index == 0 ? (
+            gfx.color.shade.index == 0 ? _.color.gray.blue.50 :
+            gfx.color.shade.index == 1 ? _.color.gray.blue.100 :
+            gfx.color.shade.index == 2 ? _.color.gray.blue.200 :
+            gfx.color.shade.index == 3 ? _.color.gray.blue.300 :
+            gfx.color.shade.index == 4 ? _.color.gray.blue.400 :
+            gfx.color.shade.index == 5 ? _.color.gray.blue.500 :
+            gfx.color.shade.index == 6 ? _.color.gray.blue.600 :
+            gfx.color.shade.index == 7 ? _.color.gray.blue.700 :
+            gfx.color.shade.index == 8 ? _.color.gray.blue.800 :
+            gfx.color.shade.index == 9 ? _.color.gray.blue.900;
+          ) :
+          gfx.color.index == 1 ? (
+            gfx.color.shade.index == 0 ? _.color.gray.cool.50 :
+            gfx.color.shade.index == 1 ? _.color.gray.cool.100 :
+            gfx.color.shade.index == 2 ? _.color.gray.cool.200 :
+            gfx.color.shade.index == 3 ? _.color.gray.cool.300 :
+            gfx.color.shade.index == 4 ? _.color.gray.cool.400 :
+            gfx.color.shade.index == 5 ? _.color.gray.cool.500 :
+            gfx.color.shade.index == 6 ? _.color.gray.cool.600 :
+            gfx.color.shade.index == 7 ? _.color.gray.cool.700 :
+            gfx.color.shade.index == 8 ? _.color.gray.cool.800 :
+            gfx.color.shade.index == 9 ? _.color.gray.cool.900;
+          ) :
+          gfx.color.index == 2 ? (
+            gfx.color.shade.index == 0 ? _.color.gray.medium.50 :
+            gfx.color.shade.index == 1 ? _.color.gray.medium.100 :
+            gfx.color.shade.index == 2 ? _.color.gray.medium.200 :
+            gfx.color.shade.index == 3 ? _.color.gray.medium.300 :
+            gfx.color.shade.index == 4 ? _.color.gray.medium.400 :
+            gfx.color.shade.index == 5 ? _.color.gray.medium.500 :
+            gfx.color.shade.index == 6 ? _.color.gray.medium.600 :
+            gfx.color.shade.index == 7 ? _.color.gray.medium.700 :
+            gfx.color.shade.index == 8 ? _.color.gray.medium.800 :
+            gfx.color.shade.index == 9 ? _.color.gray.medium.900;
+          ) :
+          gfx.color.index == 3 ? (
+            gfx.color.shade.index == 0 ? _.color.gray.true.50 :
+            gfx.color.shade.index == 1 ? _.color.gray.true.100 :
+            gfx.color.shade.index == 2 ? _.color.gray.true.200 :
+            gfx.color.shade.index == 3 ? _.color.gray.true.300 :
+            gfx.color.shade.index == 4 ? _.color.gray.true.400 :
+            gfx.color.shade.index == 5 ? _.color.gray.true.500 :
+            gfx.color.shade.index == 6 ? _.color.gray.true.600 :
+            gfx.color.shade.index == 7 ? _.color.gray.true.700 :
+            gfx.color.shade.index == 8 ? _.color.gray.true.800 :
+            gfx.color.shade.index == 9 ? _.color.gray.true.900;
+          ) :
+          gfx.color.index == 4 ? (
+            gfx.color.shade.index == 0 ? _.color.gray.warm.50 :
+            gfx.color.shade.index == 1 ? _.color.gray.warm.100 :
+            gfx.color.shade.index == 2 ? _.color.gray.warm.200 :
+            gfx.color.shade.index == 3 ? _.color.gray.warm.300 :
+            gfx.color.shade.index == 4 ? _.color.gray.warm.400 :
+            gfx.color.shade.index == 5 ? _.color.gray.warm.500 :
+            gfx.color.shade.index == 6 ? _.color.gray.warm.600 :
+            gfx.color.shade.index == 7 ? _.color.gray.warm.700 :
+            gfx.color.shade.index == 8 ? _.color.gray.warm.800 :
+            gfx.color.shade.index == 9 ? _.color.gray.warm.900;
+          );
+        ) :
+        slider.page == slider.page.color.2 ? (
+          gfx.color.index == 0 ? (
+            gfx.color.shade.index == 0 ? _.color.red.50 :
+            gfx.color.shade.index == 1 ? _.color.red.100 :
+            gfx.color.shade.index == 2 ? _.color.red.200 :
+            gfx.color.shade.index == 3 ? _.color.red.300 :
+            gfx.color.shade.index == 4 ? _.color.red.400 :
+            gfx.color.shade.index == 5 ? _.color.red.500 :
+            gfx.color.shade.index == 6 ? _.color.red.600 :
+            gfx.color.shade.index == 7 ? _.color.red.700 :
+            gfx.color.shade.index == 8 ? _.color.red.800 :
+            gfx.color.shade.index == 9 ? _.color.red.900;
+          ) :
+          gfx.color.index == 1 ? (
+            gfx.color.shade.index == 0 ? _.color.orange.50 :
+            gfx.color.shade.index == 1 ? _.color.orange.100 :
+            gfx.color.shade.index == 2 ? _.color.orange.200 :
+            gfx.color.shade.index == 3 ? _.color.orange.300 :
+            gfx.color.shade.index == 4 ? _.color.orange.400 :
+            gfx.color.shade.index == 5 ? _.color.orange.500 :
+            gfx.color.shade.index == 6 ? _.color.orange.600 :
+            gfx.color.shade.index == 7 ? _.color.orange.700 :
+            gfx.color.shade.index == 8 ? _.color.orange.800 :
+            gfx.color.shade.index == 9 ? _.color.orange.900;
+          ) :
+          gfx.color.index == 2 ? (
+            gfx.color.shade.index == 0 ? _.color.amber.50 :
+            gfx.color.shade.index == 1 ? _.color.amber.100 :
+            gfx.color.shade.index == 2 ? _.color.amber.200 :
+            gfx.color.shade.index == 3 ? _.color.amber.300 :
+            gfx.color.shade.index == 4 ? _.color.amber.400 :
+            gfx.color.shade.index == 5 ? _.color.amber.500 :
+            gfx.color.shade.index == 6 ? _.color.amber.600 :
+            gfx.color.shade.index == 7 ? _.color.amber.700 :
+            gfx.color.shade.index == 8 ? _.color.amber.800 :
+            gfx.color.shade.index == 9 ? _.color.amber.900;
+          ) :
+          gfx.color.index == 3 ? (
+            gfx.color.shade.index == 0 ? _.color.yellow.50 :
+            gfx.color.shade.index == 1 ? _.color.yellow.100 :
+            gfx.color.shade.index == 2 ? _.color.yellow.200 :
+            gfx.color.shade.index == 3 ? _.color.yellow.300 :
+            gfx.color.shade.index == 4 ? _.color.yellow.400 :
+            gfx.color.shade.index == 5 ? _.color.yellow.500 :
+            gfx.color.shade.index == 6 ? _.color.yellow.600 :
+            gfx.color.shade.index == 7 ? _.color.yellow.700 :
+            gfx.color.shade.index == 8 ? _.color.yellow.800 :
+            gfx.color.shade.index == 9 ? _.color.yellow.900;
+          ) :
+          gfx.color.index == 4 ? (
+            gfx.color.shade.index == 0 ? _.color.lime.50 :
+            gfx.color.shade.index == 1 ? _.color.lime.100 :
+            gfx.color.shade.index == 2 ? _.color.lime.200 :
+            gfx.color.shade.index == 3 ? _.color.lime.300 :
+            gfx.color.shade.index == 4 ? _.color.lime.400 :
+            gfx.color.shade.index == 5 ? _.color.lime.500 :
+            gfx.color.shade.index == 6 ? _.color.lime.600 :
+            gfx.color.shade.index == 7 ? _.color.lime.700 :
+            gfx.color.shade.index == 8 ? _.color.lime.800 :
+            gfx.color.shade.index == 9 ? _.color.lime.900;
+          );
+        ) :
+        slider.page == slider.page.color.3 ? (
+          gfx.color.index == 0 ? (
+            gfx.color.shade.index == 0 ? _.color.green.50 :
+            gfx.color.shade.index == 1 ? _.color.green.100 :
+            gfx.color.shade.index == 2 ? _.color.green.200 :
+            gfx.color.shade.index == 3 ? _.color.green.300 :
+            gfx.color.shade.index == 4 ? _.color.green.400 :
+            gfx.color.shade.index == 5 ? _.color.green.500 :
+            gfx.color.shade.index == 6 ? _.color.green.600 :
+            gfx.color.shade.index == 7 ? _.color.green.700 :
+            gfx.color.shade.index == 8 ? _.color.green.800 :
+            gfx.color.shade.index == 9 ? _.color.green.900;
+          ) :
+          gfx.color.index == 1 ? (
+            gfx.color.shade.index == 0 ? _.color.emerald.50 :
+            gfx.color.shade.index == 1 ? _.color.emerald.100 :
+            gfx.color.shade.index == 2 ? _.color.emerald.200 :
+            gfx.color.shade.index == 3 ? _.color.emerald.300 :
+            gfx.color.shade.index == 4 ? _.color.emerald.400 :
+            gfx.color.shade.index == 5 ? _.color.emerald.500 :
+            gfx.color.shade.index == 6 ? _.color.emerald.600 :
+            gfx.color.shade.index == 7 ? _.color.emerald.700 :
+            gfx.color.shade.index == 8 ? _.color.emerald.800 :
+            gfx.color.shade.index == 9 ? _.color.emerald.900;
+          ) :
+          gfx.color.index == 2 ? (
+            gfx.color.shade.index == 0 ? _.color.teal.50 :
+            gfx.color.shade.index == 1 ? _.color.teal.100 :
+            gfx.color.shade.index == 2 ? _.color.teal.200 :
+            gfx.color.shade.index == 3 ? _.color.teal.300 :
+            gfx.color.shade.index == 4 ? _.color.teal.400 :
+            gfx.color.shade.index == 5 ? _.color.teal.500 :
+            gfx.color.shade.index == 6 ? _.color.teal.600 :
+            gfx.color.shade.index == 7 ? _.color.teal.700 :
+            gfx.color.shade.index == 8 ? _.color.teal.800 :
+            gfx.color.shade.index == 9 ? _.color.teal.900;
+          ) :
+          gfx.color.index == 3 ? (
+            gfx.color.shade.index == 0 ? _.color.cyan.50 :
+            gfx.color.shade.index == 1 ? _.color.cyan.100 :
+            gfx.color.shade.index == 2 ? _.color.cyan.200 :
+            gfx.color.shade.index == 3 ? _.color.cyan.300 :
+            gfx.color.shade.index == 4 ? _.color.cyan.400 :
+            gfx.color.shade.index == 5 ? _.color.cyan.500 :
+            gfx.color.shade.index == 6 ? _.color.cyan.600 :
+            gfx.color.shade.index == 7 ? _.color.cyan.700 :
+            gfx.color.shade.index == 8 ? _.color.cyan.800 :
+            gfx.color.shade.index == 9 ? _.color.cyan.900;
+          ) :
+          gfx.color.index == 4 ? (
+            gfx.color.shade.index == 0 ? _.color.sky.50 :
+            gfx.color.shade.index == 1 ? _.color.sky.100 :
+            gfx.color.shade.index == 2 ? _.color.sky.200 :
+            gfx.color.shade.index == 3 ? _.color.sky.300 :
+            gfx.color.shade.index == 4 ? _.color.sky.400 :
+            gfx.color.shade.index == 5 ? _.color.sky.500 :
+            gfx.color.shade.index == 6 ? _.color.sky.600 :
+            gfx.color.shade.index == 7 ? _.color.sky.700 :
+            gfx.color.shade.index == 8 ? _.color.sky.800 :
+            gfx.color.shade.index == 9 ? _.color.sky.900;
+          );
+        ) :
+        slider.page == slider.page.color.4? (
+          gfx.color.index == 0 ? (
+            gfx.color.shade.index == 0 ? _.color.blue.50 :
+            gfx.color.shade.index == 1 ? _.color.blue.100 :
+            gfx.color.shade.index == 2 ? _.color.blue.200 :
+            gfx.color.shade.index == 3 ? _.color.blue.300 :
+            gfx.color.shade.index == 4 ? _.color.blue.400 :
+            gfx.color.shade.index == 5 ? _.color.blue.500 :
+            gfx.color.shade.index == 6 ? _.color.blue.600 :
+            gfx.color.shade.index == 7 ? _.color.blue.700 :
+            gfx.color.shade.index == 8 ? _.color.blue.800 :
+            gfx.color.shade.index == 9 ? _.color.blue.900;
+          ) :
+          gfx.color.index == 1 ? (
+            gfx.color.shade.index == 0 ? _.color.indigo.50 :
+            gfx.color.shade.index == 1 ? _.color.indigo.100 :
+            gfx.color.shade.index == 2 ? _.color.indigo.200 :
+            gfx.color.shade.index == 3 ? _.color.indigo.300 :
+            gfx.color.shade.index == 4 ? _.color.indigo.400 :
+            gfx.color.shade.index == 5 ? _.color.indigo.500 :
+            gfx.color.shade.index == 6 ? _.color.indigo.600 :
+            gfx.color.shade.index == 7 ? _.color.indigo.700 :
+            gfx.color.shade.index == 8 ? _.color.indigo.800 :
+            gfx.color.shade.index == 9 ? _.color.indigo.900;
+          ) :
+          gfx.color.index == 2 ? (
+            gfx.color.shade.index == 0 ? _.color.violet.50 :
+            gfx.color.shade.index == 1 ? _.color.violet.100 :
+            gfx.color.shade.index == 2 ? _.color.violet.200 :
+            gfx.color.shade.index == 3 ? _.color.violet.300 :
+            gfx.color.shade.index == 4 ? _.color.violet.400 :
+            gfx.color.shade.index == 5 ? _.color.violet.500 :
+            gfx.color.shade.index == 6 ? _.color.violet.600 :
+            gfx.color.shade.index == 7 ? _.color.violet.700 :
+            gfx.color.shade.index == 8 ? _.color.violet.800 :
+            gfx.color.shade.index == 9 ? _.color.violet.900;
+          ) :
+          gfx.color.index == 3 ? (
+            gfx.color.shade.index == 0 ? _.color.purple.50 :
+            gfx.color.shade.index == 1 ? _.color.purple.100 :
+            gfx.color.shade.index == 2 ? _.color.purple.200 :
+            gfx.color.shade.index == 3 ? _.color.purple.300 :
+            gfx.color.shade.index == 4 ? _.color.purple.400 :
+            gfx.color.shade.index == 5 ? _.color.purple.500 :
+            gfx.color.shade.index == 6 ? _.color.purple.600 :
+            gfx.color.shade.index == 7 ? _.color.purple.700 :
+            gfx.color.shade.index == 8 ? _.color.purple.800 :
+            gfx.color.shade.index == 9 ? _.color.purple.900;
+          ) :
+          gfx.color.index == 4 ? (
+            gfx.color.shade.index == 0 ? _.color.fuchsia.50 :
+            gfx.color.shade.index == 1 ? _.color.fuchsia.100 :
+            gfx.color.shade.index == 2 ? _.color.fuchsia.200 :
+            gfx.color.shade.index == 3 ? _.color.fuchsia.300 :
+            gfx.color.shade.index == 4 ? _.color.fuchsia.400 :
+            gfx.color.shade.index == 5 ? _.color.fuchsia.500 :
+            gfx.color.shade.index == 6 ? _.color.fuchsia.600 :
+            gfx.color.shade.index == 7 ? _.color.fuchsia.700 :
+            gfx.color.shade.index == 8 ? _.color.fuchsia.800 :
+            gfx.color.shade.index == 9 ? _.color.fuchsia.900;
+          );
+        ) :
+        slider.page == slider.page.color.5 ? (
+          gfx.color.index == 0 ? (
+            gfx.color.shade.index == 0 ? _.color.pink.50 :
+            gfx.color.shade.index == 1 ? _.color.pink.100 :
+            gfx.color.shade.index == 2 ? _.color.pink.200 :
+            gfx.color.shade.index == 3 ? _.color.pink.300 :
+            gfx.color.shade.index == 4 ? _.color.pink.400 :
+            gfx.color.shade.index == 5 ? _.color.pink.500 :
+            gfx.color.shade.index == 6 ? _.color.pink.600 :
+            gfx.color.shade.index == 7 ? _.color.pink.700 :
+            gfx.color.shade.index == 8 ? _.color.pink.800 :
+            gfx.color.shade.index == 9 ? _.color.pink.900;
+          ) :
+          gfx.color.index == 1 ? (
+            gfx.color.shade.index == 0 ? _.color.rose.50 :
+            gfx.color.shade.index == 1 ? _.color.rose.100 :
+            gfx.color.shade.index == 2 ? _.color.rose.200 :
+            gfx.color.shade.index == 3 ? _.color.rose.300 :
+            gfx.color.shade.index == 4 ? _.color.rose.400 :
+            gfx.color.shade.index == 5 ? _.color.rose.500 :
+            gfx.color.shade.index == 6 ? _.color.rose.600 :
+            gfx.color.shade.index == 7 ? _.color.rose.700 :
+            gfx.color.shade.index == 8 ? _.color.rose.800 :
+            gfx.color.shade.index == 9 ? _.color.rose.900;
+          ) :
+          gfx.color.index == 2 ? (
+            _.color.gray.reaper;
+          ) :
+          gfx.color.index == 3 ? (
+            _.color.black;
+          ) :
+          gfx.color.index == 4 ? (
+            _.color.white;
+          );
+        )
+      );
+      _.rounded_rectangle_fill(
+        gfx.palette.x,
+        gfx.palette.y,
+        gfx.palette.item.box.width,
+        gfx.palette.item.box.height,
+        _.border_radius.base
+      );
+
+      !gfx.shadeless ? _.print(
+        gfx.color.shade.index == 0 ?  "50" :
+        gfx.color.shade.index == 1 ? "100" :
+        gfx.color.shade.index == 2 ? "200" :
+        gfx.color.shade.index == 3 ? "300" :
+        gfx.color.shade.index == 4 ? "400" :
+        gfx.color.shade.index == 5 ? "500" :
+        gfx.color.shade.index == 6 ? "600" :
+        gfx.color.shade.index == 7 ? "700" :
+        gfx.color.shade.index == 8 ? "800" :
+        gfx.color.shade.index == 9 ? "900",
+        _.font_size.extra_small,
+        _.font_style.regular,
+        _.text_align.horizontal.center,
+        _.text_align.vertical.top,
+        _.text_overflow.visible,
+        _.color.gray.warm.700,
+        gfx.palette.x,
+        gfx.palette.y + gfx.palette.item.box.height + gfx.palette.item.gap,
+        gfx.palette.item.label.width,
+        gfx.palette.item.label.height
+      );
+    );
+  );
+)
+: slider.page == slider.page.tests ? (
+  _.print(
+    #instance.tests,
+    _.font_size.extra_small,
+    _.font_style.regular,
+    _.text_align.horizontal.left,
+    _.text_align.vertical.top,
+    _.text_overflow.visible,
+    _.color.gray.warm.700,
+    gfx.body.padding,
+    gfx.body.padding + gfx.title.height,
+    _.space.0,
+    _.space.0
+  );
+)
+: slider.page == slider.page.circular_buffer ? (
+  gfx_set(1);
+  gfx.channel = -1; loop(num_ch, gfx.channel += 1;
+    _.circular_buffer.to_array(instance.delay_lines[gfx.channel], instance.delay_lines.array);
+    _.graphs.line(
+      instance.delay_lines.array,
+      0 * gfx_ext_retina,
+      10 + (130 + 10 + 10) * gfx.channel * gfx_ext_retina,
+      400 * gfx_ext_retina,
+      130 * gfx_ext_retina,
+      1
+    );
+  );
+)
+: slider.page == slider.page.discrete_fourier_transform ? (
+  _.dft(instance.dft.samples, instance.dft.reals, instance.dft.imaginaries);
+  // _.graphs.line(
+  //   instance.dft.reals,
+  //   0 * gfx_ext_retina,
+  //   5 + (65 + 5 + 5) * 0 * gfx_ext_retina,
+  //   400 * gfx_ext_retina,
+  //   65 * gfx_ext_retina,
+  //   1
+  // );
+  // _.graphs.line(
+  //   instance.dft.imaginaries,
+  //   0 * gfx_ext_retina,
+  //   5 + (65 + 5 + 5) * 1 * gfx_ext_retina,
+  //   400 * gfx_ext_retina,
+  //   65 * gfx_ext_retina,
+  //   1
+  // );
+  _.imaginary.rectangular_to_polar(instance.dft.reals, instance.dft.imaginaries, instance.dft.magnitudes, instance.dft.phases);
+  _.graphs.line(
+    instance.dft.magnitudes,
+    0 * gfx_ext_retina,
+    5 + (65 + 5 + 5) * 2 * gfx_ext_retina,
+    400 * gfx_ext_retina,
+    65 * gfx_ext_retina,
+    1
+  );
+  // _.graphs.line(
+  //   instance.dft.phases,
+  //   0 * gfx_ext_retina,
+  //   5 + (65 + 5 + 5) * 3 * gfx_ext_retina,
+  //   400 * gfx_ext_retina,
+  //   65 * gfx_ext_retina,
+  //   1
+  // );
 );

@@ -1,23 +1,24 @@
 /*
-Circular buffer -> Array converter
-Change the implementation of graphs to use arrays
+- Today
+  - Bézier steps
+  - Move over the colors pages
 
-Line graphs
-  Zoom horizontally & vertically
-  Line or area
-Multichannel RMS
-Let the user change the window sizes on simple moving average
-Show RMS over time
-RBJ Filter: Include formula to convert between width types and use to keep sliders in sync so that width doesn’t change when you change type
-
-Data structures
-  Arrays
-    Getter for size
-  Circular buffer
-  Delay line
-  Circular counter
-  Matrix
-  Follower
+- frequency ↔ samples
+- signal_size -> signal.size
+- Use negative indices to tuck away the metadata on arrays?
+- Check Fotis’ video on synesthesia
+- Line graphs
+  - Zoom horizontally & vertically (range)
+  - Line or area
+- Multichannel RMS
+- Let the user change the window sizes on simple moving average
+- Show RMS over time
+- RBJ Filter: Include formula to convert between width types and use to keep sliders in sync so that width doesn’t change when you change type
+- Data structures
+  - Memory alignment
+  - Circular counter (helper to only run a block of code every so often, for example, the block that only runs every 256 samples on Justin’s - wavetable)
+  - Matrix
+  - Follower
 
 Design system
   border-width
@@ -35,15 +36,20 @@ Components
   Oscilloscope
   Frequency spectrum analyzer
   Colorpicker
+  Colored lines
 
 Algorithms
+  Distance
+    Manhattan
   Wrap numbers in a range
   Sort
     Smallest
     Find the median
     Largest
+  Median averaging
   Search
   Bézier
+    Color, Thickness, estimate the number of steps to come up with a smooth curve based on the distance between the control points
   Noise generation of various colors
   Random distributions
     Uniform
@@ -109,15 +115,18 @@ function _.imaginary.phase(real, imaginary) (
   atan2(imaginary, real);
 );
 
-function _.imaginary.rectangular_to_polar(reals, imaginaries, magnitudes, phases) local(N, k, ReX, ImX, MagX, PhaseX) (
+function _.imaginary.rectangular_to_polar(reals, imaginaries, magnitudes, phases)
+         local(N, k, ReX, ReX.k, ImX, ImX.k, MagX, PhaseX) (
   ReX = reals[_.array.struct.data];
   ImX = imaginaries[_.array.struct.data];
   MagX = magnitudes[_.array.struct.data];
   PhaseX = phases[_.array.struct.data];
-  N = reals[_.circular_buffer.struct.signal][_.array.struct.size];
+  N = reals[_.array.struct.size];
   k = -1; loop(N, k += 1;
-    MagX[k] = _.imaginary.magnitude(ReX[k], ImX[k]);
-    PhaseX[k] = _.imaginary.phase(ReX[k], ImX[k]);
+    ReX.k = ReX[k];
+    ImX.k = ImX[k];
+    MagX[k] = _.imaginary.magnitude(ReX.k, ImX.k);
+    PhaseX[k] = _.imaginary.phase(ReX.k, ImX.k);
   );
 );
 
@@ -163,6 +172,13 @@ function _.arsech(x) (
 );
 function _.arcsch(x) (
   log(1 / x + sqrt((1 / sqr(x)) + 1));
+);
+
+// DISTANCES
+
+// https://en.wikipedia.org/wiki/Euclidean_distance
+function _.distance.euclidian(p1, p2, q1, q2) (
+  sqrt(sqr(q1 - p1) + sqr(q2 - p2));
 );
 
 // DATA STRUCTURES
@@ -242,6 +258,25 @@ function _.circular_buffer.get(circular_buffer, offset) local(index, signal, sig
   index += offset;
   index < 0 ? index += signal_size;
   signal_data[index];
+);
+// function _.circular_buffer.to_array(circular_buffer, array)
+//          local(index, signal, signal.size, signal.data, array.data) (
+//   index = circular_buffer[_.circular_buffer.struct.index];
+//   signal = circular_buffer[_.circular_buffer.struct.signal];
+//   signal.size = signal[_.array.struct.size];
+//   signal.data = signal[_.array.struct.data];
+//   array.data = array[_.array.struct.data];
+//   index < signal.size - 1 ? memcpy(array.data + 0, signal.data + index + 1, signal.size - 1 - index);
+//   memcpy(array.data + signal.size - 1 - index, signal.data + 0, index + 1);
+// );
+function _.circular_buffer.to_array(circular_buffer, array)
+         local(circular_buffer.signal, circular_buffer.signal.size, array.data, index) (
+  circular_buffer.signal = circular_buffer[_.circular_buffer.struct.signal];
+  circular_buffer.signal.size = circular_buffer.signal[_.array.struct.size];
+  array.data = array[_.array.struct.data];
+  index = -1; loop(circular_buffer.signal.size, index += 1;
+    array.data[circular_buffer.signal.size - 1 - index] = _.circular_buffer.get(circular_buffer, -index);
+  );
 );
 
 // SIMPLE MOVING AVERAGES
@@ -497,24 +532,1215 @@ function _.dft(data, reals, imaginaries) local(N, k, i, sum.real, sum.imaginary 
   );
 );
 
-// LINE GRAPHS
+// DESIGN SYSTEM
 
-function _.graphs.line(data, x, y, width, height, thickness)
-         local(data_size, data_point_width, height_half, height_midpoint, index, line.x, line.x.next, line.y, line.y.next, thickness.index) (
-  data_size = data[_.circular_buffer.struct.signal][_.array.struct.size];
-  data_point_width = width / data_size;
-  height_half = height / 2;
-  height_midpoint = y + height_half;
-  line.x = x + width;
-  line.y = _.circular_buffer.get(data, 0);
-  index = 0; loop(data_size - 1, index += 1;
-    line.x.next = line.x - data_point_width;
-    line.y.next = height_midpoint - _.circular_buffer.get(data, -index) * height_half;
+// https://github.com/leafac/css/blob/f1fb7bdc73f1cf7afcffcc61222c36f1c1ff0702/source/index.ts
+/*
+// rem → px
+`._`.replace(/([\d.]+)rem/g, (_, rem) => Number(rem) * 16);
+
+// Colors
+for (const color of `
+    --color--gray--reaper: #e9e9e9;
+  `
+  .trim()
+  .split("\n")) {
+  let [_, name, red, green, blue] = color
+    .trim()
+    .match(/^--(.*?): #([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2});$/);
+  name = name.replaceAll("--", ".");
+  red = parseInt(red, 16) / 255;
+  green = parseInt(green, 16) / 255;
+  blue = parseInt(blue, 16) / 255;
+  console.log(
+    `_.${name} = _.struct.new(_.color.struct);
+_.${name}[_.color.struct.red] = ${red};
+_.${name}[_.color.struct.green] = ${green};
+_.${name}[_.color.struct.blue] = ${blue};`
+  );
+}
+*/
+
+function _.gfx.init() (
+  _.color.struct = _.struct.define();
+  _.color.struct.red = _.struct.define.field(_.color.struct);
+  _.color.struct.green = _.struct.define.field(_.color.struct);
+  _.color.struct.blue = _.struct.define.field(_.color.struct);
+
+  _.color.gray.reaper = _.struct.new(_.color.struct);
+  _.color.gray.reaper[_.color.struct.red] = 0.9137254901960784;
+  _.color.gray.reaper[_.color.struct.green] = 0.9137254901960784;
+  _.color.gray.reaper[_.color.struct.blue] = 0.9137254901960784;
+  _.color.black = _.struct.new(_.color.struct);
+  _.color.black[_.color.struct.red] = 0;
+  _.color.black[_.color.struct.green] = 0;
+  _.color.black[_.color.struct.blue] = 0;
+  _.color.white = _.struct.new(_.color.struct);
+  _.color.white[_.color.struct.red] = 1;
+  _.color.white[_.color.struct.green] = 1;
+  _.color.white[_.color.struct.blue] = 1;
+  _.color.gray.blue.50 = _.struct.new(_.color.struct);
+  _.color.gray.blue.50[_.color.struct.red] = 0.9725490196078431;
+  _.color.gray.blue.50[_.color.struct.green] = 0.9803921568627451;
+  _.color.gray.blue.50[_.color.struct.blue] = 0.9882352941176471;
+  _.color.gray.blue.100 = _.struct.new(_.color.struct);
+  _.color.gray.blue.100[_.color.struct.red] = 0.9450980392156862;
+  _.color.gray.blue.100[_.color.struct.green] = 0.9607843137254902;
+  _.color.gray.blue.100[_.color.struct.blue] = 0.9764705882352941;
+  _.color.gray.blue.200 = _.struct.new(_.color.struct);
+  _.color.gray.blue.200[_.color.struct.red] = 0.8862745098039215;
+  _.color.gray.blue.200[_.color.struct.green] = 0.9098039215686274;
+  _.color.gray.blue.200[_.color.struct.blue] = 0.9411764705882353;
+  _.color.gray.blue.300 = _.struct.new(_.color.struct);
+  _.color.gray.blue.300[_.color.struct.red] = 0.796078431372549;
+  _.color.gray.blue.300[_.color.struct.green] = 0.8352941176470589;
+  _.color.gray.blue.300[_.color.struct.blue] = 0.8823529411764706;
+  _.color.gray.blue.400 = _.struct.new(_.color.struct);
+  _.color.gray.blue.400[_.color.struct.red] = 0.5803921568627451;
+  _.color.gray.blue.400[_.color.struct.green] = 0.6392156862745098;
+  _.color.gray.blue.400[_.color.struct.blue] = 0.7215686274509804;
+  _.color.gray.blue.500 = _.struct.new(_.color.struct);
+  _.color.gray.blue.500[_.color.struct.red] = 0.39215686274509803;
+  _.color.gray.blue.500[_.color.struct.green] = 0.4549019607843137;
+  _.color.gray.blue.500[_.color.struct.blue] = 0.5450980392156862;
+  _.color.gray.blue.600 = _.struct.new(_.color.struct);
+  _.color.gray.blue.600[_.color.struct.red] = 0.2784313725490196;
+  _.color.gray.blue.600[_.color.struct.green] = 0.3333333333333333;
+  _.color.gray.blue.600[_.color.struct.blue] = 0.4117647058823529;
+  _.color.gray.blue.700 = _.struct.new(_.color.struct);
+  _.color.gray.blue.700[_.color.struct.red] = 0.2;
+  _.color.gray.blue.700[_.color.struct.green] = 0.2549019607843137;
+  _.color.gray.blue.700[_.color.struct.blue] = 0.3333333333333333;
+  _.color.gray.blue.800 = _.struct.new(_.color.struct);
+  _.color.gray.blue.800[_.color.struct.red] = 0.11764705882352941;
+  _.color.gray.blue.800[_.color.struct.green] = 0.1607843137254902;
+  _.color.gray.blue.800[_.color.struct.blue] = 0.23137254901960785;
+  _.color.gray.blue.900 = _.struct.new(_.color.struct);
+  _.color.gray.blue.900[_.color.struct.red] = 0.058823529411764705;
+  _.color.gray.blue.900[_.color.struct.green] = 0.09019607843137255;
+  _.color.gray.blue.900[_.color.struct.blue] = 0.16470588235294117;
+  _.color.gray.cool.50 = _.struct.new(_.color.struct);
+  _.color.gray.cool.50[_.color.struct.red] = 0.9764705882352941;
+  _.color.gray.cool.50[_.color.struct.green] = 0.9803921568627451;
+  _.color.gray.cool.50[_.color.struct.blue] = 0.984313725490196;
+  _.color.gray.cool.100 = _.struct.new(_.color.struct);
+  _.color.gray.cool.100[_.color.struct.red] = 0.9529411764705882;
+  _.color.gray.cool.100[_.color.struct.green] = 0.9568627450980393;
+  _.color.gray.cool.100[_.color.struct.blue] = 0.9647058823529412;
+  _.color.gray.cool.200 = _.struct.new(_.color.struct);
+  _.color.gray.cool.200[_.color.struct.red] = 0.8980392156862745;
+  _.color.gray.cool.200[_.color.struct.green] = 0.9058823529411765;
+  _.color.gray.cool.200[_.color.struct.blue] = 0.9215686274509803;
+  _.color.gray.cool.300 = _.struct.new(_.color.struct);
+  _.color.gray.cool.300[_.color.struct.red] = 0.8196078431372549;
+  _.color.gray.cool.300[_.color.struct.green] = 0.8352941176470589;
+  _.color.gray.cool.300[_.color.struct.blue] = 0.8588235294117647;
+  _.color.gray.cool.400 = _.struct.new(_.color.struct);
+  _.color.gray.cool.400[_.color.struct.red] = 0.611764705882353;
+  _.color.gray.cool.400[_.color.struct.green] = 0.6392156862745098;
+  _.color.gray.cool.400[_.color.struct.blue] = 0.6862745098039216;
+  _.color.gray.cool.500 = _.struct.new(_.color.struct);
+  _.color.gray.cool.500[_.color.struct.red] = 0.4196078431372549;
+  _.color.gray.cool.500[_.color.struct.green] = 0.4470588235294118;
+  _.color.gray.cool.500[_.color.struct.blue] = 0.5019607843137255;
+  _.color.gray.cool.600 = _.struct.new(_.color.struct);
+  _.color.gray.cool.600[_.color.struct.red] = 0.29411764705882354;
+  _.color.gray.cool.600[_.color.struct.green] = 0.3333333333333333;
+  _.color.gray.cool.600[_.color.struct.blue] = 0.38823529411764707;
+  _.color.gray.cool.700 = _.struct.new(_.color.struct);
+  _.color.gray.cool.700[_.color.struct.red] = 0.21568627450980393;
+  _.color.gray.cool.700[_.color.struct.green] = 0.2549019607843137;
+  _.color.gray.cool.700[_.color.struct.blue] = 0.3176470588235294;
+  _.color.gray.cool.800 = _.struct.new(_.color.struct);
+  _.color.gray.cool.800[_.color.struct.red] = 0.12156862745098039;
+  _.color.gray.cool.800[_.color.struct.green] = 0.1607843137254902;
+  _.color.gray.cool.800[_.color.struct.blue] = 0.21568627450980393;
+  _.color.gray.cool.900 = _.struct.new(_.color.struct);
+  _.color.gray.cool.900[_.color.struct.red] = 0.06666666666666667;
+  _.color.gray.cool.900[_.color.struct.green] = 0.09411764705882353;
+  _.color.gray.cool.900[_.color.struct.blue] = 0.15294117647058825;
+  _.color.gray.medium.50 = _.struct.new(_.color.struct);
+  _.color.gray.medium.50[_.color.struct.red] = 0.9803921568627451;
+  _.color.gray.medium.50[_.color.struct.green] = 0.9803921568627451;
+  _.color.gray.medium.50[_.color.struct.blue] = 0.9803921568627451;
+  _.color.gray.medium.100 = _.struct.new(_.color.struct);
+  _.color.gray.medium.100[_.color.struct.red] = 0.9568627450980393;
+  _.color.gray.medium.100[_.color.struct.green] = 0.9568627450980393;
+  _.color.gray.medium.100[_.color.struct.blue] = 0.9607843137254902;
+  _.color.gray.medium.200 = _.struct.new(_.color.struct);
+  _.color.gray.medium.200[_.color.struct.red] = 0.8941176470588236;
+  _.color.gray.medium.200[_.color.struct.green] = 0.8941176470588236;
+  _.color.gray.medium.200[_.color.struct.blue] = 0.9058823529411765;
+  _.color.gray.medium.300 = _.struct.new(_.color.struct);
+  _.color.gray.medium.300[_.color.struct.red] = 0.8313725490196079;
+  _.color.gray.medium.300[_.color.struct.green] = 0.8313725490196079;
+  _.color.gray.medium.300[_.color.struct.blue] = 0.8470588235294118;
+  _.color.gray.medium.400 = _.struct.new(_.color.struct);
+  _.color.gray.medium.400[_.color.struct.red] = 0.6313725490196078;
+  _.color.gray.medium.400[_.color.struct.green] = 0.6313725490196078;
+  _.color.gray.medium.400[_.color.struct.blue] = 0.6666666666666666;
+  _.color.gray.medium.500 = _.struct.new(_.color.struct);
+  _.color.gray.medium.500[_.color.struct.red] = 0.44313725490196076;
+  _.color.gray.medium.500[_.color.struct.green] = 0.44313725490196076;
+  _.color.gray.medium.500[_.color.struct.blue] = 0.47843137254901963;
+  _.color.gray.medium.600 = _.struct.new(_.color.struct);
+  _.color.gray.medium.600[_.color.struct.red] = 0.3215686274509804;
+  _.color.gray.medium.600[_.color.struct.green] = 0.3215686274509804;
+  _.color.gray.medium.600[_.color.struct.blue] = 0.3568627450980392;
+  _.color.gray.medium.700 = _.struct.new(_.color.struct);
+  _.color.gray.medium.700[_.color.struct.red] = 0.24705882352941178;
+  _.color.gray.medium.700[_.color.struct.green] = 0.24705882352941178;
+  _.color.gray.medium.700[_.color.struct.blue] = 0.27450980392156865;
+  _.color.gray.medium.800 = _.struct.new(_.color.struct);
+  _.color.gray.medium.800[_.color.struct.red] = 0.15294117647058825;
+  _.color.gray.medium.800[_.color.struct.green] = 0.15294117647058825;
+  _.color.gray.medium.800[_.color.struct.blue] = 0.16470588235294117;
+  _.color.gray.medium.900 = _.struct.new(_.color.struct);
+  _.color.gray.medium.900[_.color.struct.red] = 0.09411764705882353;
+  _.color.gray.medium.900[_.color.struct.green] = 0.09411764705882353;
+  _.color.gray.medium.900[_.color.struct.blue] = 0.10588235294117647;
+  _.color.gray.true.50 = _.struct.new(_.color.struct);
+  _.color.gray.true.50[_.color.struct.red] = 0.9803921568627451;
+  _.color.gray.true.50[_.color.struct.green] = 0.9803921568627451;
+  _.color.gray.true.50[_.color.struct.blue] = 0.9803921568627451;
+  _.color.gray.true.100 = _.struct.new(_.color.struct);
+  _.color.gray.true.100[_.color.struct.red] = 0.9607843137254902;
+  _.color.gray.true.100[_.color.struct.green] = 0.9607843137254902;
+  _.color.gray.true.100[_.color.struct.blue] = 0.9607843137254902;
+  _.color.gray.true.200 = _.struct.new(_.color.struct);
+  _.color.gray.true.200[_.color.struct.red] = 0.8980392156862745;
+  _.color.gray.true.200[_.color.struct.green] = 0.8980392156862745;
+  _.color.gray.true.200[_.color.struct.blue] = 0.8980392156862745;
+  _.color.gray.true.300 = _.struct.new(_.color.struct);
+  _.color.gray.true.300[_.color.struct.red] = 0.8313725490196079;
+  _.color.gray.true.300[_.color.struct.green] = 0.8313725490196079;
+  _.color.gray.true.300[_.color.struct.blue] = 0.8313725490196079;
+  _.color.gray.true.400 = _.struct.new(_.color.struct);
+  _.color.gray.true.400[_.color.struct.red] = 0.6392156862745098;
+  _.color.gray.true.400[_.color.struct.green] = 0.6392156862745098;
+  _.color.gray.true.400[_.color.struct.blue] = 0.6392156862745098;
+  _.color.gray.true.500 = _.struct.new(_.color.struct);
+  _.color.gray.true.500[_.color.struct.red] = 0.45098039215686275;
+  _.color.gray.true.500[_.color.struct.green] = 0.45098039215686275;
+  _.color.gray.true.500[_.color.struct.blue] = 0.45098039215686275;
+  _.color.gray.true.600 = _.struct.new(_.color.struct);
+  _.color.gray.true.600[_.color.struct.red] = 0.3215686274509804;
+  _.color.gray.true.600[_.color.struct.green] = 0.3215686274509804;
+  _.color.gray.true.600[_.color.struct.blue] = 0.3215686274509804;
+  _.color.gray.true.700 = _.struct.new(_.color.struct);
+  _.color.gray.true.700[_.color.struct.red] = 0.25098039215686274;
+  _.color.gray.true.700[_.color.struct.green] = 0.25098039215686274;
+  _.color.gray.true.700[_.color.struct.blue] = 0.25098039215686274;
+  _.color.gray.true.800 = _.struct.new(_.color.struct);
+  _.color.gray.true.800[_.color.struct.red] = 0.14901960784313725;
+  _.color.gray.true.800[_.color.struct.green] = 0.14901960784313725;
+  _.color.gray.true.800[_.color.struct.blue] = 0.14901960784313725;
+  _.color.gray.true.900 = _.struct.new(_.color.struct);
+  _.color.gray.true.900[_.color.struct.red] = 0.09019607843137255;
+  _.color.gray.true.900[_.color.struct.green] = 0.09019607843137255;
+  _.color.gray.true.900[_.color.struct.blue] = 0.09019607843137255;
+  _.color.gray.warm.50 = _.struct.new(_.color.struct);
+  _.color.gray.warm.50[_.color.struct.red] = 0.9803921568627451;
+  _.color.gray.warm.50[_.color.struct.green] = 0.9803921568627451;
+  _.color.gray.warm.50[_.color.struct.blue] = 0.9764705882352941;
+  _.color.gray.warm.100 = _.struct.new(_.color.struct);
+  _.color.gray.warm.100[_.color.struct.red] = 0.9607843137254902;
+  _.color.gray.warm.100[_.color.struct.green] = 0.9607843137254902;
+  _.color.gray.warm.100[_.color.struct.blue] = 0.9568627450980393;
+  _.color.gray.warm.200 = _.struct.new(_.color.struct);
+  _.color.gray.warm.200[_.color.struct.red] = 0.9058823529411765;
+  _.color.gray.warm.200[_.color.struct.green] = 0.8980392156862745;
+  _.color.gray.warm.200[_.color.struct.blue] = 0.8941176470588236;
+  _.color.gray.warm.300 = _.struct.new(_.color.struct);
+  _.color.gray.warm.300[_.color.struct.red] = 0.8392156862745098;
+  _.color.gray.warm.300[_.color.struct.green] = 0.8274509803921568;
+  _.color.gray.warm.300[_.color.struct.blue] = 0.8196078431372549;
+  _.color.gray.warm.400 = _.struct.new(_.color.struct);
+  _.color.gray.warm.400[_.color.struct.red] = 0.6588235294117647;
+  _.color.gray.warm.400[_.color.struct.green] = 0.6352941176470588;
+  _.color.gray.warm.400[_.color.struct.blue] = 0.6196078431372549;
+  _.color.gray.warm.500 = _.struct.new(_.color.struct);
+  _.color.gray.warm.500[_.color.struct.red] = 0.47058823529411764;
+  _.color.gray.warm.500[_.color.struct.green] = 0.44313725490196076;
+  _.color.gray.warm.500[_.color.struct.blue] = 0.4235294117647059;
+  _.color.gray.warm.600 = _.struct.new(_.color.struct);
+  _.color.gray.warm.600[_.color.struct.red] = 0.3411764705882353;
+  _.color.gray.warm.600[_.color.struct.green] = 0.3254901960784314;
+  _.color.gray.warm.600[_.color.struct.blue] = 0.3058823529411765;
+  _.color.gray.warm.700 = _.struct.new(_.color.struct);
+  _.color.gray.warm.700[_.color.struct.red] = 0.26666666666666666;
+  _.color.gray.warm.700[_.color.struct.green] = 0.25098039215686274;
+  _.color.gray.warm.700[_.color.struct.blue] = 0.23529411764705882;
+  _.color.gray.warm.800 = _.struct.new(_.color.struct);
+  _.color.gray.warm.800[_.color.struct.red] = 0.1607843137254902;
+  _.color.gray.warm.800[_.color.struct.green] = 0.1450980392156863;
+  _.color.gray.warm.800[_.color.struct.blue] = 0.1411764705882353;
+  _.color.gray.warm.900 = _.struct.new(_.color.struct);
+  _.color.gray.warm.900[_.color.struct.red] = 0.10980392156862745;
+  _.color.gray.warm.900[_.color.struct.green] = 0.09803921568627451;
+  _.color.gray.warm.900[_.color.struct.blue] = 0.09019607843137255;
+  _.color.red.50 = _.struct.new(_.color.struct);
+  _.color.red.50[_.color.struct.red] = 0.996078431372549;
+  _.color.red.50[_.color.struct.green] = 0.9490196078431372;
+  _.color.red.50[_.color.struct.blue] = 0.9490196078431372;
+  _.color.red.100 = _.struct.new(_.color.struct);
+  _.color.red.100[_.color.struct.red] = 0.996078431372549;
+  _.color.red.100[_.color.struct.green] = 0.8862745098039215;
+  _.color.red.100[_.color.struct.blue] = 0.8862745098039215;
+  _.color.red.200 = _.struct.new(_.color.struct);
+  _.color.red.200[_.color.struct.red] = 0.996078431372549;
+  _.color.red.200[_.color.struct.green] = 0.792156862745098;
+  _.color.red.200[_.color.struct.blue] = 0.792156862745098;
+  _.color.red.300 = _.struct.new(_.color.struct);
+  _.color.red.300[_.color.struct.red] = 0.9882352941176471;
+  _.color.red.300[_.color.struct.green] = 0.6470588235294118;
+  _.color.red.300[_.color.struct.blue] = 0.6470588235294118;
+  _.color.red.400 = _.struct.new(_.color.struct);
+  _.color.red.400[_.color.struct.red] = 0.9725490196078431;
+  _.color.red.400[_.color.struct.green] = 0.44313725490196076;
+  _.color.red.400[_.color.struct.blue] = 0.44313725490196076;
+  _.color.red.500 = _.struct.new(_.color.struct);
+  _.color.red.500[_.color.struct.red] = 0.9372549019607843;
+  _.color.red.500[_.color.struct.green] = 0.26666666666666666;
+  _.color.red.500[_.color.struct.blue] = 0.26666666666666666;
+  _.color.red.600 = _.struct.new(_.color.struct);
+  _.color.red.600[_.color.struct.red] = 0.8627450980392157;
+  _.color.red.600[_.color.struct.green] = 0.14901960784313725;
+  _.color.red.600[_.color.struct.blue] = 0.14901960784313725;
+  _.color.red.700 = _.struct.new(_.color.struct);
+  _.color.red.700[_.color.struct.red] = 0.7254901960784313;
+  _.color.red.700[_.color.struct.green] = 0.10980392156862745;
+  _.color.red.700[_.color.struct.blue] = 0.10980392156862745;
+  _.color.red.800 = _.struct.new(_.color.struct);
+  _.color.red.800[_.color.struct.red] = 0.6;
+  _.color.red.800[_.color.struct.green] = 0.10588235294117647;
+  _.color.red.800[_.color.struct.blue] = 0.10588235294117647;
+  _.color.red.900 = _.struct.new(_.color.struct);
+  _.color.red.900[_.color.struct.red] = 0.4980392156862745;
+  _.color.red.900[_.color.struct.green] = 0.11372549019607843;
+  _.color.red.900[_.color.struct.blue] = 0.11372549019607843;
+  _.color.orange.50 = _.struct.new(_.color.struct);
+  _.color.orange.50[_.color.struct.red] = 1;
+  _.color.orange.50[_.color.struct.green] = 0.9686274509803922;
+  _.color.orange.50[_.color.struct.blue] = 0.9294117647058824;
+  _.color.orange.100 = _.struct.new(_.color.struct);
+  _.color.orange.100[_.color.struct.red] = 1;
+  _.color.orange.100[_.color.struct.green] = 0.9294117647058824;
+  _.color.orange.100[_.color.struct.blue] = 0.8352941176470589;
+  _.color.orange.200 = _.struct.new(_.color.struct);
+  _.color.orange.200[_.color.struct.red] = 0.996078431372549;
+  _.color.orange.200[_.color.struct.green] = 0.8431372549019608;
+  _.color.orange.200[_.color.struct.blue] = 0.6666666666666666;
+  _.color.orange.300 = _.struct.new(_.color.struct);
+  _.color.orange.300[_.color.struct.red] = 0.9921568627450981;
+  _.color.orange.300[_.color.struct.green] = 0.7294117647058823;
+  _.color.orange.300[_.color.struct.blue] = 0.4549019607843137;
+  _.color.orange.400 = _.struct.new(_.color.struct);
+  _.color.orange.400[_.color.struct.red] = 0.984313725490196;
+  _.color.orange.400[_.color.struct.green] = 0.5725490196078431;
+  _.color.orange.400[_.color.struct.blue] = 0.23529411764705882;
+  _.color.orange.500 = _.struct.new(_.color.struct);
+  _.color.orange.500[_.color.struct.red] = 0.9764705882352941;
+  _.color.orange.500[_.color.struct.green] = 0.45098039215686275;
+  _.color.orange.500[_.color.struct.blue] = 0.08627450980392157;
+  _.color.orange.600 = _.struct.new(_.color.struct);
+  _.color.orange.600[_.color.struct.red] = 0.9176470588235294;
+  _.color.orange.600[_.color.struct.green] = 0.34509803921568627;
+  _.color.orange.600[_.color.struct.blue] = 0.047058823529411764;
+  _.color.orange.700 = _.struct.new(_.color.struct);
+  _.color.orange.700[_.color.struct.red] = 0.7607843137254902;
+  _.color.orange.700[_.color.struct.green] = 0.2549019607843137;
+  _.color.orange.700[_.color.struct.blue] = 0.047058823529411764;
+  _.color.orange.800 = _.struct.new(_.color.struct);
+  _.color.orange.800[_.color.struct.red] = 0.6039215686274509;
+  _.color.orange.800[_.color.struct.green] = 0.20392156862745098;
+  _.color.orange.800[_.color.struct.blue] = 0.07058823529411765;
+  _.color.orange.900 = _.struct.new(_.color.struct);
+  _.color.orange.900[_.color.struct.red] = 0.48627450980392156;
+  _.color.orange.900[_.color.struct.green] = 0.17647058823529413;
+  _.color.orange.900[_.color.struct.blue] = 0.07058823529411765;
+  _.color.amber.50 = _.struct.new(_.color.struct);
+  _.color.amber.50[_.color.struct.red] = 1;
+  _.color.amber.50[_.color.struct.green] = 0.984313725490196;
+  _.color.amber.50[_.color.struct.blue] = 0.9215686274509803;
+  _.color.amber.100 = _.struct.new(_.color.struct);
+  _.color.amber.100[_.color.struct.red] = 0.996078431372549;
+  _.color.amber.100[_.color.struct.green] = 0.9529411764705882;
+  _.color.amber.100[_.color.struct.blue] = 0.7803921568627451;
+  _.color.amber.200 = _.struct.new(_.color.struct);
+  _.color.amber.200[_.color.struct.red] = 0.9921568627450981;
+  _.color.amber.200[_.color.struct.green] = 0.9019607843137255;
+  _.color.amber.200[_.color.struct.blue] = 0.5411764705882353;
+  _.color.amber.300 = _.struct.new(_.color.struct);
+  _.color.amber.300[_.color.struct.red] = 0.9882352941176471;
+  _.color.amber.300[_.color.struct.green] = 0.8274509803921568;
+  _.color.amber.300[_.color.struct.blue] = 0.30196078431372547;
+  _.color.amber.400 = _.struct.new(_.color.struct);
+  _.color.amber.400[_.color.struct.red] = 0.984313725490196;
+  _.color.amber.400[_.color.struct.green] = 0.7490196078431373;
+  _.color.amber.400[_.color.struct.blue] = 0.1411764705882353;
+  _.color.amber.500 = _.struct.new(_.color.struct);
+  _.color.amber.500[_.color.struct.red] = 0.9607843137254902;
+  _.color.amber.500[_.color.struct.green] = 0.6196078431372549;
+  _.color.amber.500[_.color.struct.blue] = 0.043137254901960784;
+  _.color.amber.600 = _.struct.new(_.color.struct);
+  _.color.amber.600[_.color.struct.red] = 0.8509803921568627;
+  _.color.amber.600[_.color.struct.green] = 0.4666666666666667;
+  _.color.amber.600[_.color.struct.blue] = 0.023529411764705882;
+  _.color.amber.700 = _.struct.new(_.color.struct);
+  _.color.amber.700[_.color.struct.red] = 0.7058823529411765;
+  _.color.amber.700[_.color.struct.green] = 0.3254901960784314;
+  _.color.amber.700[_.color.struct.blue] = 0.03529411764705882;
+  _.color.amber.800 = _.struct.new(_.color.struct);
+  _.color.amber.800[_.color.struct.red] = 0.5725490196078431;
+  _.color.amber.800[_.color.struct.green] = 0.25098039215686274;
+  _.color.amber.800[_.color.struct.blue] = 0.054901960784313725;
+  _.color.amber.900 = _.struct.new(_.color.struct);
+  _.color.amber.900[_.color.struct.red] = 0.47058823529411764;
+  _.color.amber.900[_.color.struct.green] = 0.20784313725490197;
+  _.color.amber.900[_.color.struct.blue] = 0.058823529411764705;
+  _.color.yellow.50 = _.struct.new(_.color.struct);
+  _.color.yellow.50[_.color.struct.red] = 0.996078431372549;
+  _.color.yellow.50[_.color.struct.green] = 0.9882352941176471;
+  _.color.yellow.50[_.color.struct.blue] = 0.9098039215686274;
+  _.color.yellow.100 = _.struct.new(_.color.struct);
+  _.color.yellow.100[_.color.struct.red] = 0.996078431372549;
+  _.color.yellow.100[_.color.struct.green] = 0.9764705882352941;
+  _.color.yellow.100[_.color.struct.blue] = 0.7647058823529411;
+  _.color.yellow.200 = _.struct.new(_.color.struct);
+  _.color.yellow.200[_.color.struct.red] = 0.996078431372549;
+  _.color.yellow.200[_.color.struct.green] = 0.9411764705882353;
+  _.color.yellow.200[_.color.struct.blue] = 0.5411764705882353;
+  _.color.yellow.300 = _.struct.new(_.color.struct);
+  _.color.yellow.300[_.color.struct.red] = 0.9921568627450981;
+  _.color.yellow.300[_.color.struct.green] = 0.8784313725490196;
+  _.color.yellow.300[_.color.struct.blue] = 0.2784313725490196;
+  _.color.yellow.400 = _.struct.new(_.color.struct);
+  _.color.yellow.400[_.color.struct.red] = 0.9803921568627451;
+  _.color.yellow.400[_.color.struct.green] = 0.8;
+  _.color.yellow.400[_.color.struct.blue] = 0.08235294117647059;
+  _.color.yellow.500 = _.struct.new(_.color.struct);
+  _.color.yellow.500[_.color.struct.red] = 0.9176470588235294;
+  _.color.yellow.500[_.color.struct.green] = 0.7019607843137254;
+  _.color.yellow.500[_.color.struct.blue] = 0.03137254901960784;
+  _.color.yellow.600 = _.struct.new(_.color.struct);
+  _.color.yellow.600[_.color.struct.red] = 0.792156862745098;
+  _.color.yellow.600[_.color.struct.green] = 0.5411764705882353;
+  _.color.yellow.600[_.color.struct.blue] = 0.01568627450980392;
+  _.color.yellow.700 = _.struct.new(_.color.struct);
+  _.color.yellow.700[_.color.struct.red] = 0.6313725490196078;
+  _.color.yellow.700[_.color.struct.green] = 0.3843137254901961;
+  _.color.yellow.700[_.color.struct.blue] = 0.027450980392156862;
+  _.color.yellow.800 = _.struct.new(_.color.struct);
+  _.color.yellow.800[_.color.struct.red] = 0.5215686274509804;
+  _.color.yellow.800[_.color.struct.green] = 0.30196078431372547;
+  _.color.yellow.800[_.color.struct.blue] = 0.054901960784313725;
+  _.color.yellow.900 = _.struct.new(_.color.struct);
+  _.color.yellow.900[_.color.struct.red] = 0.44313725490196076;
+  _.color.yellow.900[_.color.struct.green] = 0.24705882352941178;
+  _.color.yellow.900[_.color.struct.blue] = 0.07058823529411765;
+  _.color.lime.50 = _.struct.new(_.color.struct);
+  _.color.lime.50[_.color.struct.red] = 0.9686274509803922;
+  _.color.lime.50[_.color.struct.green] = 0.996078431372549;
+  _.color.lime.50[_.color.struct.blue] = 0.9058823529411765;
+  _.color.lime.100 = _.struct.new(_.color.struct);
+  _.color.lime.100[_.color.struct.red] = 0.9254901960784314;
+  _.color.lime.100[_.color.struct.green] = 0.9882352941176471;
+  _.color.lime.100[_.color.struct.blue] = 0.796078431372549;
+  _.color.lime.200 = _.struct.new(_.color.struct);
+  _.color.lime.200[_.color.struct.red] = 0.8509803921568627;
+  _.color.lime.200[_.color.struct.green] = 0.9764705882352941;
+  _.color.lime.200[_.color.struct.blue] = 0.615686274509804;
+  _.color.lime.300 = _.struct.new(_.color.struct);
+  _.color.lime.300[_.color.struct.red] = 0.7450980392156863;
+  _.color.lime.300[_.color.struct.green] = 0.9490196078431372;
+  _.color.lime.300[_.color.struct.blue] = 0.39215686274509803;
+  _.color.lime.400 = _.struct.new(_.color.struct);
+  _.color.lime.400[_.color.struct.red] = 0.6392156862745098;
+  _.color.lime.400[_.color.struct.green] = 0.9019607843137255;
+  _.color.lime.400[_.color.struct.blue] = 0.20784313725490197;
+  _.color.lime.500 = _.struct.new(_.color.struct);
+  _.color.lime.500[_.color.struct.red] = 0.5176470588235295;
+  _.color.lime.500[_.color.struct.green] = 0.8;
+  _.color.lime.500[_.color.struct.blue] = 0.08627450980392157;
+  _.color.lime.600 = _.struct.new(_.color.struct);
+  _.color.lime.600[_.color.struct.red] = 0.396078431372549;
+  _.color.lime.600[_.color.struct.green] = 0.6392156862745098;
+  _.color.lime.600[_.color.struct.blue] = 0.050980392156862744;
+  _.color.lime.700 = _.struct.new(_.color.struct);
+  _.color.lime.700[_.color.struct.red] = 0.30196078431372547;
+  _.color.lime.700[_.color.struct.green] = 0.48627450980392156;
+  _.color.lime.700[_.color.struct.blue] = 0.058823529411764705;
+  _.color.lime.800 = _.struct.new(_.color.struct);
+  _.color.lime.800[_.color.struct.red] = 0.24705882352941178;
+  _.color.lime.800[_.color.struct.green] = 0.3843137254901961;
+  _.color.lime.800[_.color.struct.blue] = 0.07058823529411765;
+  _.color.lime.900 = _.struct.new(_.color.struct);
+  _.color.lime.900[_.color.struct.red] = 0.21176470588235294;
+  _.color.lime.900[_.color.struct.green] = 0.3254901960784314;
+  _.color.lime.900[_.color.struct.blue] = 0.0784313725490196;
+  _.color.green.50 = _.struct.new(_.color.struct);
+  _.color.green.50[_.color.struct.red] = 0.9411764705882353;
+  _.color.green.50[_.color.struct.green] = 0.9921568627450981;
+  _.color.green.50[_.color.struct.blue] = 0.9568627450980393;
+  _.color.green.100 = _.struct.new(_.color.struct);
+  _.color.green.100[_.color.struct.red] = 0.8627450980392157;
+  _.color.green.100[_.color.struct.green] = 0.9882352941176471;
+  _.color.green.100[_.color.struct.blue] = 0.9058823529411765;
+  _.color.green.200 = _.struct.new(_.color.struct);
+  _.color.green.200[_.color.struct.red] = 0.7333333333333333;
+  _.color.green.200[_.color.struct.green] = 0.9686274509803922;
+  _.color.green.200[_.color.struct.blue] = 0.8156862745098039;
+  _.color.green.300 = _.struct.new(_.color.struct);
+  _.color.green.300[_.color.struct.red] = 0.5254901960784314;
+  _.color.green.300[_.color.struct.green] = 0.9372549019607843;
+  _.color.green.300[_.color.struct.blue] = 0.6745098039215687;
+  _.color.green.400 = _.struct.new(_.color.struct);
+  _.color.green.400[_.color.struct.red] = 0.2901960784313726;
+  _.color.green.400[_.color.struct.green] = 0.8705882352941177;
+  _.color.green.400[_.color.struct.blue] = 0.5019607843137255;
+  _.color.green.500 = _.struct.new(_.color.struct);
+  _.color.green.500[_.color.struct.red] = 0.13333333333333333;
+  _.color.green.500[_.color.struct.green] = 0.7725490196078432;
+  _.color.green.500[_.color.struct.blue] = 0.3686274509803922;
+  _.color.green.600 = _.struct.new(_.color.struct);
+  _.color.green.600[_.color.struct.red] = 0.08627450980392157;
+  _.color.green.600[_.color.struct.green] = 0.6392156862745098;
+  _.color.green.600[_.color.struct.blue] = 0.2901960784313726;
+  _.color.green.700 = _.struct.new(_.color.struct);
+  _.color.green.700[_.color.struct.red] = 0.08235294117647059;
+  _.color.green.700[_.color.struct.green] = 0.5019607843137255;
+  _.color.green.700[_.color.struct.blue] = 0.23921568627450981;
+  _.color.green.800 = _.struct.new(_.color.struct);
+  _.color.green.800[_.color.struct.red] = 0.08627450980392157;
+  _.color.green.800[_.color.struct.green] = 0.396078431372549;
+  _.color.green.800[_.color.struct.blue] = 0.20392156862745098;
+  _.color.green.900 = _.struct.new(_.color.struct);
+  _.color.green.900[_.color.struct.red] = 0.0784313725490196;
+  _.color.green.900[_.color.struct.green] = 0.3254901960784314;
+  _.color.green.900[_.color.struct.blue] = 0.17647058823529413;
+  _.color.emerald.50 = _.struct.new(_.color.struct);
+  _.color.emerald.50[_.color.struct.red] = 0.9254901960784314;
+  _.color.emerald.50[_.color.struct.green] = 0.9921568627450981;
+  _.color.emerald.50[_.color.struct.blue] = 0.9607843137254902;
+  _.color.emerald.100 = _.struct.new(_.color.struct);
+  _.color.emerald.100[_.color.struct.red] = 0.8196078431372549;
+  _.color.emerald.100[_.color.struct.green] = 0.9803921568627451;
+  _.color.emerald.100[_.color.struct.blue] = 0.8980392156862745;
+  _.color.emerald.200 = _.struct.new(_.color.struct);
+  _.color.emerald.200[_.color.struct.red] = 0.6549019607843137;
+  _.color.emerald.200[_.color.struct.green] = 0.9529411764705882;
+  _.color.emerald.200[_.color.struct.blue] = 0.8156862745098039;
+  _.color.emerald.300 = _.struct.new(_.color.struct);
+  _.color.emerald.300[_.color.struct.red] = 0.43137254901960786;
+  _.color.emerald.300[_.color.struct.green] = 0.9058823529411765;
+  _.color.emerald.300[_.color.struct.blue] = 0.7176470588235294;
+  _.color.emerald.400 = _.struct.new(_.color.struct);
+  _.color.emerald.400[_.color.struct.red] = 0.20392156862745098;
+  _.color.emerald.400[_.color.struct.green] = 0.8274509803921568;
+  _.color.emerald.400[_.color.struct.blue] = 0.6;
+  _.color.emerald.500 = _.struct.new(_.color.struct);
+  _.color.emerald.500[_.color.struct.red] = 0.06274509803921569;
+  _.color.emerald.500[_.color.struct.green] = 0.7254901960784313;
+  _.color.emerald.500[_.color.struct.blue] = 0.5058823529411764;
+  _.color.emerald.600 = _.struct.new(_.color.struct);
+  _.color.emerald.600[_.color.struct.red] = 0.0196078431372549;
+  _.color.emerald.600[_.color.struct.green] = 0.5882352941176471;
+  _.color.emerald.600[_.color.struct.blue] = 0.4117647058823529;
+  _.color.emerald.700 = _.struct.new(_.color.struct);
+  _.color.emerald.700[_.color.struct.red] = 0.01568627450980392;
+  _.color.emerald.700[_.color.struct.green] = 0.47058823529411764;
+  _.color.emerald.700[_.color.struct.blue] = 0.3411764705882353;
+  _.color.emerald.800 = _.struct.new(_.color.struct);
+  _.color.emerald.800[_.color.struct.red] = 0.023529411764705882;
+  _.color.emerald.800[_.color.struct.green] = 0.37254901960784315;
+  _.color.emerald.800[_.color.struct.blue] = 0.27450980392156865;
+  _.color.emerald.900 = _.struct.new(_.color.struct);
+  _.color.emerald.900[_.color.struct.red] = 0.023529411764705882;
+  _.color.emerald.900[_.color.struct.green] = 0.3058823529411765;
+  _.color.emerald.900[_.color.struct.blue] = 0.23137254901960785;
+  _.color.teal.50 = _.struct.new(_.color.struct);
+  _.color.teal.50[_.color.struct.red] = 0.9411764705882353;
+  _.color.teal.50[_.color.struct.green] = 0.9921568627450981;
+  _.color.teal.50[_.color.struct.blue] = 0.9803921568627451;
+  _.color.teal.100 = _.struct.new(_.color.struct);
+  _.color.teal.100[_.color.struct.red] = 0.8;
+  _.color.teal.100[_.color.struct.green] = 0.984313725490196;
+  _.color.teal.100[_.color.struct.blue] = 0.9450980392156862;
+  _.color.teal.200 = _.struct.new(_.color.struct);
+  _.color.teal.200[_.color.struct.red] = 0.6;
+  _.color.teal.200[_.color.struct.green] = 0.9647058823529412;
+  _.color.teal.200[_.color.struct.blue] = 0.8941176470588236;
+  _.color.teal.300 = _.struct.new(_.color.struct);
+  _.color.teal.300[_.color.struct.red] = 0.3686274509803922;
+  _.color.teal.300[_.color.struct.green] = 0.9176470588235294;
+  _.color.teal.300[_.color.struct.blue] = 0.8313725490196079;
+  _.color.teal.400 = _.struct.new(_.color.struct);
+  _.color.teal.400[_.color.struct.red] = 0.17647058823529413;
+  _.color.teal.400[_.color.struct.green] = 0.8313725490196079;
+  _.color.teal.400[_.color.struct.blue] = 0.7490196078431373;
+  _.color.teal.500 = _.struct.new(_.color.struct);
+  _.color.teal.500[_.color.struct.red] = 0.0784313725490196;
+  _.color.teal.500[_.color.struct.green] = 0.7215686274509804;
+  _.color.teal.500[_.color.struct.blue] = 0.6509803921568628;
+  _.color.teal.600 = _.struct.new(_.color.struct);
+  _.color.teal.600[_.color.struct.red] = 0.050980392156862744;
+  _.color.teal.600[_.color.struct.green] = 0.5803921568627451;
+  _.color.teal.600[_.color.struct.blue] = 0.5333333333333333;
+  _.color.teal.700 = _.struct.new(_.color.struct);
+  _.color.teal.700[_.color.struct.red] = 0.058823529411764705;
+  _.color.teal.700[_.color.struct.green] = 0.4627450980392157;
+  _.color.teal.700[_.color.struct.blue] = 0.43137254901960786;
+  _.color.teal.800 = _.struct.new(_.color.struct);
+  _.color.teal.800[_.color.struct.red] = 0.06666666666666667;
+  _.color.teal.800[_.color.struct.green] = 0.3686274509803922;
+  _.color.teal.800[_.color.struct.blue] = 0.34901960784313724;
+  _.color.teal.900 = _.struct.new(_.color.struct);
+  _.color.teal.900[_.color.struct.red] = 0.07450980392156863;
+  _.color.teal.900[_.color.struct.green] = 0.3058823529411765;
+  _.color.teal.900[_.color.struct.blue] = 0.2901960784313726;
+  _.color.cyan.50 = _.struct.new(_.color.struct);
+  _.color.cyan.50[_.color.struct.red] = 0.9254901960784314;
+  _.color.cyan.50[_.color.struct.green] = 0.996078431372549;
+  _.color.cyan.50[_.color.struct.blue] = 1;
+  _.color.cyan.100 = _.struct.new(_.color.struct);
+  _.color.cyan.100[_.color.struct.red] = 0.8117647058823529;
+  _.color.cyan.100[_.color.struct.green] = 0.9803921568627451;
+  _.color.cyan.100[_.color.struct.blue] = 0.996078431372549;
+  _.color.cyan.200 = _.struct.new(_.color.struct);
+  _.color.cyan.200[_.color.struct.red] = 0.6470588235294118;
+  _.color.cyan.200[_.color.struct.green] = 0.9529411764705882;
+  _.color.cyan.200[_.color.struct.blue] = 0.9882352941176471;
+  _.color.cyan.300 = _.struct.new(_.color.struct);
+  _.color.cyan.300[_.color.struct.red] = 0.403921568627451;
+  _.color.cyan.300[_.color.struct.green] = 0.9098039215686274;
+  _.color.cyan.300[_.color.struct.blue] = 0.9764705882352941;
+  _.color.cyan.400 = _.struct.new(_.color.struct);
+  _.color.cyan.400[_.color.struct.red] = 0.13333333333333333;
+  _.color.cyan.400[_.color.struct.green] = 0.8274509803921568;
+  _.color.cyan.400[_.color.struct.blue] = 0.9333333333333333;
+  _.color.cyan.500 = _.struct.new(_.color.struct);
+  _.color.cyan.500[_.color.struct.red] = 0.023529411764705882;
+  _.color.cyan.500[_.color.struct.green] = 0.7137254901960784;
+  _.color.cyan.500[_.color.struct.blue] = 0.8313725490196079;
+  _.color.cyan.600 = _.struct.new(_.color.struct);
+  _.color.cyan.600[_.color.struct.red] = 0.03137254901960784;
+  _.color.cyan.600[_.color.struct.green] = 0.5686274509803921;
+  _.color.cyan.600[_.color.struct.blue] = 0.6980392156862745;
+  _.color.cyan.700 = _.struct.new(_.color.struct);
+  _.color.cyan.700[_.color.struct.red] = 0.054901960784313725;
+  _.color.cyan.700[_.color.struct.green] = 0.4549019607843137;
+  _.color.cyan.700[_.color.struct.blue] = 0.5647058823529412;
+  _.color.cyan.800 = _.struct.new(_.color.struct);
+  _.color.cyan.800[_.color.struct.red] = 0.08235294117647059;
+  _.color.cyan.800[_.color.struct.green] = 0.3686274509803922;
+  _.color.cyan.800[_.color.struct.blue] = 0.4588235294117647;
+  _.color.cyan.900 = _.struct.new(_.color.struct);
+  _.color.cyan.900[_.color.struct.red] = 0.08627450980392157;
+  _.color.cyan.900[_.color.struct.green] = 0.3058823529411765;
+  _.color.cyan.900[_.color.struct.blue] = 0.38823529411764707;
+  _.color.sky.50 = _.struct.new(_.color.struct);
+  _.color.sky.50[_.color.struct.red] = 0.9411764705882353;
+  _.color.sky.50[_.color.struct.green] = 0.9764705882352941;
+  _.color.sky.50[_.color.struct.blue] = 1;
+  _.color.sky.100 = _.struct.new(_.color.struct);
+  _.color.sky.100[_.color.struct.red] = 0.8784313725490196;
+  _.color.sky.100[_.color.struct.green] = 0.9490196078431372;
+  _.color.sky.100[_.color.struct.blue] = 0.996078431372549;
+  _.color.sky.200 = _.struct.new(_.color.struct);
+  _.color.sky.200[_.color.struct.red] = 0.7294117647058823;
+  _.color.sky.200[_.color.struct.green] = 0.9019607843137255;
+  _.color.sky.200[_.color.struct.blue] = 0.9921568627450981;
+  _.color.sky.300 = _.struct.new(_.color.struct);
+  _.color.sky.300[_.color.struct.red] = 0.49019607843137253;
+  _.color.sky.300[_.color.struct.green] = 0.8274509803921568;
+  _.color.sky.300[_.color.struct.blue] = 0.9882352941176471;
+  _.color.sky.400 = _.struct.new(_.color.struct);
+  _.color.sky.400[_.color.struct.red] = 0.2196078431372549;
+  _.color.sky.400[_.color.struct.green] = 0.7411764705882353;
+  _.color.sky.400[_.color.struct.blue] = 0.9725490196078431;
+  _.color.sky.500 = _.struct.new(_.color.struct);
+  _.color.sky.500[_.color.struct.red] = 0.054901960784313725;
+  _.color.sky.500[_.color.struct.green] = 0.6470588235294118;
+  _.color.sky.500[_.color.struct.blue] = 0.9137254901960784;
+  _.color.sky.600 = _.struct.new(_.color.struct);
+  _.color.sky.600[_.color.struct.red] = 0.00784313725490196;
+  _.color.sky.600[_.color.struct.green] = 0.5176470588235295;
+  _.color.sky.600[_.color.struct.blue] = 0.7803921568627451;
+  _.color.sky.700 = _.struct.new(_.color.struct);
+  _.color.sky.700[_.color.struct.red] = 0.011764705882352941;
+  _.color.sky.700[_.color.struct.green] = 0.4117647058823529;
+  _.color.sky.700[_.color.struct.blue] = 0.6313725490196078;
+  _.color.sky.800 = _.struct.new(_.color.struct);
+  _.color.sky.800[_.color.struct.red] = 0.027450980392156862;
+  _.color.sky.800[_.color.struct.green] = 0.34901960784313724;
+  _.color.sky.800[_.color.struct.blue] = 0.5215686274509804;
+  _.color.sky.900 = _.struct.new(_.color.struct);
+  _.color.sky.900[_.color.struct.red] = 0.047058823529411764;
+  _.color.sky.900[_.color.struct.green] = 0.2901960784313726;
+  _.color.sky.900[_.color.struct.blue] = 0.43137254901960786;
+  _.color.blue.50 = _.struct.new(_.color.struct);
+  _.color.blue.50[_.color.struct.red] = 0.9372549019607843;
+  _.color.blue.50[_.color.struct.green] = 0.9647058823529412;
+  _.color.blue.50[_.color.struct.blue] = 1;
+  _.color.blue.100 = _.struct.new(_.color.struct);
+  _.color.blue.100[_.color.struct.red] = 0.8588235294117647;
+  _.color.blue.100[_.color.struct.green] = 0.9176470588235294;
+  _.color.blue.100[_.color.struct.blue] = 0.996078431372549;
+  _.color.blue.200 = _.struct.new(_.color.struct);
+  _.color.blue.200[_.color.struct.red] = 0.7490196078431373;
+  _.color.blue.200[_.color.struct.green] = 0.8588235294117647;
+  _.color.blue.200[_.color.struct.blue] = 0.996078431372549;
+  _.color.blue.300 = _.struct.new(_.color.struct);
+  _.color.blue.300[_.color.struct.red] = 0.5764705882352941;
+  _.color.blue.300[_.color.struct.green] = 0.7725490196078432;
+  _.color.blue.300[_.color.struct.blue] = 0.9921568627450981;
+  _.color.blue.400 = _.struct.new(_.color.struct);
+  _.color.blue.400[_.color.struct.red] = 0.3764705882352941;
+  _.color.blue.400[_.color.struct.green] = 0.6470588235294118;
+  _.color.blue.400[_.color.struct.blue] = 0.9803921568627451;
+  _.color.blue.500 = _.struct.new(_.color.struct);
+  _.color.blue.500[_.color.struct.red] = 0.23137254901960785;
+  _.color.blue.500[_.color.struct.green] = 0.5098039215686274;
+  _.color.blue.500[_.color.struct.blue] = 0.9647058823529412;
+  _.color.blue.600 = _.struct.new(_.color.struct);
+  _.color.blue.600[_.color.struct.red] = 0.1450980392156863;
+  _.color.blue.600[_.color.struct.green] = 0.38823529411764707;
+  _.color.blue.600[_.color.struct.blue] = 0.9215686274509803;
+  _.color.blue.700 = _.struct.new(_.color.struct);
+  _.color.blue.700[_.color.struct.red] = 0.11372549019607843;
+  _.color.blue.700[_.color.struct.green] = 0.3058823529411765;
+  _.color.blue.700[_.color.struct.blue] = 0.8470588235294118;
+  _.color.blue.800 = _.struct.new(_.color.struct);
+  _.color.blue.800[_.color.struct.red] = 0.11764705882352941;
+  _.color.blue.800[_.color.struct.green] = 0.25098039215686274;
+  _.color.blue.800[_.color.struct.blue] = 0.6862745098039216;
+  _.color.blue.900 = _.struct.new(_.color.struct);
+  _.color.blue.900[_.color.struct.red] = 0.11764705882352941;
+  _.color.blue.900[_.color.struct.green] = 0.22745098039215686;
+  _.color.blue.900[_.color.struct.blue] = 0.5411764705882353;
+  _.color.indigo.50 = _.struct.new(_.color.struct);
+  _.color.indigo.50[_.color.struct.red] = 0.9333333333333333;
+  _.color.indigo.50[_.color.struct.green] = 0.9490196078431372;
+  _.color.indigo.50[_.color.struct.blue] = 1;
+  _.color.indigo.100 = _.struct.new(_.color.struct);
+  _.color.indigo.100[_.color.struct.red] = 0.8784313725490196;
+  _.color.indigo.100[_.color.struct.green] = 0.9058823529411765;
+  _.color.indigo.100[_.color.struct.blue] = 1;
+  _.color.indigo.200 = _.struct.new(_.color.struct);
+  _.color.indigo.200[_.color.struct.red] = 0.7803921568627451;
+  _.color.indigo.200[_.color.struct.green] = 0.8235294117647058;
+  _.color.indigo.200[_.color.struct.blue] = 0.996078431372549;
+  _.color.indigo.300 = _.struct.new(_.color.struct);
+  _.color.indigo.300[_.color.struct.red] = 0.6470588235294118;
+  _.color.indigo.300[_.color.struct.green] = 0.7058823529411765;
+  _.color.indigo.300[_.color.struct.blue] = 0.9882352941176471;
+  _.color.indigo.400 = _.struct.new(_.color.struct);
+  _.color.indigo.400[_.color.struct.red] = 0.5058823529411764;
+  _.color.indigo.400[_.color.struct.green] = 0.5490196078431373;
+  _.color.indigo.400[_.color.struct.blue] = 0.9725490196078431;
+  _.color.indigo.500 = _.struct.new(_.color.struct);
+  _.color.indigo.500[_.color.struct.red] = 0.38823529411764707;
+  _.color.indigo.500[_.color.struct.green] = 0.4;
+  _.color.indigo.500[_.color.struct.blue] = 0.9450980392156862;
+  _.color.indigo.600 = _.struct.new(_.color.struct);
+  _.color.indigo.600[_.color.struct.red] = 0.30980392156862746;
+  _.color.indigo.600[_.color.struct.green] = 0.27450980392156865;
+  _.color.indigo.600[_.color.struct.blue] = 0.8980392156862745;
+  _.color.indigo.700 = _.struct.new(_.color.struct);
+  _.color.indigo.700[_.color.struct.red] = 0.2627450980392157;
+  _.color.indigo.700[_.color.struct.green] = 0.2196078431372549;
+  _.color.indigo.700[_.color.struct.blue] = 0.792156862745098;
+  _.color.indigo.800 = _.struct.new(_.color.struct);
+  _.color.indigo.800[_.color.struct.red] = 0.21568627450980393;
+  _.color.indigo.800[_.color.struct.green] = 0.18823529411764706;
+  _.color.indigo.800[_.color.struct.blue] = 0.6392156862745098;
+  _.color.indigo.900 = _.struct.new(_.color.struct);
+  _.color.indigo.900[_.color.struct.red] = 0.19215686274509805;
+  _.color.indigo.900[_.color.struct.green] = 0.1803921568627451;
+  _.color.indigo.900[_.color.struct.blue] = 0.5058823529411764;
+  _.color.violet.50 = _.struct.new(_.color.struct);
+  _.color.violet.50[_.color.struct.red] = 0.9607843137254902;
+  _.color.violet.50[_.color.struct.green] = 0.9529411764705882;
+  _.color.violet.50[_.color.struct.blue] = 1;
+  _.color.violet.100 = _.struct.new(_.color.struct);
+  _.color.violet.100[_.color.struct.red] = 0.9294117647058824;
+  _.color.violet.100[_.color.struct.green] = 0.9137254901960784;
+  _.color.violet.100[_.color.struct.blue] = 0.996078431372549;
+  _.color.violet.200 = _.struct.new(_.color.struct);
+  _.color.violet.200[_.color.struct.red] = 0.8666666666666667;
+  _.color.violet.200[_.color.struct.green] = 0.8392156862745098;
+  _.color.violet.200[_.color.struct.blue] = 0.996078431372549;
+  _.color.violet.300 = _.struct.new(_.color.struct);
+  _.color.violet.300[_.color.struct.red] = 0.7686274509803922;
+  _.color.violet.300[_.color.struct.green] = 0.7098039215686275;
+  _.color.violet.300[_.color.struct.blue] = 0.9921568627450981;
+  _.color.violet.400 = _.struct.new(_.color.struct);
+  _.color.violet.400[_.color.struct.red] = 0.6549019607843137;
+  _.color.violet.400[_.color.struct.green] = 0.5450980392156862;
+  _.color.violet.400[_.color.struct.blue] = 0.9803921568627451;
+  _.color.violet.500 = _.struct.new(_.color.struct);
+  _.color.violet.500[_.color.struct.red] = 0.5450980392156862;
+  _.color.violet.500[_.color.struct.green] = 0.3607843137254902;
+  _.color.violet.500[_.color.struct.blue] = 0.9647058823529412;
+  _.color.violet.600 = _.struct.new(_.color.struct);
+  _.color.violet.600[_.color.struct.red] = 0.48627450980392156;
+  _.color.violet.600[_.color.struct.green] = 0.22745098039215686;
+  _.color.violet.600[_.color.struct.blue] = 0.9294117647058824;
+  _.color.violet.700 = _.struct.new(_.color.struct);
+  _.color.violet.700[_.color.struct.red] = 0.42745098039215684;
+  _.color.violet.700[_.color.struct.green] = 0.1568627450980392;
+  _.color.violet.700[_.color.struct.blue] = 0.8509803921568627;
+  _.color.violet.800 = _.struct.new(_.color.struct);
+  _.color.violet.800[_.color.struct.red] = 0.3568627450980392;
+  _.color.violet.800[_.color.struct.green] = 0.12941176470588237;
+  _.color.violet.800[_.color.struct.blue] = 0.7137254901960784;
+  _.color.violet.900 = _.struct.new(_.color.struct);
+  _.color.violet.900[_.color.struct.red] = 0.2980392156862745;
+  _.color.violet.900[_.color.struct.green] = 0.11372549019607843;
+  _.color.violet.900[_.color.struct.blue] = 0.5843137254901961;
+  _.color.purple.50 = _.struct.new(_.color.struct);
+  _.color.purple.50[_.color.struct.red] = 0.9803921568627451;
+  _.color.purple.50[_.color.struct.green] = 0.9607843137254902;
+  _.color.purple.50[_.color.struct.blue] = 1;
+  _.color.purple.100 = _.struct.new(_.color.struct);
+  _.color.purple.100[_.color.struct.red] = 0.9529411764705882;
+  _.color.purple.100[_.color.struct.green] = 0.9098039215686274;
+  _.color.purple.100[_.color.struct.blue] = 1;
+  _.color.purple.200 = _.struct.new(_.color.struct);
+  _.color.purple.200[_.color.struct.red] = 0.9137254901960784;
+  _.color.purple.200[_.color.struct.green] = 0.8352941176470589;
+  _.color.purple.200[_.color.struct.blue] = 1;
+  _.color.purple.300 = _.struct.new(_.color.struct);
+  _.color.purple.300[_.color.struct.red] = 0.8470588235294118;
+  _.color.purple.300[_.color.struct.green] = 0.7058823529411765;
+  _.color.purple.300[_.color.struct.blue] = 0.996078431372549;
+  _.color.purple.400 = _.struct.new(_.color.struct);
+  _.color.purple.400[_.color.struct.red] = 0.7529411764705882;
+  _.color.purple.400[_.color.struct.green] = 0.5176470588235295;
+  _.color.purple.400[_.color.struct.blue] = 0.9882352941176471;
+  _.color.purple.500 = _.struct.new(_.color.struct);
+  _.color.purple.500[_.color.struct.red] = 0.6588235294117647;
+  _.color.purple.500[_.color.struct.green] = 0.3333333333333333;
+  _.color.purple.500[_.color.struct.blue] = 0.9686274509803922;
+  _.color.purple.600 = _.struct.new(_.color.struct);
+  _.color.purple.600[_.color.struct.red] = 0.5764705882352941;
+  _.color.purple.600[_.color.struct.green] = 0.2;
+  _.color.purple.600[_.color.struct.blue] = 0.9176470588235294;
+  _.color.purple.700 = _.struct.new(_.color.struct);
+  _.color.purple.700[_.color.struct.red] = 0.49411764705882355;
+  _.color.purple.700[_.color.struct.green] = 0.13333333333333333;
+  _.color.purple.700[_.color.struct.blue] = 0.807843137254902;
+  _.color.purple.800 = _.struct.new(_.color.struct);
+  _.color.purple.800[_.color.struct.red] = 0.4196078431372549;
+  _.color.purple.800[_.color.struct.green] = 0.12941176470588237;
+  _.color.purple.800[_.color.struct.blue] = 0.6588235294117647;
+  _.color.purple.900 = _.struct.new(_.color.struct);
+  _.color.purple.900[_.color.struct.red] = 0.34509803921568627;
+  _.color.purple.900[_.color.struct.green] = 0.10980392156862745;
+  _.color.purple.900[_.color.struct.blue] = 0.5294117647058824;
+  _.color.fuchsia.50 = _.struct.new(_.color.struct);
+  _.color.fuchsia.50[_.color.struct.red] = 0.9921568627450981;
+  _.color.fuchsia.50[_.color.struct.green] = 0.9568627450980393;
+  _.color.fuchsia.50[_.color.struct.blue] = 1;
+  _.color.fuchsia.100 = _.struct.new(_.color.struct);
+  _.color.fuchsia.100[_.color.struct.red] = 0.9803921568627451;
+  _.color.fuchsia.100[_.color.struct.green] = 0.9098039215686274;
+  _.color.fuchsia.100[_.color.struct.blue] = 1;
+  _.color.fuchsia.200 = _.struct.new(_.color.struct);
+  _.color.fuchsia.200[_.color.struct.red] = 0.9607843137254902;
+  _.color.fuchsia.200[_.color.struct.green] = 0.8156862745098039;
+  _.color.fuchsia.200[_.color.struct.blue] = 0.996078431372549;
+  _.color.fuchsia.300 = _.struct.new(_.color.struct);
+  _.color.fuchsia.300[_.color.struct.red] = 0.9411764705882353;
+  _.color.fuchsia.300[_.color.struct.green] = 0.6705882352941176;
+  _.color.fuchsia.300[_.color.struct.blue] = 0.9882352941176471;
+  _.color.fuchsia.400 = _.struct.new(_.color.struct);
+  _.color.fuchsia.400[_.color.struct.red] = 0.9098039215686274;
+  _.color.fuchsia.400[_.color.struct.green] = 0.4745098039215686;
+  _.color.fuchsia.400[_.color.struct.blue] = 0.9764705882352941;
+  _.color.fuchsia.500 = _.struct.new(_.color.struct);
+  _.color.fuchsia.500[_.color.struct.red] = 0.8509803921568627;
+  _.color.fuchsia.500[_.color.struct.green] = 0.27450980392156865;
+  _.color.fuchsia.500[_.color.struct.blue] = 0.9372549019607843;
+  _.color.fuchsia.600 = _.struct.new(_.color.struct);
+  _.color.fuchsia.600[_.color.struct.red] = 0.7529411764705882;
+  _.color.fuchsia.600[_.color.struct.green] = 0.14901960784313725;
+  _.color.fuchsia.600[_.color.struct.blue] = 0.8274509803921568;
+  _.color.fuchsia.700 = _.struct.new(_.color.struct);
+  _.color.fuchsia.700[_.color.struct.red] = 0.6352941176470588;
+  _.color.fuchsia.700[_.color.struct.green] = 0.10980392156862745;
+  _.color.fuchsia.700[_.color.struct.blue] = 0.6862745098039216;
+  _.color.fuchsia.800 = _.struct.new(_.color.struct);
+  _.color.fuchsia.800[_.color.struct.red] = 0.5254901960784314;
+  _.color.fuchsia.800[_.color.struct.green] = 0.09803921568627451;
+  _.color.fuchsia.800[_.color.struct.blue] = 0.5607843137254902;
+  _.color.fuchsia.900 = _.struct.new(_.color.struct);
+  _.color.fuchsia.900[_.color.struct.red] = 0.4392156862745098;
+  _.color.fuchsia.900[_.color.struct.green] = 0.10196078431372549;
+  _.color.fuchsia.900[_.color.struct.blue] = 0.4588235294117647;
+  _.color.pink.50 = _.struct.new(_.color.struct);
+  _.color.pink.50[_.color.struct.red] = 0.9921568627450981;
+  _.color.pink.50[_.color.struct.green] = 0.9490196078431372;
+  _.color.pink.50[_.color.struct.blue] = 0.9725490196078431;
+  _.color.pink.100 = _.struct.new(_.color.struct);
+  _.color.pink.100[_.color.struct.red] = 0.9882352941176471;
+  _.color.pink.100[_.color.struct.green] = 0.9058823529411765;
+  _.color.pink.100[_.color.struct.blue] = 0.9529411764705882;
+  _.color.pink.200 = _.struct.new(_.color.struct);
+  _.color.pink.200[_.color.struct.red] = 0.984313725490196;
+  _.color.pink.200[_.color.struct.green] = 0.8117647058823529;
+  _.color.pink.200[_.color.struct.blue] = 0.9098039215686274;
+  _.color.pink.300 = _.struct.new(_.color.struct);
+  _.color.pink.300[_.color.struct.red] = 0.9764705882352941;
+  _.color.pink.300[_.color.struct.green] = 0.6588235294117647;
+  _.color.pink.300[_.color.struct.blue] = 0.8313725490196079;
+  _.color.pink.400 = _.struct.new(_.color.struct);
+  _.color.pink.400[_.color.struct.red] = 0.9568627450980393;
+  _.color.pink.400[_.color.struct.green] = 0.4470588235294118;
+  _.color.pink.400[_.color.struct.blue] = 0.7137254901960784;
+  _.color.pink.500 = _.struct.new(_.color.struct);
+  _.color.pink.500[_.color.struct.red] = 0.9254901960784314;
+  _.color.pink.500[_.color.struct.green] = 0.2823529411764706;
+  _.color.pink.500[_.color.struct.blue] = 0.6;
+  _.color.pink.600 = _.struct.new(_.color.struct);
+  _.color.pink.600[_.color.struct.red] = 0.8588235294117647;
+  _.color.pink.600[_.color.struct.green] = 0.15294117647058825;
+  _.color.pink.600[_.color.struct.blue] = 0.4666666666666667;
+  _.color.pink.700 = _.struct.new(_.color.struct);
+  _.color.pink.700[_.color.struct.red] = 0.7450980392156863;
+  _.color.pink.700[_.color.struct.green] = 0.09411764705882353;
+  _.color.pink.700[_.color.struct.blue] = 0.36470588235294116;
+  _.color.pink.800 = _.struct.new(_.color.struct);
+  _.color.pink.800[_.color.struct.red] = 0.615686274509804;
+  _.color.pink.800[_.color.struct.green] = 0.09019607843137255;
+  _.color.pink.800[_.color.struct.blue] = 0.30196078431372547;
+  _.color.pink.900 = _.struct.new(_.color.struct);
+  _.color.pink.900[_.color.struct.red] = 0.5137254901960784;
+  _.color.pink.900[_.color.struct.green] = 0.09411764705882353;
+  _.color.pink.900[_.color.struct.blue] = 0.2627450980392157;
+  _.color.rose.50 = _.struct.new(_.color.struct);
+  _.color.rose.50[_.color.struct.red] = 1;
+  _.color.rose.50[_.color.struct.green] = 0.9450980392156862;
+  _.color.rose.50[_.color.struct.blue] = 0.9490196078431372;
+  _.color.rose.100 = _.struct.new(_.color.struct);
+  _.color.rose.100[_.color.struct.red] = 1;
+  _.color.rose.100[_.color.struct.green] = 0.8941176470588236;
+  _.color.rose.100[_.color.struct.blue] = 0.9019607843137255;
+  _.color.rose.200 = _.struct.new(_.color.struct);
+  _.color.rose.200[_.color.struct.red] = 0.996078431372549;
+  _.color.rose.200[_.color.struct.green] = 0.803921568627451;
+  _.color.rose.200[_.color.struct.blue] = 0.8274509803921568;
+  _.color.rose.300 = _.struct.new(_.color.struct);
+  _.color.rose.300[_.color.struct.red] = 0.9921568627450981;
+  _.color.rose.300[_.color.struct.green] = 0.6431372549019608;
+  _.color.rose.300[_.color.struct.blue] = 0.6862745098039216;
+  _.color.rose.400 = _.struct.new(_.color.struct);
+  _.color.rose.400[_.color.struct.red] = 0.984313725490196;
+  _.color.rose.400[_.color.struct.green] = 0.44313725490196076;
+  _.color.rose.400[_.color.struct.blue] = 0.5215686274509804;
+  _.color.rose.500 = _.struct.new(_.color.struct);
+  _.color.rose.500[_.color.struct.red] = 0.9568627450980393;
+  _.color.rose.500[_.color.struct.green] = 0.24705882352941178;
+  _.color.rose.500[_.color.struct.blue] = 0.3686274509803922;
+  _.color.rose.600 = _.struct.new(_.color.struct);
+  _.color.rose.600[_.color.struct.red] = 0.8823529411764706;
+  _.color.rose.600[_.color.struct.green] = 0.11372549019607843;
+  _.color.rose.600[_.color.struct.blue] = 0.2823529411764706;
+  _.color.rose.700 = _.struct.new(_.color.struct);
+  _.color.rose.700[_.color.struct.red] = 0.7450980392156863;
+  _.color.rose.700[_.color.struct.green] = 0.07058823529411765;
+  _.color.rose.700[_.color.struct.blue] = 0.23529411764705882;
+  _.color.rose.800 = _.struct.new(_.color.struct);
+  _.color.rose.800[_.color.struct.red] = 0.6235294117647059;
+  _.color.rose.800[_.color.struct.green] = 0.07058823529411765;
+  _.color.rose.800[_.color.struct.blue] = 0.2235294117647059;
+  _.color.rose.900 = _.struct.new(_.color.struct);
+  _.color.rose.900[_.color.struct.red] = 0.5333333333333333;
+  _.color.rose.900[_.color.struct.green] = 0.07450980392156863;
+  _.color.rose.900[_.color.struct.blue] = 0.21568627450980393;
+);
+function _.gfx() (
+  !_.gfx.executed ? ( _.gfx.executed = _.true;
+    _.font_size.extra_small.2 = gfx_ext_retina * 10;
+    _.line_height.extra_small.2 = gfx_ext_retina * 14;
+    _.font_size.extra_small = gfx_ext_retina * 12;
+    _.line_height.extra_small = gfx_ext_retina * 16;
+    _.font_size.small = gfx_ext_retina * 14;
+    _.line_height.small = gfx_ext_retina * 20;
+    _.font_size.base = gfx_ext_retina * 16;
+    _.line_height.base = gfx_ext_retina * 24;
+    _.font_size.large = gfx_ext_retina * 18;
+    _.line_height.large = gfx_ext_retina * 28;
+    _.font_size.extra_large = gfx_ext_retina * 20;
+    _.line_height.extra_large = gfx_ext_retina * 28;
+    _.font_size.extra_large.2 = gfx_ext_retina * 24;
+    _.line_height.extra_large.2 = gfx_ext_retina * 32;
+    _.font_size.extra_large.3 = gfx_ext_retina * 30;
+    _.line_height.extra_large.3 = gfx_ext_retina * 36;
+    _.font_size.extra_large.4 = gfx_ext_retina * 36;
+    _.line_height.extra_large.4 = gfx_ext_retina * 40;
+    _.font_size.extra_large.5 = gfx_ext_retina * 48;
+    _.line_height.extra_large.5 = gfx_ext_retina * 1;
+    _.font_size.extra_large.6 = gfx_ext_retina * 60;
+    _.line_height.extra_large.6 = gfx_ext_retina * 1;
+    _.font_size.extra_large.7 = gfx_ext_retina * 72;
+    _.line_height.extra_large.7 = gfx_ext_retina * 1;
+    _.font_size.extra_large.8 = gfx_ext_retina * 96;
+    _.line_height.extra_large.8 = gfx_ext_retina * 1;
+    _.font_size.extra_large.9 = gfx_ext_retina * 128;
+    _.line_height.extra_large.9 = gfx_ext_retina * 1;
+
+    _.font_style.regular = '';
+    _.font_style.bold = 'b';
+    _.font_style.italic = 'i';
+    _.font_style.bold_italic = 'bi';
+
+    _.text_align.horizontal.left = 0;
+    _.text_align.horizontal.center = 1;
+    _.text_align.horizontal.right = 2;
+    _.text_align.vertical.top = 0;
+    _.text_align.vertical.center = 4;
+    _.text_align.vertical.bottom = 8;
+
+    _.text_overflow.hidden = 0;
+    _.text_overflow.visible = 256;
+
+    _.width.0 = gfx_ext_retina * 0;
+    _.width.extra_small = gfx_ext_retina * 320;
+    _.width.small = gfx_ext_retina * 384;
+    _.width.medium = gfx_ext_retina * 448;
+    _.width.large = gfx_ext_retina * 512;
+    _.width.extra_large = gfx_ext_retina * 576;
+    _.width.extra_large.2 = gfx_ext_retina * 672;
+    _.width.extra_large.3 = gfx_ext_retina * 768;
+    _.width.extra_large.4 = gfx_ext_retina * 896;
+    _.width.extra_large.5 = gfx_ext_retina * 1024;
+    _.width.extra_large.6 = gfx_ext_retina * 1152;
+    _.width.extra_large.7 = gfx_ext_retina * 1280;
+    _.width.prose = gfx_ext_retina * 546;
+
+    _.space._96 = gfx_ext_retina * -384;
+    _.space._80 = gfx_ext_retina * -320;
+    _.space._72 = gfx_ext_retina * -288;
+    _.space._64 = gfx_ext_retina * -256;
+    _.space._60 = gfx_ext_retina * -240;
+    _.space._56 = gfx_ext_retina * -224;
+    _.space._52 = gfx_ext_retina * -208;
+    _.space._48 = gfx_ext_retina * -192;
+    _.space._44 = gfx_ext_retina * -176;
+    _.space._40 = gfx_ext_retina * -160;
+    _.space._36 = gfx_ext_retina * -144;
+    _.space._32 = gfx_ext_retina * -128;
+    _.space._28 = gfx_ext_retina * -112;
+    _.space._24 = gfx_ext_retina * -96;
+    _.space._20 = gfx_ext_retina * -80;
+    _.space._16 = gfx_ext_retina * -64;
+    _.space._14 = gfx_ext_retina * -56;
+    _.space._12 = gfx_ext_retina * -48;
+    _.space._11 = gfx_ext_retina * -44;
+    _.space._10 = gfx_ext_retina * -40;
+    _.space._9 = gfx_ext_retina * -36;
+    _.space._8 = gfx_ext_retina * -32;
+    _.space._7 = gfx_ext_retina * -28;
+    _.space._6 = gfx_ext_retina * -24;
+    _.space._5 = gfx_ext_retina * -20;
+    _.space._4 = gfx_ext_retina * -16;
+    _.space._3_5 = gfx_ext_retina * -14;
+    _.space._3 = gfx_ext_retina * -12;
+    _.space._2_5 = gfx_ext_retina * -10;
+    _.space._2 = gfx_ext_retina * -8;
+    _.space._1_5 = gfx_ext_retina * -6;
+    _.space._1 = gfx_ext_retina * -4;
+    _.space._0_5 = gfx_ext_retina * -2;
+    _.space._px = gfx_ext_retina * -1;
+    _.space.0 = gfx_ext_retina * 0;
+    _.space.px = gfx_ext_retina * 1;
+    _.space.0_5 = gfx_ext_retina * 2;
+    _.space.1 = gfx_ext_retina * 4;
+    _.space.1_5 = gfx_ext_retina * 6;
+    _.space.2 = gfx_ext_retina * 8;
+    _.space.2_5 = gfx_ext_retina * 10;
+    _.space.3 = gfx_ext_retina * 12;
+    _.space.3_5 = gfx_ext_retina * 14;
+    _.space.4 = gfx_ext_retina * 16;
+    _.space.5 = gfx_ext_retina * 20;
+    _.space.6 = gfx_ext_retina * 24;
+    _.space.7 = gfx_ext_retina * 28;
+    _.space.8 = gfx_ext_retina * 32;
+    _.space.9 = gfx_ext_retina * 36;
+    _.space.10 = gfx_ext_retina * 40;
+    _.space.11 = gfx_ext_retina * 44;
+    _.space.12 = gfx_ext_retina * 48;
+    _.space.14 = gfx_ext_retina * 56;
+    _.space.16 = gfx_ext_retina * 64;
+    _.space.20 = gfx_ext_retina * 80;
+    _.space.24 = gfx_ext_retina * 96;
+    _.space.28 = gfx_ext_retina * 112;
+    _.space.32 = gfx_ext_retina * 128;
+    _.space.36 = gfx_ext_retina * 144;
+    _.space.40 = gfx_ext_retina * 160;
+    _.space.44 = gfx_ext_retina * 176;
+    _.space.48 = gfx_ext_retina * 192;
+    _.space.52 = gfx_ext_retina * 208;
+    _.space.56 = gfx_ext_retina * 224;
+    _.space.60 = gfx_ext_retina * 240;
+    _.space.64 = gfx_ext_retina * 256;
+    _.space.72 = gfx_ext_retina * 288;
+    _.space.80 = gfx_ext_retina * 320;
+    _.space.96 = gfx_ext_retina * 384;
+
+    _.border_radius.none = gfx_ext_retina * 0;
+    _.border_radius.small = gfx_ext_retina * 2;
+    _.border_radius.base = gfx_ext_retina * 4;
+    _.border_radius.medium = gfx_ext_retina * 6;
+    _.border_radius.large = gfx_ext_retina * 8;
+    _.border_radius.extra_large = gfx_ext_retina * 12;
+    _.border_radius.extra_large.2 = gfx_ext_retina * 16;
+    _.border_radius.extra_large.3 = gfx_ext_retina * 24;
+    _.border_radius.full = gfx_ext_retina * 9999;
+  );
+);
+
+// STYLES SETTERS
+
+function _.font(size, style) (
+  gfx_setfont(1, "Arial", size, style);
+);
+function _.color(color) (
+  gfx_r = color[_.color.struct.red];
+  gfx_g = color[_.color.struct.green];
+  gfx_b = color[_.color.struct.blue];
+);
+function _.background_color(color) local(color.red, color.green, color.blue) (
+  color.red = color[_.color.struct.red];
+  color.green = color[_.color.struct.green];
+  color.blue = color[_.color.struct.blue];
+  gfx_clear = color.red * 255 + color.green * 255 * 256 + color.blue * 255 * 65536;
+);
+
+// DRAWING FUNCTIONS
+
+function _.print(
+  string,
+  font_size,
+  font_style,
+  text_align.horizontal,
+  text_align.vertical,
+  text_overflow,
+  color,
+  x,
+  y,
+  width,
+  height
+) (
+  _.font(font_size, font_style);
+  _.color(color);
+  gfx_x = x;
+  gfx_y = y;
+  gfx_drawstr(
+    string,
+    text_align.horizontal | text_align.vertical | text_overflow,
+    x + width,
+    y + height
+  );
+);
+
+function _.rounded_rectangle_fill(x, y, width, height, radius) (
+  radius = min(min(radius, width / 2), height / 2);
+  gfx_rect(x + radius, y, width - radius * 2, height);
+  gfx_rect(x, y + radius, width, height - radius * 2);
+  gfx_circle(x + radius, y + radius, radius, 1);
+  gfx_circle(x + width - radius - 1, y + radius, radius, 1);
+  gfx_circle(x + radius, y + height - radius - 1, radius, 1);
+  gfx_circle(x + width - radius - 1, y + height - radius - 1, radius, 1);
+);
+
+function _.graphs.line(array, x, y, width, height, thickness)
+         local(
+           array.size,
+           array.data,
+           array.index,
+           item.width,
+           height.half,
+           height.midpoint,
+           index,
+           line.x,
+           line.x.next,
+           line.y,
+           line.y.next,
+           thickness.index
+         ) (
+  array.size = array[_.array.struct.size];
+  array.data = array[_.array.struct.data];
+  item.width = width / array.size;
+  height.half = height / 2;
+  height.midpoint = y + height.half;
+  line.x = x;
+  line.y = height.midpoint - array.data[0] * height.half;
+  array.index = 0; loop(array.size - 1, array.index += 1;
+    line.x.next = line.x + item.width;
+    line.y.next = height.midpoint - array.data[array.index] * height.half;
     thickness.index = -1; loop(thickness, thickness.index += 1;
       gfx_line(line.x, line.y + thickness.index, line.x.next, line.y.next + thickness.index, 1);
     );
     line.x = line.x.next;
     line.y = line.y.next;
+  );
+);
+
+// BÉZIER CURVES
+// https://en.wikipedia.org/wiki/Bézier_curve
+// https://ciechanow.ski/drawing-bezier-curves/
+
+_.bezier.steps_multiplier = 0.13;
+
+function _.bezier.linear(P0, P1, t) (
+  P0 + t * (P1 - P0);
+);
+
+function _.bezier.linear.draw(P0.x, P0.y, P1.x, P1.y) local(steps, t, t.increment) (
+  steps = _.bezier.steps_multiplier * _.distance.euclidian(P0.x, P0.y, P1.x, P1.y);
+  gfx_x = P0.x;
+  gfx_y = P0.y;
+  t.increment = 1 / steps;
+  t = 0; loop(steps, t += t.increment;
+    gfx_lineto(_.bezier.linear(P0.x, P1.x, t), _.bezier.linear(P0.y, P1.y, t), _.true);
+  );
+);
+
+function _.bezier.quadratic(P0, P1, P2, t) (
+  P1 + sqr(1 - t) * (P0 - P1)  + sqr(t) * (P2 - P1);
+);
+
+function _.bezier.quadratic.draw(P0.x, P0.y, P1.x, P1.y, P2.x, P2.y) local(steps, t, t.increment) (
+  steps = _.bezier.steps_multiplier * (
+    _.distance.euclidian(P0.x, P0.y, P1.x, P1.y) +
+    _.distance.euclidian(P1.x, P1.y, P2.x, P2.y)
+  );
+  gfx_x = P0.x;
+  gfx_y = P0.y;
+  t.increment = 1 / steps;
+  t = 0; loop(steps, t += t.increment;
+    gfx_lineto(_.bezier.quadratic(P0.x, P1.x, P2.x, t), _.bezier.quadratic(P0.y, P1.y, P2.y, t), _.true);
+  );
+);
+
+function _.bezier.cubic(P0, P1, P2, P3, t) (
+  pow(1 - t, 3) * P0 + 3 * sqr(1 - t) * t * P1 + 3 * (1 - t) * sqr(t) * P2 + pow(t, 3) * P3;
+);
+
+function _.bezier.cubic.draw(P0.x, P0.y, P1.x, P1.y, P2.x, P2.y, P3.x, P3.y) local(steps, t, t.increment) (
+  steps = _.bezier.steps_multiplier * (
+    _.distance.euclidian(P0.x, P0.y, P1.x, P1.y) +
+    _.distance.euclidian(P1.x, P1.y, P2.x, P2.y) +
+    _.distance.euclidian(P2.x, P2.y, P3.x, P3.y)
+  );
+  gfx_x = P0.x;
+  gfx_y = P0.y;
+  t.increment = 1 / steps;
+  t = 0; loop(steps, t += t.increment;
+    gfx_lineto(_.bezier.cubic(P0.x, P1.x, P2.x, P3.x, t), _.bezier.cubic(P0.y, P1.y, P2.y, P3.y, t), _.true);
   );
 );
 
@@ -533,6 +1759,7 @@ function _.init() (
   _.circular_buffer.init();
   _.moving_average.simple.init();
   _.filter.biquad.init();
+  _.gfx.init();
 
   gfx_ext_retina = 1;
 );
