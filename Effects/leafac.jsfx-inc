@@ -1,4 +1,44 @@
 /*
+Library
+  leafac_Bit crusher.jsfx
+  leafac_White noise.jsfx
+  leafac_Gain.jsfx
+  mid-side
+  leafac_Oscillator (Tone generator) (LFO).jsfx
+  leafac_RMS.jsfx
+
+Effects
+  Distortion / waveshapers
+    leafac_Bit crusher.jsfx
+    leafac_Rectifier full-wave.jsfx
+    leafac_Rectifier half-wave.jsfx
+    leafac_Limiter hard clipper.jsfx
+    Bézier waveshaping
+    antialiasing
+  leafac_Noises
+    White
+    Pink
+    Brown
+  leafac_Burn-in speakers.jsfx
+    gain
+    Timer
+  leafac_DC offset.jsfx
+  Tremolo
+  leafac_Gain.jsfx
+  leafac_Invert phase.jsfx
+  leafac_Mute.jsfx
+  leafac_Null tester.jsfx
+  leafac_Oscillator (Tone generator) (LFO).jsfx
+  leafac_Oscilloscope.jsfx
+  leafac_RMS.jsfx (history, peak, true peak, lufs, and other measurements)
+
+
+leafac_Stereo mixer.jsfx
+
+
+
+
+
 - frequency ↔ samples
 - signal_size -> signal.size
 - Use negative indices to tuck away the metadata on arrays?
