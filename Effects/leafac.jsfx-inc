@@ -8,6 +8,10 @@ Library
   leafac_RMS.jsfx
 
 Effects
+  leafac_Noises
+    White
+    Pink
+    Brown
   Distortion / waveshapers
     leafac_Bit crusher.jsfx
     leafac_Rectifier full-wave.jsfx
@@ -15,10 +19,6 @@ Effects
     leafac_Limiter hard clipper.jsfx
     Bézier waveshaping
     antialiasing
-  leafac_Noises
-    White
-    Pink
-    Brown
   leafac_Burn-in speakers.jsfx
     gain
     Timer
