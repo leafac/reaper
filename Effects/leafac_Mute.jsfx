@@ -1,7 +1,9 @@
-// https://youtu.be/mnr3udsFZO0
+desc:leafac_Mute
+
+Useful, for example, when you want to mute the audio but not the video on a track.
 
 @sample
 
-channel = -1; loop(num_ch, channel += 1;
-  spl(channel) = 0;
+sample.channel = -1; loop(num_ch, sample.channel += 1;
+  spl(sample.channel) = 0;
 );
