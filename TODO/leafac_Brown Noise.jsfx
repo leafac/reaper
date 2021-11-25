@@ -1,0 +1,12 @@
+It seems that a resolution of 8 does the trick.
+
+slider1:resolution=1<.1,100,.1>Resolution
+slider2:gain=-12<-60,0, .1>Gain (dB)
+
+@sample
+
+sample += (rand() - .5) / resolution;
+sample > 1 ? sample = 2 - sample;
+sample < -1 ? sample = -2 - sample;
+
+spl0 = spl1 = sample * 10^(gain/20);

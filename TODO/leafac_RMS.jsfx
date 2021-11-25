@@ -1,0 +1,34 @@
+slider1:10<0,20,1>Gain
+
+@init
+
+// Sliding window
+window = 0;
+window_index = 0;
+window_size = floor(.3 * srate);
+sum = 0;
+
+// Exponential weighting
+weight = 0;
+rms_exponential_weighting = 0;
+
+@sample
+
+// Sliding window
+window_index = (window_index + 1) % window_size;
+sum -= window[window_index];
+square = sqr(spl0);
+window[window_index] = square;
+sum += square;
+rms_sliding_window = sqrt(sum / window_size);
+
+// Exponential weighting 
+weight += 1;
+rms_exponential_weighting =
+  sqrt((1 - 1/weight) * rms_exponential_weighting + (1/weight) * sqr(spl0));
+
+@gfx
+gfx_set(255);
+
+gfx_rect(10, 10, 10000 * rms_sliding_window, 20);
+gfx_rect(10, 40, 10000 * rms_exponential_weighting, 20);

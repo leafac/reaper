@@ -1,0 +1,15 @@
+options:gmem=InterInstanceCommunication
+
+slider1:the_slider=0<0,1,0.1>The slider
+
+@slider
+
+gmem[] = the_slider;
+
+@block
+
+gmem[] != the_slider ? (
+  the_slider = gmem[];
+  sliderchange(the_slider);
+);
+

@@ -1,0 +1,16 @@
+slider1:length=100<10,2000,1>Length (ms)
+slider2:gain=0.5<0,1,0.01>Gain
+slider3:feedback=0<0,0.99,0.01>Feedback
+
+@sample
+buffer0 = 0;
+buffer1 = 3000000;
+samples = length * srate / 1000;
+buffer_index = (buffer_index + 1) % samples;
+buffer0_previous = buffer0[buffer_index];
+buffer1_previous = buffer1[buffer_index];
+buffer0[buffer_index] = spl0 + buffer0_previous * feedback;
+buffer1[buffer_index] = spl1 + buffer1_previous * feedback;
+spl0 += buffer0_previous * gain;
+spl1 += buffer1_previous * gain;
+
