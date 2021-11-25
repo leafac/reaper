@@ -1,8 +1,4 @@
 /*
-- Today
-  - Bézier steps
-  - Move over the colors pages
-
 - frequency ↔ samples
 - signal_size -> signal.size
 - Use negative indices to tuck away the metadata on arrays?
@@ -46,6 +42,7 @@ Algorithms
     Smallest
     Find the median
     Largest
+  Moving average Hull
   Median averaging
   Search
   Bézier
