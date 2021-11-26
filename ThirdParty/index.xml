@@ -23,6 +23,13 @@
   </category>
   <category name="Filter">
     <reapack name="ReEQ and ReSpectrum" type="effect">
+      <version name="1.1.2">
+        <source file="ReEQ and ReSpectrum/ReEQ.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.1.2/ReEQ.jsfx</source>
+        <source file="ReEQ and ReSpectrum/ReSpectrum.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/v1.1.2/ReSpectrum.jsfx</source>
+        <source file="ReEQ and ReSpectrum/firhalfband.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.1.2/firhalfband.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/spectrum.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.1.2/spectrum.jsfx-inc</source>
+        <source file="ReEQ and ReSpectrum/svf_filter.jsfx-inc">https://github.com/Justin-Johnson/ReJJ/raw/v1.1.2/svf_filter.jsfx-inc</source>
+      </version>
       <version name="1.1.0">
         <source file="ReEQ and ReSpectrum/ReEQ.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/bdf7c767d370bea754165e436337796a24e94b52/ReEQ.jsfx</source>
         <source file="ReEQ and ReSpectrum/ReSpectrum.jsfx">https://github.com/Justin-Johnson/ReJJ/raw/bdf7c767d370bea754165e436337796a24e94b52/ReSpectrum.jsfx</source>
