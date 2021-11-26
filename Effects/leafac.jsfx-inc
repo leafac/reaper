@@ -46,6 +46,7 @@ leafac_Stereo mixer.jsfx
   - Zoom horizontally & vertically (range)
   - Line or area
 - Multichannel RMS
+- RMS with exponentially weighted moving average
 - Let the user change the window sizes on simple moving average
 - Show RMS over time
 - RBJ Filter: Include formula to convert between width types and use to keep sliders in sync so that width doesn’t change when you change type
