@@ -123,6 +123,8 @@ end_memory_allocation();
 
 Automixer
 
+- https://forums.prosoundweb.com/index.php/topic,158018.0.html
+- https://forum.audulus.com/t/gain-sharing-auto-mixer/1744
 - [ ] Plugin Delay Compensation should be 0 samples when there’s no lookahead (hard-code a special case)
 - [ ] max(gain reduction with lookahead, gain reduction without lookahead) https://www.youtube.com/watch?v=p7Ol5FPvHfs
 - [ ] Draw dB scale on meters
