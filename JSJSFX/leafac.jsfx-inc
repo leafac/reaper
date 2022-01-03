@@ -1,119 +1,136 @@
 /*
-Library
-  leafac_Bit crusher.jsfx
-  leafac_White noise.jsfx
-  leafac_Gain.jsfx
-  mid-side
-  leafac_Oscillator (Tone generator) (LFO).jsfx
-  leafac_RMS.jsfx
 
-Effects
-  leafac_Noises
-    White
-    Pink
-    Brown
-  Distortion / waveshapers
-    leafac_Bit crusher.jsfx
-    leafac_Rectifier full-wave.jsfx
-    leafac_Rectifier half-wave.jsfx
-    leafac_Limiter hard clipper.jsfx
-    Bézier waveshaping
-    antialiasing
-  leafac_Burn-in speakers.jsfx
-    gain
-    Timer
-  leafac_DC offset.jsfx
-  Tremolo
-  leafac_Gain.jsfx
-  leafac_Invert phase.jsfx
-  leafac_Null tester.jsfx
-  leafac_Oscillator (Tone generator) (LFO).jsfx
-  leafac_Oscilloscope.jsfx
-  leafac_RMS.jsfx (history, peak, true peak, lufs, and other measurements)
+EFFECTS
 
+- Memory visualizer
+  - https://forums.cockos.com/showthread.php?p=2039886
+  - https://forum.cockos.com/showthread.php?t=151992
+- De-Reverb
+  - https://www.youtube.com/watch?v=9c57YnS7ppA
+  - https://riddlermike.wordpress.com/2013/08/25/deverb-for-free-removing-reverb-using-free-plugins/
+- Dan Worrall’s idea of manipulating the stereo image with all-pass filters: https://www.youtube.com/watch?v=uZ9WQDojQt8
+- Static distortions
+  - Bit Crusher
+  - Rectifier
+    - Full-wave
+    - Half-wave
+  - Clipper
+  - Include oversampling options
+  - Bézier waveshaping
+- Noise generator (white, pink, brown, and maybe some other colors)
+- Gain
+  - Smooth automation & a reasonable range.
+- Mid-side encoder & decoder
+- Oscillator (Tone generator) LFO)
+- Burn-in speakers
+  - Gain
+  - Timer
+- DC Offset
+  - Set an arbitrary DC offset.
+  - Fix a DC offset with a high-pass filter
+- Tremolo
+- Oscilloscope
+  - Show waveforms when zoomed out
+  - When zoomed in, show a lollipop graph (https://www.youtube.com/watch?v=cIQ9IXSUzuM&t=18s) and draw the waveforms as they really will be when converted to analog
+- Meters
+  - Pretty much like the stock ones (LUFS, RMS, True Peak, and so forth) but plot results over time.
+- Monitor with low volume based on Dan Worrall’s video: https://www.youtube.com/watch?v=wgogJmeQFvY
 
-leafac_Stereo mixer.jsfx
+LIBRARY
 
-
-
-
-
-- frequency ↔ samples
-- signal_size -> signal.size
-- Use negative indices to tuck away the metadata on arrays?
-- Check Fotis’ video on synesthesia
-- Line graphs
-  - Zoom horizontally & vertically (range)
-  - Line or area
-- Multichannel RMS
-- RMS with exponentially weighted moving average
-- Let the user change the window sizes on simple moving average
-- Show RMS over time
-- RBJ Filter: Include formula to convert between width types and use to keep sliders in sync so that width doesn’t change when you change type
+- SVF
+  - Remove ‘biquad’ from the name
+  - Add sliders in the demonstration effect.
+  - Add extensions from ReEQ (for example, interpolation of coeffiecients for morphing filters).
+  - Add functions to visualize the frequency response (again, borrow from ReEQ).
 - Data structures
-  - Memory alignment
-  - Circular counter (helper to only run a block of code every so often, for example, the block that only runs every 256 samples on Justin’s - wavetable)
+  - Arrays
+    - Use negative indices to tuck away the metadata on arrays?
+      - Change some .memory into .array
+  - Circular buffers
+    - Consider using pointer arithmetic to return the address to the current position. This is slightly annoing because it’s pointer arithmetic, but it may simplify the use of circular buffers.
+  - Circular counter
+    - Helper to only run a block of code every so often, for example, the block that only runs every 256 samples on Justin’s wavetable
+  - Memory-aligned memory allocator
   - Matrix
   - Follower
-
-Design system
-  border-width
-  opacity
-  rotate
-  scale
-  brightness
-  contrast
-  saturate
-  animations
-    transition-duration
-    transition-timing-function
-
-Components
-  Oscilloscope
-  Frequency spectrum analyzer
-  Colorpicker
-  Colored lines
-
-Algorithms
-  Distance
-    Manhattan
-  Wrap numbers in a range
-  Sort
-    Smallest
-    Find the median
-    Largest
-  Moving average Hull
-  Median averaging
-  Search
-  Bézier
-    Color, Thickness, estimate the number of steps to come up with a smooth curve based on the distance between the control points
-  Noise generation of various colors
-  Random distributions
-    Uniform
-    Gaussian
-  dB ↔ amplitude conversation
-  degrees ↔ radians
-  DFT
-  Slew Rate
-  Phase
-    Unwrap
-    Reduce noise by checking small values & returning 0
-
-Filters
-  Biquad
-    rbj__q_to_bandwidth
-  SVF
-  Windowed-sinc
-  Butterworth
-  …
-
-Document
-  Dimensions for the @gfx block can’t use functions
-  You must call the initializers
-  How to manage different font sizes/styles/decoration
-  Why always arial (because of retina + operating system font support)
-    Workaround (render every text in the interface as images)
-  _rounded_rectangle_fill can’t be used with opacity < 1
+    - [x] Fixed-slope
+    - Fixed length
+    - Different shapes
+    - Different maximums going up & down (attack & release)
+    - https://docs.juce.com/master/classdsp_1_1BallisticsFilter.html
+  - Delay line with waveforms
+- Mid-side encoding & decoding
+- Auxiliary mathematical functions
+  - Clip a number (using min & max)
+  - Map a number from a range to another range (similar to Processing’s map)
+  - Rectify
+    - Full-wave
+    - Half-wave
+  - frequency ↔ samples
+- Oscillators
+  - Band-limited versions, using Justin’s code
+- RMS
+  - Multichannel
+  - Exponentially weighted moving average
+  - Change window size
+- Oversampling.
+- Line graphs
+  - Zoom horizontally & vertically (range)
+  - Line or area under curve
+- Moving averages
+  - Simple moving average
+    - Change window size
+  - Moving average Hull
+  - Median averaging
+- RBJ Filters
+  - Include formula to convert between width types (Q, BW, and S)
+    - Use to keep sliders in sync so that width doesn’t change when you change type
+- Frequency spectrum analyzer
+- Colorpicker
+- Filters
+  - Windowed-sinc
+  - Butterworth
+  - First-order filters (6dB/octave slopes)
+  - Moog & other analog filter emulation
+- Design system
+  - border-width
+  - opacity
+  - rotate
+  - scale
+  - brightness
+  - contrast
+  - saturate
+  - animations
+    - transition-duration
+    - transition-timing-function
+- Distance
+  - Manhattan
+- Sort
+  - Smallest
+  - Find the median
+  - Largest
+- Search (for example, binary search)
+- Bézier
+  - Color
+  - Thickness
+- Noise
+  - Gaussian
+  - Perlin
+- Random distributions
+  - Uniform
+  - Gaussian
+- Hilbert curve
+- Raycaster
+- degrees ↔ radians
+- amplitude_to_db -> linear_to_db
+- FFT (mostly to understand it)
+- Slew Rate
+- Phase
+  - Unwrap
+  - Reduce noise by checking small values & returning 0
+- FFT blurring
+- Logarithmic sliders
 */
 
 @init
@@ -211,6 +228,24 @@ function _.arcsch(x) (
   log(1 / x + sqrt((1 / sqr(x)) + 1));
 );
 
+// NUMERICAL FUNCTIONS
+
+function _.count_trailing_zeros(number) local(trailing_zeros) (
+  trailing_zeros = 0;
+  while (number & 1 << trailing_zeros == 0) (
+    trailing_zeros += 1;
+  );
+  trailing_zeros;
+);
+
+function _.follower(follower, target, maximum_change) (
+  follower + max(min(target - follower, maximum_change), -maximum_change);
+);
+
+function _.map(value, from.minimum, from.maximum, to.minimum, to.maximum) (
+  (value - from.minimum) / (from.maximum - from.minimum) * (to.maximum - to.minimum) + to.minimum;
+);
+
 // DISTANCES
 
 // https://en.wikipedia.org/wiki/Euclidean_distance
@@ -276,25 +311,30 @@ function _.circular_buffer.new(size) local(circular_buffer) (
   circular_buffer[_.circular_buffer.struct.signal] = _.array.new(size);
   circular_buffer;
 );
-function _.circular_buffer.push(circular_buffer, sample) local(index, signal, signal_size, signal_data) (
-  index = circular_buffer[_.circular_buffer.struct.index];
-  signal = circular_buffer[_.circular_buffer.struct.signal];
-  signal_size = signal[_.array.struct.size];
-  signal_data = signal[_.array.struct.data];
-  index += 1;
-  index == signal_size ? index -= signal_size;
-  circular_buffer[_.circular_buffer.struct.index] = index;
-  signal_data[index] = sample;
+function _.circular_buffer.index.advance(circular_buffer)
+         local(circular_buffer.index, circular_buffer.signal, circular_buffer.signal.size, circular_buffer.signal.data) (
+  circular_buffer.index = circular_buffer[_.circular_buffer.struct.index];
+  circular_buffer.signal = circular_buffer[_.circular_buffer.struct.signal];
+  circular_buffer.signal.size = circular_buffer.signal[_.array.struct.size];
+  circular_buffer.signal.data = circular_buffer.signal[_.array.struct.data];
+  circular_buffer.index += 1;
+  circular_buffer.index == circular_buffer.signal.size ? circular_buffer.index -= circular_buffer.signal.size;
+  circular_buffer[_.circular_buffer.struct.index] = circular_buffer.index;
+  circular_buffer.index;
+);
+function _.circular_buffer.push(circular_buffer, sample) (
+  circular_buffer[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.advance(circular_buffer)] = sample;
   sample;
 );
-function _.circular_buffer.get(circular_buffer, offset) local(index, signal, signal_size, signal_data) (
-  index = circular_buffer[_.circular_buffer.struct.index];
-  signal = circular_buffer[_.circular_buffer.struct.signal];
-  signal_size = signal[_.array.struct.size];
-  signal_data = signal[_.array.struct.data];
-  index += offset;
-  index < 0 ? index += signal_size;
-  signal_data[index];
+function _.circular_buffer.index.get(circular_buffer, offset) local(circular_buffer.index, circular_buffer.signal.size) (
+  circular_buffer.index = circular_buffer[_.circular_buffer.struct.index];
+  circular_buffer.signal.size = circular_buffer[_.circular_buffer.struct.signal][_.array.struct.size];
+  circular_buffer.index += offset;
+  circular_buffer.index < 0 ? circular_buffer.index += circular_buffer.signal.size;
+  circular_buffer.index;
+);
+function _.circular_buffer.get(circular_buffer, offset) (
+  circular_buffer[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.get(circular_buffer, offset)];
 );
 // function _.circular_buffer.to_array(circular_buffer, array)
 //          local(index, signal, signal.size, signal.data, array.data) (
@@ -370,60 +410,60 @@ function _.rms.get(rms) (
 // https://github.com/libaudioverse/libaudioverse/blob/master/audio%20eq%20cookbook.txt
 // https://music.columbia.edu/pipermail/music-dsp/2001-March/041752.html
 
-function _.filter.biquad.init() (
-  _.filter.biquad.struct = _.struct.define();
-  _.filter.biquad.struct.type = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.type.low_pass = _.enumeration();
-  _.filter.biquad.struct.type.high_pass = _.enumeration();
-  _.filter.biquad.struct.type.band_pass.constant_skirt = _.enumeration();
-  _.filter.biquad.struct.type.band_pass.constant_peak = _.enumeration();
-  _.filter.biquad.struct.type.notch = _.enumeration();
-  _.filter.biquad.struct.type.all_pass = _.enumeration();
-  _.filter.biquad.struct.type.peaking = _.enumeration();
-  _.filter.biquad.struct.type.low_shelf = _.enumeration();
-  _.filter.biquad.struct.type.high_shelf = _.enumeration();
-  _.filter.biquad.struct.frequency = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.gain = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.width.type = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.width.type.Q = _.enumeration();
-  _.filter.biquad.struct.width.type.bandwidth = _.enumeration();
-  _.filter.biquad.struct.width.type.S = _.enumeration();
-  _.filter.biquad.struct.width.value = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.b0_a0 = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.b1_a0 = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.b2_a0 = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.a0 = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.a1_a0 = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.a2_a0 = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.x_n = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.x_n_1 = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.x_n_2 = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.y_n = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.y_n_1 = _.struct.define.field(_.filter.biquad.struct);
-  _.filter.biquad.struct.y_n_2 = _.struct.define.field(_.filter.biquad.struct);
+function _.filter.biquad.rbj.init() (
+  _.filter.biquad.rbj.struct = _.struct.define();
+  _.filter.biquad.rbj.struct.type = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.type.low_pass = _.enumeration();
+  _.filter.biquad.rbj.struct.type.high_pass = _.enumeration();
+  _.filter.biquad.rbj.struct.type.band_pass.constant_skirt = _.enumeration();
+  _.filter.biquad.rbj.struct.type.band_pass.constant_peak = _.enumeration();
+  _.filter.biquad.rbj.struct.type.notch = _.enumeration();
+  _.filter.biquad.rbj.struct.type.all_pass = _.enumeration();
+  _.filter.biquad.rbj.struct.type.peaking = _.enumeration();
+  _.filter.biquad.rbj.struct.type.low_shelf = _.enumeration();
+  _.filter.biquad.rbj.struct.type.high_shelf = _.enumeration();
+  _.filter.biquad.rbj.struct.frequency = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.gain = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.width.type = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.width.type.Q = _.enumeration();
+  _.filter.biquad.rbj.struct.width.type.bandwidth = _.enumeration();
+  _.filter.biquad.rbj.struct.width.type.S = _.enumeration();
+  _.filter.biquad.rbj.struct.width.value = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.b0_a0 = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.b1_a0 = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.b2_a0 = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.a0 = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.a1_a0 = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.a2_a0 = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.x_n = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.x_n_1 = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.x_n_2 = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.y_n = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.y_n_1 = _.struct.define.field(_.filter.biquad.rbj.struct);
+  _.filter.biquad.rbj.struct.y_n_2 = _.struct.define.field(_.filter.biquad.rbj.struct);
 );
-function _.filter.biquad.new() local(filter) (
-  filter = _.struct.new(_.filter.biquad.struct);
-  filter[_.filter.biquad.struct.type] = _.undefined;
-  filter[_.filter.biquad.struct.frequency] = _.undefined;
-  filter[_.filter.biquad.struct.gain] = _.undefined;
-  filter[_.filter.biquad.struct.width.type] = _.undefined;
-  filter[_.filter.biquad.struct.width.value] = _.undefined;
-  filter[_.filter.biquad.struct.b0_a0] = _.undefined;
-  filter[_.filter.biquad.struct.b1_a0] = _.undefined;
-  filter[_.filter.biquad.struct.b2_a0] = _.undefined;
-  filter[_.filter.biquad.struct.a0] = _.undefined;
-  filter[_.filter.biquad.struct.a1_a0] = _.undefined;
-  filter[_.filter.biquad.struct.a2_a0] = _.undefined;
-  filter[_.filter.biquad.struct.x_n] = 0;
-  filter[_.filter.biquad.struct.x_n_1] = 0;
-  filter[_.filter.biquad.struct.x_n_2] = 0;
-  filter[_.filter.biquad.struct.y_n] = 0;
-  filter[_.filter.biquad.struct.y_n_1] = 0;
-  filter[_.filter.biquad.struct.y_n_2] = 0;
+function _.filter.biquad.rbj.new() local(filter) (
+  filter = _.struct.new(_.filter.biquad.rbj.struct);
+  filter[_.filter.biquad.rbj.struct.type] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.frequency] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.gain] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.width.type] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.width.value] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.b0_a0] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.b1_a0] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.b2_a0] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.a0] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.a1_a0] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.a2_a0] = _.undefined;
+  filter[_.filter.biquad.rbj.struct.x_n] = 0;
+  filter[_.filter.biquad.rbj.struct.x_n_1] = 0;
+  filter[_.filter.biquad.rbj.struct.x_n_2] = 0;
+  filter[_.filter.biquad.rbj.struct.y_n] = 0;
+  filter[_.filter.biquad.rbj.struct.y_n_1] = 0;
+  filter[_.filter.biquad.rbj.struct.y_n_2] = 0;
   filter;
 );
-function _.filter.biquad.configure(filter, type, frequency, gain, width.type, width.value)
+function _.filter.biquad.rbj.configure(filter, type, frequency, gain, width.type, width.value)
          local(A, w0, cos_w0, sin_w0, alpha,
                b0, b1, b2, a0, a1, a2, b0_a0, b1_a0, b2_a0, a1_a0, a2_a0) (
   A = 10^(gain / 40);
@@ -431,13 +471,13 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
   cos_w0 = cos(w0);
   sin_w0 = sin(w0);
   alpha =
-    width.type == _.filter.biquad.struct.width.type.Q
+    width.type == _.filter.biquad.rbj.struct.width.type.Q
     ? sin_w0 / (2 * width.value)
-    : width.type == _.filter.biquad.struct.width.type.bandwidth
+    : width.type == _.filter.biquad.rbj.struct.width.type.bandwidth
     ? sin_w0 * _.sinh(log(2) / 2 * width.value * w0 / sin_w0)
-    : width.type == _.filter.biquad.struct.width.type.S
+    : width.type == _.filter.biquad.rbj.struct.width.type.S
     ? sin_w0 / 2 * sqrt((A + 1 / A) * (1 / width.value - 1) + 2);
-  type == _.filter.biquad.struct.type.low_pass ? (
+  type == _.filter.biquad.rbj.struct.type.low_pass ? (
     b0 = (1 - cos_w0) / 2;
     b1 = 1 - cos_w0;
     b2 = (1 - cos_w0) / 2;
@@ -445,7 +485,7 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
     a1 = -2 * cos_w0;
     a2 = 1 - alpha;
   )
-  : type == _.filter.biquad.struct.type.high_pass ? (
+  : type == _.filter.biquad.rbj.struct.type.high_pass ? (
     b0 = (1 + cos_w0) / 2;
     b1 = -(1 + cos_w0);
     b2 = (1 + cos_w0) / 2;
@@ -453,7 +493,7 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
     a1 = -2 * cos_w0;
     a2 = 1 - alpha;
   )
-  : type == _.filter.biquad.struct.type.band_pass.constant_skirt ? (
+  : type == _.filter.biquad.rbj.struct.type.band_pass.constant_skirt ? (
     b0 = sin_w0 / 2;
     b1 = 0;
     b2 = -sin_w0 / 2;
@@ -461,7 +501,7 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
     a1 = -2 * cos_w0;
     a2 = 1 - alpha;
   )
-  : type == _.filter.biquad.struct.type.band_pass.constant_peak ? (
+  : type == _.filter.biquad.rbj.struct.type.band_pass.constant_peak ? (
     b0 = alpha;
     b1 = 0;
     b2 = -alpha;
@@ -469,7 +509,7 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
     a1 = -2 * cos_w0;
     a2 = 1 - alpha;
   )
-  : type == _.filter.biquad.struct.type.notch ? (
+  : type == _.filter.biquad.rbj.struct.type.notch ? (
     b0 = 1;
     b1 = -2 * cos_w0;
     b2 = 1;
@@ -477,7 +517,7 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
     a1 = -2 * cos_w0;
     a2 = 1 - alpha;
   )
-  : type == _.filter.biquad.struct.type.all_pass ? (
+  : type == _.filter.biquad.rbj.struct.type.all_pass ? (
     b0 = 1 - alpha;
     b1 = -2 * cos_w0;
     b2 = 1 + alpha;
@@ -485,7 +525,7 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
     a1 = -2 * cos_w0;
     a2 = 1 - alpha;
   )
-  : type == _.filter.biquad.struct.type.peaking ? (
+  : type == _.filter.biquad.rbj.struct.type.peaking ? (
     b0 = 1 + alpha * A;
     b1 = -2 * cos_w0;
     b2 = 1 - alpha * A;
@@ -493,7 +533,7 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
     a1 = -2 * cos_w0;
     a2 = 1 - alpha / A;
   )
-  : type == _.filter.biquad.struct.type.low_shelf ? (
+  : type == _.filter.biquad.rbj.struct.type.low_shelf ? (
     b0 =      A * ((A + 1) - (A - 1) * cos_w0 + 2 * sqrt(A) * alpha);
     b1 =  2 * A * ((A - 1) - (A + 1) * cos_w0                      );
     b2 =      A * ((A + 1) - (A - 1) * cos_w0 - 2 * sqrt(A) * alpha);
@@ -501,7 +541,7 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
     a1 =     -2 * ((A - 1) + (A + 1) * cos_w0                      );
     a2 =           (A + 1) + (A - 1) * cos_w0 - 2 * sqrt(A) * alpha;
   )
-  : type == _.filter.biquad.struct.type.high_shelf ? (
+  : type == _.filter.biquad.rbj.struct.type.high_shelf ? (
     b0 =      A * ((A + 1) + (A - 1) * cos_w0 + 2 * sqrt(A) * alpha );
     b1 = -2 * A * ((A - 1) + (A + 1) * cos_w0                       );
     b2 =      A * ((A + 1) + (A - 1) * cos_w0 - 2 * sqrt(A) * alpha );
@@ -514,42 +554,221 @@ function _.filter.biquad.configure(filter, type, frequency, gain, width.type, wi
   b2_a0 = b2 / a0;
   a1_a0 = a1 / a0;
   a2_a0 = a2 / a0;
-  filter[_.filter.biquad.struct.type] = type;
-  filter[_.filter.biquad.struct.frequency] = frequency;
-  filter[_.filter.biquad.struct.gain] = gain;
-  filter[_.filter.biquad.struct.width.type] = width.type;
-  filter[_.filter.biquad.struct.width.value] = width.value;
-  filter[_.filter.biquad.struct.b0_a0] = b0_a0;
-  filter[_.filter.biquad.struct.b1_a0] = b1_a0;
-  filter[_.filter.biquad.struct.b2_a0] = b2_a0;
-  filter[_.filter.biquad.struct.a0] = a0;
-  filter[_.filter.biquad.struct.a1_a0] = a1_a0;
-  filter[_.filter.biquad.struct.a2_a0] = a2_a0;
+  filter[_.filter.biquad.rbj.struct.type] = type;
+  filter[_.filter.biquad.rbj.struct.frequency] = frequency;
+  filter[_.filter.biquad.rbj.struct.gain] = gain;
+  filter[_.filter.biquad.rbj.struct.width.type] = width.type;
+  filter[_.filter.biquad.rbj.struct.width.value] = width.value;
+  filter[_.filter.biquad.rbj.struct.b0_a0] = b0_a0;
+  filter[_.filter.biquad.rbj.struct.b1_a0] = b1_a0;
+  filter[_.filter.biquad.rbj.struct.b2_a0] = b2_a0;
+  filter[_.filter.biquad.rbj.struct.a0] = a0;
+  filter[_.filter.biquad.rbj.struct.a1_a0] = a1_a0;
+  filter[_.filter.biquad.rbj.struct.a2_a0] = a2_a0;
 );
-function _.filter.biquad.filter(filter, sample)
+function _.filter.biquad.rbj.filter(filter, sample)
          local(b0_a0, b1_a0, b2_a0, a1_a0, a2_a0, x_n_2, x_n_1, x_n, y_n_2, y_n_1, y_n) (
-  b0_a0 = filter[_.filter.biquad.struct.b0_a0];
-  b1_a0 = filter[_.filter.biquad.struct.b1_a0];
-  b2_a0 = filter[_.filter.biquad.struct.b2_a0];
-  a1_a0 = filter[_.filter.biquad.struct.a1_a0];
-  a2_a0 = filter[_.filter.biquad.struct.a2_a0];
-  x_n_2 = filter[_.filter.biquad.struct.x_n_1];
-  x_n_1 = filter[_.filter.biquad.struct.x_n];
+  b0_a0 = filter[_.filter.biquad.rbj.struct.b0_a0];
+  b1_a0 = filter[_.filter.biquad.rbj.struct.b1_a0];
+  b2_a0 = filter[_.filter.biquad.rbj.struct.b2_a0];
+  a1_a0 = filter[_.filter.biquad.rbj.struct.a1_a0];
+  a2_a0 = filter[_.filter.biquad.rbj.struct.a2_a0];
+  x_n_2 = filter[_.filter.biquad.rbj.struct.x_n_1];
+  x_n_1 = filter[_.filter.biquad.rbj.struct.x_n];
   x_n = sample;
-  y_n_2 = filter[_.filter.biquad.struct.y_n_1];
-  y_n_1 = filter[_.filter.biquad.struct.y_n];
+  y_n_2 = filter[_.filter.biquad.rbj.struct.y_n_1];
+  y_n_1 = filter[_.filter.biquad.rbj.struct.y_n];
   y_n = b0_a0 * x_n + b1_a0 * x_n_1 + b2_a0 * x_n_2
                     - a1_a0 * y_n_1 - a2_a0 * y_n_2;
-  filter[_.filter.biquad.struct.x_n] = x_n;
-  filter[_.filter.biquad.struct.x_n_1] = x_n_1;
-  filter[_.filter.biquad.struct.x_n_2] = x_n_2;
-  filter[_.filter.biquad.struct.y_n] = y_n;
-  filter[_.filter.biquad.struct.y_n_1] = y_n_1;
-  filter[_.filter.biquad.struct.y_n_2] = y_n_2;
+  filter[_.filter.biquad.rbj.struct.x_n] = x_n;
+  filter[_.filter.biquad.rbj.struct.x_n_1] = x_n_1;
+  filter[_.filter.biquad.rbj.struct.x_n_2] = x_n_2;
+  filter[_.filter.biquad.rbj.struct.y_n] = y_n;
+  filter[_.filter.biquad.rbj.struct.y_n_1] = y_n_1;
+  filter[_.filter.biquad.rbj.struct.y_n_2] = y_n_2;
   y_n;
 );
 
-// Discrete Fourier Transform
+// STATE VARIABLE FILTER (SVF)
+
+// https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
+
+function _.filter.biquad.svf.init() (
+  _.filter.biquad.svf.struct = _.struct.define();
+  _.filter.biquad.svf.struct.type = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.type.low_pass = _.enumeration();
+  _.filter.biquad.svf.struct.type.band_pass = _.enumeration();
+  _.filter.biquad.svf.struct.type.high_pass = _.enumeration();
+  _.filter.biquad.svf.struct.type.notch = _.enumeration();
+  _.filter.biquad.svf.struct.type.peak = _.enumeration();
+  _.filter.biquad.svf.struct.type.all_pass = _.enumeration();
+  _.filter.biquad.svf.struct.type.bell = _.enumeration();
+  _.filter.biquad.svf.struct.type.low_shelf = _.enumeration();
+  _.filter.biquad.svf.struct.type.high_shelf = _.enumeration();
+  _.filter.biquad.svf.struct.frequency = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.gain = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.Q = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.a1 = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.a2 = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.a3 = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.m0 = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.m1 = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.m2 = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.ic1eq = _.struct.define.field(_.filter.biquad.svf.struct);
+  _.filter.biquad.svf.struct.ic2eq = _.struct.define.field(_.filter.biquad.svf.struct);
+);
+function _.filter.biquad.svf.new() local(filter) (
+  filter = _.struct.new(_.filter.biquad.svf.struct);
+  filter[_.filter.biquad.svf.struct.type] = _.undefined;
+  filter[_.filter.biquad.svf.struct.frequency] = _.undefined;
+  filter[_.filter.biquad.svf.struct.gain] = _.undefined;
+  filter[_.filter.biquad.svf.struct.Q] = _.undefined;
+  filter[_.filter.biquad.svf.struct.a1] = _.undefined;
+  filter[_.filter.biquad.svf.struct.a2] = _.undefined;
+  filter[_.filter.biquad.svf.struct.a3] = _.undefined;
+  filter[_.filter.biquad.svf.struct.m0] = _.undefined;
+  filter[_.filter.biquad.svf.struct.m1] = _.undefined;
+  filter[_.filter.biquad.svf.struct.m2] = _.undefined;
+  filter[_.filter.biquad.svf.struct.ic1eq] = 0;
+  filter[_.filter.biquad.svf.struct.ic2eq] = 0;
+  filter;
+);
+function _.filter.biquad.svf.configure(filter, type, frequency, gain, Q)
+         local(A, g, k, a1, a2, a3, m0, m1, m2) (
+  
+  type == _.filter.biquad.svf.struct.type.low_pass ? (
+    g = tan($pi * frequency / srate);
+    k = 1 / Q;
+    a1 = 1 / (1 + g * (g + k));
+    a2 = g * a1;
+    a3 = g * a2;
+    m0 = 0;
+    m1 = 0;
+    m2 = 1;
+  )
+  : type == _.filter.biquad.svf.struct.type.band_pass ? (
+    g = "TODO";
+    k = "TODO";
+    a1 = "TODO";
+    a2 = "TODO";
+    a3 = "TODO";
+    m0 = "TODO";
+    m1 = "TODO";
+    m2 = "TODO";
+  )
+  : type == _.filter.biquad.svf.struct.type.high_pass ? (
+    g = "TODO";
+    k = "TODO";
+    a1 = "TODO";
+    a2 = "TODO";
+    a3 = "TODO";
+    m0 = "TODO";
+    m1 = "TODO";
+    m2 = "TODO";
+  )
+  : type == _.filter.biquad.svf.struct.type.notch ? (
+    g = "TODO";
+    k = "TODO";
+    a1 = "TODO";
+    a2 = "TODO";
+    a3 = "TODO";
+    m0 = "TODO";
+    m1 = "TODO";
+    m2 = "TODO";
+  )
+  : type == _.filter.biquad.svf.struct.type.peak ? (
+    g = tan($pi * frequency / srate);
+    k = 1 / Q;
+    a1 = 1 / (1 + g * (g + k));
+    a2 = g * a1;
+    a3 = g * a2;
+    m0 = 1;
+    m1 = -k;
+    m2 = -2;
+  )
+  : type == _.filter.biquad.svf.struct.type.all_pass ? (
+    g = "TODO";
+    k = "TODO";
+    a1 = "TODO";
+    a2 = "TODO";
+    a3 = "TODO";
+    m0 = "TODO";
+    m1 = "TODO";
+    m2 = "TODO";
+  )
+  : type == _.filter.biquad.svf.struct.type.bell ? (
+    A = pow(10, gain / 40);
+    g = tan($pi * frequency / srate);
+    k = 1 / (Q * A);
+    a1 = 1 / (1 + g * (g + k));
+    a2 = g * a1;
+    a3 = g * a2;
+    m0 = 1;
+    m1 = k * (A * A - 1);
+    m2 = 0;
+  )
+  : type == _.filter.biquad.svf.struct.type.low_shelf ? (
+    g = "TODO";
+    k = "TODO";
+    a1 = "TODO";
+    a2 = "TODO";
+    a3 = "TODO";
+    m0 = "TODO";
+    m1 = "TODO";
+    m2 = "TODO";
+  )
+  : type == _.filter.biquad.svf.struct.type.high_shelf ? (
+    g = "TODO";
+    k = "TODO";
+    a1 = "TODO";
+    a2 = "TODO";
+    a3 = "TODO";
+    m0 = "TODO";
+    m1 = "TODO";
+    m2 = "TODO";
+  );
+  filter[_.filter.biquad.svf.struct.type] = type;
+  filter[_.filter.biquad.svf.struct.frequency] = frequency;
+  filter[_.filter.biquad.svf.struct.gain] = gain;
+  filter[_.filter.biquad.svf.struct.Q] = Q;
+  filter[_.filter.biquad.svf.struct.a1] = a1;
+  filter[_.filter.biquad.svf.struct.a2] = a2;
+  filter[_.filter.biquad.svf.struct.a3] = a3;
+  filter[_.filter.biquad.svf.struct.m0] = m0;
+  filter[_.filter.biquad.svf.struct.m1] = m1;
+  filter[_.filter.biquad.svf.struct.m2] = m2;
+);
+function _.filter.biquad.svf.filter(filter, sample)
+         local(a1, a2, a3, m0, m1, m2, ic1eq, ic2eq, v0, v1, v2, v3, output) (
+  a1 = filter[_.filter.biquad.svf.struct.a1];
+  a2 = filter[_.filter.biquad.svf.struct.a2];
+  a3 = filter[_.filter.biquad.svf.struct.a3];
+  m0 = filter[_.filter.biquad.svf.struct.m0];
+  m1 = filter[_.filter.biquad.svf.struct.m1];
+  m2 = filter[_.filter.biquad.svf.struct.m2];
+  ic1eq = filter[_.filter.biquad.svf.struct.ic1eq];
+  ic2eq = filter[_.filter.biquad.svf.struct.ic2eq];
+
+  v0 = sample;
+  v3 = v0 - ic2eq;
+  v1 = a1 * ic1eq + a2 * v3;
+  v2 = ic2eq + a2 * ic1eq + a3 * v3;
+  ic1eq = 2 * v1 - ic1eq;
+  ic2eq = 2 * v2 - ic2eq;
+  output = m0 * v0 + m1 * v1 + m2 * v2;
+
+  filter[_.filter.biquad.svf.struct.ic1eq] = ic1eq;
+  filter[_.filter.biquad.svf.struct.ic2eq] = ic2eq;
+
+  output;
+);
+
+function _.filter.init() (
+  _.filter.biquad.rbj.init();
+  _.filter.biquad.svf.init();
+);
+
+// DISCRETE FOURIER TRANSFORM
 // http://www.dspguide.com/CH8.PDF
 
 function _.dft(data, reals, imaginaries) local(N, k, i, sum.real, sum.imaginary x_i, ReX, ImX) (
@@ -567,6 +786,86 @@ function _.dft(data, reals, imaginaries) local(N, k, i, sum.real, sum.imaginary 
     ReX[k] = sum.real;
     ImX[k] = -sum.imaginary;
   );
+);
+
+// NOISES
+// https://en.wikipedia.org/wiki/White_noise
+// https://en.wikipedia.org/wiki/Pink_noise
+// https://en.wikipedia.org/wiki/Brownian_noise
+// White and brown music, fractal curves and one-over-f fluctuations. By Martin Gardner (https://music.informatics.indiana.edu/courses/I400/doc/mathgames.pdf)
+// https://www.firstpr.com.au/dsp/pink-noise/
+// https://www.dsprelated.com/showarticle/908.php
+// https://github.com/audacity/audacity/blob/f0a31622451df1692413f38748f7662aa757eabe/src/effects/Noise.cpp
+// https://www.ridgerat-tech.us/pink/pinkalg.htm
+// https://www.ridgerat-tech.us/pink/newpink.htm
+
+function _.noise.white() (
+  rand() * 2 - 1;
+);
+
+function _.noise.pink.init() (
+  _.noise.pink.white_noises.size = 10; // Calibrated by hand while looking at a spectrum analyzer with a 3dB slope.
+  _.noise.pink.white_noises.counter.maximum = 2^(_.noise.pink.white_noises.size - 1);
+
+  _.noise.pink.struct = _.struct.define();
+  _.noise.pink.struct.white_noises = _.struct.define.field(_.noise.pink.struct);
+  _.noise.pink.struct.white_noises.counter = _.struct.define.field(_.noise.pink.struct);
+  _.noise.pink.struct.white_noises.sum = _.struct.define.field(_.noise.pink.struct);
+);
+function _.noise.pink.new() local(noise) (
+  noise = _.struct.new(_.noise.pink.struct);
+  noise[_.noise.pink.struct.white_noises] = _.memory.new(_.noise.pink.white_noises.size);
+  noise[_.noise.pink.struct.white_noises.counter] = 1;
+  noise[_.noise.pink.struct.white_noises.sum] = 0;
+  noise;
+);
+function _.noise.pink(noise)
+  local(
+    noise.white_noises,
+    noise.white_noises.counter,
+    noise.white_noises.sum,
+    noise.white_noises.index,
+    white_sample
+  ) (
+  noise.white_noises = noise[_.noise.pink.struct.white_noises];
+  noise.white_noises.counter = noise[_.noise.pink.struct.white_noises.counter];
+  noise.white_noises.sum = noise[_.noise.pink.struct.white_noises.sum];
+
+  white_sample = _.noise.white();
+  noise.white_noises.index = _.count_trailing_zeros(noise.white_noises.counter);
+  noise.white_noises.sum += - noise.white_noises[noise.white_noises.index] + white_sample;
+  noise.white_noises.counter += 1;
+  noise.white_noises.counter > _.noise.pink.white_noises.counter.maximum ? noise.white_noises.counter = 1;
+
+  noise.white_noises[noise.white_noises.index] = white_sample;
+  noise[_.noise.pink.struct.white_noises.counter] = noise.white_noises.counter;
+  noise[_.noise.pink.struct.white_noises.sum] = noise.white_noises.sum;
+  (noise.white_noises.sum + _.noise.white()) / (_.noise.pink.white_noises.size + 1);
+);
+
+function _.noise.brown.init() (
+  _.noise.brown.travel_amount = 0.05; // Calibrated by hand, looking at the sound in a 6dB tilt spectrum analyzer. Maybe this needs to change depending on the sample rate.
+
+  _.noise.brown.struct = _.struct.define();
+  _.noise.brown.struct.previous_sample = _.struct.define.field(_.noise.brown.struct);
+);
+function _.noise.brown.new() local(noise) (
+  noise = _.struct.new(_.noise.brown.struct);
+  noise[_.noise.brown.struct.previous_sample] = 0;
+  noise;
+);
+function _.noise.brown(noise) local(noise.previous_sample, sample) (
+  noise.previous_sample = noise[_.noise.brown.struct.previous_sample];
+  sample = noise.previous_sample + _.noise.white() * _.noise.brown.travel_amount;
+  sample > 1 ? sample = 2 - sample;
+  sample < -1 ? sample = -2 - sample;
+  noise[_.noise.brown.struct.previous_sample] = sample;
+  sample;
+);
+
+function _.noise.init() (
+  _.noise.pink.init();
+  _.noise.brown.init();
 );
 
 // DESIGN SYSTEM
@@ -1636,6 +1935,22 @@ function _.gfx() (
     _.border_radius.extra_large.2 = gfx_ext_retina * 16;
     _.border_radius.extra_large.3 = gfx_ext_retina * 24;
     _.border_radius.full = gfx_ext_retina * 9999;
+
+    _.opacity.0 = 0;
+    _.opacity.5 = 0.05;
+    _.opacity.10 = 0.1;
+    _.opacity.20 = 0.2;
+    _.opacity.25 = 0.25;
+    _.opacity.30 = 0.3;
+    _.opacity.40 = 0.4;
+    _.opacity.50 = 0.5;
+    _.opacity.60 = 0.6;
+    _.opacity.70 = 0.7;
+    _.opacity.75 = 0.75;
+    _.opacity.80 = 0.8;
+    _.opacity.90 = 0.9;
+    _.opacity.95 = 0.95;
+    _.opacity.100 = 1;
   );
 );
 
@@ -1726,6 +2041,193 @@ function _.graphs.line(array, x, y, width, height, thickness)
   );
 );
 
+// WAVEFORMS
+
+function _.waveform.init() (
+  _.waveform.struct = _.struct.define();
+  _.waveform.struct.slices = _.struct.define.field(_.waveform.struct);
+  _.waveform.struct.slices.duration = _.struct.define.field(_.waveform.struct);
+  _.waveform.struct.slices.samples_per_slice = _.struct.define.field(_.waveform.struct);
+  _.waveform.struct.slices.samples_in_current_slice = _.struct.define.field(_.waveform.struct);
+  _.waveform.slice.struct = _.struct.define();
+  _.waveform.slice.struct.minimum = _.struct.define.field(_.waveform.slice.struct);
+  _.waveform.slice.struct.maximum = _.struct.define.field(_.waveform.slice.struct);
+);
+function _.waveform.new(slices.size, slices.duration)
+local(
+  waveform,
+  waveform.slices,
+  waveform.slices.signal,
+  waveform.slices.signal.size,
+  waveform.slices.signal.data,
+  waveform.slices.signal.data.index,
+  waveform.slice
+) (
+  waveform = _.struct.new(_.waveform.struct);
+  waveform.slices = _.circular_buffer.new(slices.size);
+  waveform.slices.signal = waveform.slices[_.circular_buffer.struct.signal];
+  waveform.slices.signal.size = waveform.slices.signal[_.array.struct.size];
+  waveform.slices.signal.data = waveform.slices.signal[_.array.struct.data];
+  waveform.slices.signal.data.index = -1; loop(waveform.slices.signal.size, waveform.slices.signal.data.index += 1;
+    waveform.slice = _.struct.new(_.waveform.slice.struct);
+    // TODO: Extract this waveform.slice reset.
+    waveform.slice[_.waveform.slice.struct.minimum] = _.infinity;
+    waveform.slice[_.waveform.slice.struct.maximum] = -_.infinity;
+    waveform.slices.signal.data[waveform.slices.signal.data.index] = waveform.slice;
+  );
+  waveform[_.waveform.struct.slices] = waveform.slices;
+  waveform[_.waveform.struct.slices.duration] = slices.duration;
+  waveform[_.waveform.struct.slices.samples_per_slice] = slices.duration / slices.size;
+  waveform[_.waveform.struct.slices.samples_in_current_slice] = 0;
+  waveform;
+);
+function _.waveform.push(waveform, sample)
+local(
+  waveform.slices,
+  waveform.slices.samples_per_slice,
+  waveform.slices.samples_in_current_slice,
+  waveform.slice
+) (
+  waveform.slices = waveform[_.waveform.struct.slices];
+  waveform.slices.samples_per_slice = waveform[_.waveform.struct.slices.samples_per_slice];
+  waveform.slices.samples_in_current_slice = waveform[_.waveform.struct.slices.samples_in_current_slice];
+  waveform.slice = waveform.slices[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.get(waveform.slices, 0)];
+
+  waveform.slice[_.waveform.slice.struct.minimum] = min(waveform.slice[_.waveform.slice.struct.minimum], sample);
+  waveform.slice[_.waveform.slice.struct.maximum] = max(waveform.slice[_.waveform.slice.struct.maximum], sample);
+  // TODO: Extract this notion of circular counting.
+  waveform.slices.samples_in_current_slice += 1;
+  waveform.slices.samples_in_current_slice >= waveform.slices.samples_per_slice ? (
+    waveform.slices.samples_in_current_slice -= waveform.slices.samples_per_slice;
+    waveform.slice = waveform.slices[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.advance(waveform.slices)];
+    waveform.slice[_.waveform.slice.struct.minimum] = _.infinity;
+    waveform.slice[_.waveform.slice.struct.maximum] = -_.infinity;
+  );
+
+  waveform[_.waveform.struct.slices.samples_in_current_slice] = waveform.slices.samples_in_current_slice;
+);
+function _.waveform.draw(waveform, x, y, width, height)
+local (
+  waveform.slices,
+  waveform.slices.signal.size,
+  waveform.height.half,
+  waveform.slice.width,
+  waveform.y.midpoint,
+  waveform.slices.offset,
+  waveform.x,
+  waveform.slice,
+  waveform.slice.minimum,
+  waveform.slice.maximum,
+  waveform.y,
+  waveform.slice.height
+) (
+  waveform.slices = waveform[_.waveform.struct.slices];
+  waveform.slices.signal.size = waveform.slices[_.circular_buffer.struct.signal][_.array.struct.size];
+
+  waveform.height.half = height / 2;
+  waveform.slice.width = width / waveform.slices.signal.size;
+  waveform.y.midpoint = y + waveform.height.half;
+  waveform.slices.offset = 1;
+  waveform.x = x + width;
+  loop(waveform.slices.signal.size,
+    waveform.slices.offset -= 1;
+    waveform.x -= waveform.slice.width;
+    waveform.slice = waveform.slices[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.get(waveform.slices, waveform.slices.offset)];
+    waveform.slice.minimum = waveform.slice[_.waveform.slice.struct.minimum];
+    waveform.slice.maximum = waveform.slice[_.waveform.slice.struct.maximum];
+    waveform.y = waveform.y.midpoint - waveform.slice.maximum * waveform.height.half;
+    waveform.slice.height = (waveform.slice.maximum - waveform.slice.minimum) * waveform.height.half;
+    gfx_rect(
+      waveform.x,
+      waveform.y,
+      max(gfx_ext_retina * 2, waveform.slice.width),
+      max(gfx_ext_retina, waveform.slice.height)
+    );
+  );
+);
+
+// LINES
+
+function _.line.init() (
+  _.line.struct = _.struct.define();
+  _.line.struct.points = _.struct.define.field(_.line.struct);
+  _.line.struct.duration = _.struct.define.field(_.line.struct);
+  _.line.struct.samples_per_point = _.struct.define.field(_.line.struct);
+  _.line.struct.samples_in_current_point = _.struct.define.field(_.line.struct);
+);
+// TODO: Have some preselected ‘points.size’, for instance the 8K stuff we did yesterday.
+function _.line.new(points.size, duration)
+local(line) (
+  line = _.struct.new(_.line.struct);
+  line[_.line.struct.points] = _.circular_buffer.new(points.size);
+  line[_.line.struct.duration] = duration;
+  line[_.line.struct.samples_per_point] = duration / points.size;
+  line[_.line.struct.samples_in_current_point] = 0;
+  line;
+);
+function _.line.push(line, sample)
+local(
+  line.points,
+  line.points.samples_per_point,
+  line.points.samples_in_current_point,
+  line.point
+) (
+  line.points = line[_.line.struct.points];
+  line.points.samples_per_point = line[_.line.struct.samples_per_point];
+  line.points.samples_in_current_point = line[_.line.struct.samples_in_current_point];
+  line.point = line.points[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.get(line.points, 0)];
+
+  // TODO: Other kinds of accumulation: minimum, maximum, mean, decimation, and so forth
+  line.point += sample / line.points.samples_per_point;
+  line.points[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.get(line.points, 0)] = line.point;
+  // TODO: Extract this notion of circular counting.
+  line.points.samples_in_current_point += 1;
+  line.points.samples_in_current_point >= line.points.samples_per_point ? (
+    line.points.samples_in_current_point -= line.points.samples_per_point;
+    line.point = line.points[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.advance(line.points)];
+    line.point = 0;
+    line.points[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.get(line.points, 0)] = line.point;
+  );
+
+  line[_.line.struct.samples_in_current_point] = line.points.samples_in_current_point;
+);
+function _.line.draw(line, minimum, maximum, x, y, width, height, y.offset)
+local (
+  line.points,
+  line.points.signal.size,
+  line.y.offset,
+  line.point.width,
+  line.y.starting_point,
+  line.points.offset,
+  line.x,
+  line.point,
+  line.y,
+  line.point.height
+) (
+  // TODO: Work in the minimum and the maximum.
+  line.points = line[_.line.struct.points];
+  line.points.signal.size = line.points[_.circular_buffer.struct.signal][_.array.struct.size];
+
+  line.y.offset = height * y.offset;
+  line.point.width = width / line.points.signal.size;
+  line.y.starting_point = y + line.y.offset;
+  line.points.offset = 1;
+  line.x = x + width;
+  loop(line.points.signal.size,
+    line.points.offset -= 1;
+    line.x -= line.point.width;
+    line.point = line.points[_.circular_buffer.struct.signal][_.array.struct.data][_.circular_buffer.index.get(line.points, line.points.offset)];
+    line.y = line.y.starting_point - line.point * line.y.offset;
+    gfx_rect(
+      line.x,
+      line.y,
+      // TODO: Don’t hardcode this value: either have it as a parameter or use the design system.
+      gfx_ext_retina * 2,
+      gfx_ext_retina * 2
+    );
+  );
+);
+
 // BÉZIER CURVES
 // https://en.wikipedia.org/wiki/Bézier_curve
 // https://ciechanow.ski/drawing-bezier-curves/
@@ -1787,6 +2289,8 @@ function _.init() (
   _.true = 1;
   _.false = 0;
 
+  _.infinity = 9999999999;
+
   _.db.minimum = -9999;
 
   _.undefined = _.enumeration();
@@ -1795,8 +2299,11 @@ function _.init() (
   _.array.init();
   _.circular_buffer.init();
   _.moving_average.simple.init();
-  _.filter.biquad.init();
+  _.filter.init();
+  _.noise.init();
   _.gfx.init();
+
+  _.waveform.init();
 
   gfx_ext_retina = 1;
 );

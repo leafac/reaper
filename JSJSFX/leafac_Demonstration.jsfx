@@ -1,19 +1,22 @@
 desc:leafac_Demonstration
 
-slider1:slider.page=0<0,10,1{Bézier Curves,_.color 1,_.color 2,_.color 3,_.color 4,_.color 5,Tests,Circular Buffer (Delay),RMS,Filters · Biquad,Discrete Fourier Transform}>Page
+slider1:slider.page=0<0,12,1{Noises,Bézier Curves,_.color 1,_.color 2,_.color 3,_.color 4,_.color 5,Tests,Circular Buffer (Delay),RMS,Filters · Biquad · RBJ,Filters · Biquad · SVF,Discrete Fourier Transform}>Page
 
 slider3:slider.delay.length=48000<0,48000,100>Delay Length (Samples)
 
 slider4:slider.rms=0<-90,12,0.1>RMS (dB)
 
-slider5:slider.filter.biquad.type=0<0,8,1{Low-Pass,High-Pass,Band-Pass (constant skirt gain / peak gain = Q),Band-Pass (constant 0 dB peak gain),Notch,All-Pass,Peaking,Low-Shelf,High-Shelf}>Type
-slider6:slider.filter.biquad.frequency=1000<20,20000,100>Frequency (Hz)
-slider7:slider.filter.biquad.gain=0<-24,24,0.1>Gain (dB)
-slider8:slider.filter.biquad.width.type.non_shelving=0<0,1,1{Q,Bandwidth}>Width Type
-slider9:slider.filter.biquad.width.type.shelving=0<0,2,1{Q,Bandwidth,S}>Width Type
-slider10:slider.filter.biquad.width.value.Q=0.71<0.1,40,0.01}>Q
-slider11:slider.filter.biquad.width.value.bandwidth=2<0.01,4,0.01}>Bandwidth
-slider12:slider.filter.biquad.width.value.S=1<0.01,4,0.01}>S (dB/octave)
+slider5:slider.filter.biquad.rbj.type=0<0,8,1{Low-Pass,High-Pass,Band-Pass (constant skirt gain / peak gain = Q),Band-Pass (constant 0 dB peak gain),Notch,All-Pass,Peaking,Low-Shelf,High-Shelf}>Type
+slider6:slider.filter.biquad.rbj.frequency=1000<20,20000,100>Frequency (Hz)
+slider7:slider.filter.biquad.rbj.gain=0<-24,24,0.1>Gain (dB)
+slider8:slider.filter.biquad.rbj.width.type.non_shelving=0<0,1,1{Q,Bandwidth}>Width Type
+slider9:slider.filter.biquad.rbj.width.type.shelving=0<0,2,1{Q,Bandwidth,S}>Width Type
+slider10:slider.filter.biquad.rbj.width.value.Q=0.71<0.1,40,0.01}>Q
+slider11:slider.filter.biquad.rbj.width.value.bandwidth=2<0.01,4,0.01}>Bandwidth
+slider12:slider.filter.biquad.rbj.width.value.S=1<0.01,4,0.01}>S (dB/octave)
+
+slider13:slider.noises.type=0<0,2,1{White,Pink,Brown}>Type
+slider14:slider.noises.gain.db=-60<-60,12,1>Gain (dB)
 
 import leafac.jsfx-inc
 
@@ -21,19 +24,25 @@ import leafac.jsfx-inc
 
 _.init();
 
-slider.page.bezier_curves = 0;
-slider.page.color.1 = 1;
-slider.page.color.2 = 2;
-slider.page.color.3 = 3;
-slider.page.color.4 = 4;
-slider.page.color.5 = 5;
-slider.page.tests = 6;
-slider.page.circular_buffer = 7;
-slider.page.rms = 8;
-slider.page.filters.biquad = 9;
-slider.page.discrete_fourier_transform = 10;
+slider.page.noises = 0;
+slider.page.bezier_curves = 1;
+slider.page.color.1 = 2;
+slider.page.color.2 = 3;
+slider.page.color.3 = 4;
+slider.page.color.4 = 5;
+slider.page.color.5 = 6;
+slider.page.tests = 7;
+slider.page.circular_buffer = 8;
+slider.page.rms = 9;
+slider.page.filters.biquad.rbj = 10;
+slider.page.filters.biquad.svf = 11;
+slider.page.discrete_fourier_transform = 12;
 
 constant.delay.length.maximum = 48000;
+
+slider.noises.type.white = 0;
+slider.noises.type.pink = 1;
+slider.noises.type.brown = 2;
 
 #instance.tests = "";
 
@@ -135,6 +144,31 @@ _.arcsch(10) == 0.09983
 ? #instance.tests += "PASS\n"
 : #instance.tests += "FAIL\n";
 
+#instance.tests += "_.count_trailing_zeros(): ";
+_.count_trailing_zeros(1 /* 0001 */) == 0 &&
+_.count_trailing_zeros(2 /* 0010 */) == 1 &&
+_.count_trailing_zeros(3 /* 0011 */) == 0 &&
+_.count_trailing_zeros(4 /* 0100 */) == 2 &&
+_.count_trailing_zeros(5 /* 0101 */) == 0 &&
+_.count_trailing_zeros(6 /* 0110 */) == 1 &&
+_.count_trailing_zeros(7 /* 0111 */) == 0 &&
+_.count_trailing_zeros(8 /* 1000 */) == 3
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
+
+#instance.tests += "_.follower(): ";
+_.follower(0.5, 0.7, 0.3) == 0.7 &&
+_.follower(0.7, 0.5, 0.3) == 0.5 &&
+_.follower(0.5, 0.7, 0.1) == 0.6 &&
+_.follower(0.7, 0.5, 0.1) == 0.6
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
+
+#instance.tests += "_.map(): ";
+_.map(0.5, -1, 1, 20, 60) == 50
+? #instance.tests += "PASS\n"
+: #instance.tests += "FAIL\n";
+
 #instance.tests += "_.distance.euclidian(): ";
 _.distance.euclidian(6, 5, 3, 9) == 5
 ? #instance.tests += "PASS\n"
@@ -203,7 +237,12 @@ _.circular_buffer.get(init.circular_buffer, -1) == 112 &&
 _.circular_buffer.get(init.circular_buffer, -2) == 111 &&
 init.circular_buffer.array[_.array.struct.data][0] == 111 &&
 init.circular_buffer.array[_.array.struct.data][1] == 112 &&
-init.circular_buffer.array[_.array.struct.data][2] == 113
+init.circular_buffer.array[_.array.struct.data][2] == 113 &&
+_.circular_buffer.index.get(init.circular_buffer, -0) == 1 &&
+_.circular_buffer.index.get(init.circular_buffer, -1) == 0 &&
+_.circular_buffer.index.get(init.circular_buffer, -2) == 2 &&
+_.circular_buffer.index.advance(init.circular_buffer) == 2 &&
+_.circular_buffer.index.get(init.circular_buffer, -0) == 2
 ? #instance.tests += "PASS\n"
 : #instance.tests += "FAIL\n";
 
@@ -229,17 +268,38 @@ _.rms.get(init.rms) == sqrt((sqr(30) + sqr(50) + sqr(25)) / 3)
 ? #instance.tests += "PASS\n"
 : #instance.tests += "FAIL\n";
 
+instance.noise.pinks = _.memory.new(num_ch);
+init.channel = -1; loop(num_ch, init.channel += 1;
+  instance.noise.pinks[init.channel] = _.noise.pink.new();
+);
+instance.noise.browns = _.memory.new(num_ch);
+init.channel = -1; loop(num_ch, init.channel += 1;
+  instance.noise.browns[init.channel] = _.noise.brown.new();
+);
+
 instance.delay_lines = _.memory.new(num_ch);
 init.channel = -1; loop(num_ch, init.channel += 1;
   instance.delay_lines[init.channel] = _.circular_buffer.new(constant.delay.length.maximum + 1);
 );
 instance.delay_lines.array = _.array.new(constant.delay.length.maximum + 1);
 
+instance.delay_lines.waveforms = _.memory.new(num_ch);
+init.channel = -1; loop(num_ch, init.channel += 1;
+  instance.delay_lines.waveforms[init.channel] = _.waveform.new(5000, constant.delay.length.maximum * 5);
+);
+
 instance.rms = _.rms.new(_.milliseconds_to_samples(300));
 
-instance.filters.biquad = _.memory.new(num_ch);
+instance.filters.biquad.rbj = _.memory.new(num_ch);
 init.channel = -1; loop(num_ch, init.channel += 1;
-  instance.filters.biquad[init.channel] = _.filter.biquad.new();
+  instance.filters.biquad.rbj[init.channel] = _.filter.biquad.rbj.new();
+);
+
+instance.filters.biquad.svf = _.memory.new(num_ch);
+init.channel = -1; loop(num_ch, init.channel += 1;
+  init.filter = _.filter.biquad.svf.new();
+  _.filter.biquad.svf.configure(init.filter, _.filter.biquad.svf.struct.type.bell, 15000, 6, 0.707);
+  instance.filters.biquad.svf[init.channel] = init.filter;
 );
 
 instance.dft.samples = _.circular_buffer.new(2048);
@@ -250,79 +310,83 @@ instance.dft.phases = _.array.new(2048 / 2 + 1);
 
 @slider
 
+slider_show(slider.noises.type, slider.page == slider.page.noises);
+slider_show(slider.noises.gain.db, slider.page == slider.page.noises);
+slider.noises.gain.amplitude = slider.noises.gain.db <= -60 ? 0 : _.db_to_amplitude(slider.noises.gain.db);
+
 slider_show(slider.delay.length, slider.page == slider.page.circular_buffer);
 
 slider_show(slider.rms, slider.page == slider.page.rms);
 
-slider_show(slider.filter.biquad.type, slider.page == slider.page.filters.biquad);
-slider.filter.biquad.struct.type =
-    slider.filter.biquad.type == 0 ? _.filter.biquad.struct.type.low_pass
-  : slider.filter.biquad.type == 1 ? _.filter.biquad.struct.type.high_pass
-  : slider.filter.biquad.type == 2 ? _.filter.biquad.struct.type.band_pass.constant_skirt
-  : slider.filter.biquad.type == 3 ? _.filter.biquad.struct.type.band_pass.constant_peak
-  : slider.filter.biquad.type == 4 ? _.filter.biquad.struct.type.notch
-  : slider.filter.biquad.type == 5 ? _.filter.biquad.struct.type.all_pass
-  : slider.filter.biquad.type == 6 ? _.filter.biquad.struct.type.peaking
-  : slider.filter.biquad.type == 7 ? _.filter.biquad.struct.type.low_shelf
-  : slider.filter.biquad.type == 8 ? _.filter.biquad.struct.type.high_shelf;
-slider_show(slider.filter.biquad.frequency, slider.page == slider.page.filters.biquad);
+slider_show(slider.filter.biquad.rbj.type, slider.page == slider.page.filters.biquad.rbj);
+slider.filter.biquad.rbj.struct.type =
+    slider.filter.biquad.rbj.type == 0 ? _.filter.biquad.rbj.struct.type.low_pass
+  : slider.filter.biquad.rbj.type == 1 ? _.filter.biquad.rbj.struct.type.high_pass
+  : slider.filter.biquad.rbj.type == 2 ? _.filter.biquad.rbj.struct.type.band_pass.constant_skirt
+  : slider.filter.biquad.rbj.type == 3 ? _.filter.biquad.rbj.struct.type.band_pass.constant_peak
+  : slider.filter.biquad.rbj.type == 4 ? _.filter.biquad.rbj.struct.type.notch
+  : slider.filter.biquad.rbj.type == 5 ? _.filter.biquad.rbj.struct.type.all_pass
+  : slider.filter.biquad.rbj.type == 6 ? _.filter.biquad.rbj.struct.type.peaking
+  : slider.filter.biquad.rbj.type == 7 ? _.filter.biquad.rbj.struct.type.low_shelf
+  : slider.filter.biquad.rbj.type == 8 ? _.filter.biquad.rbj.struct.type.high_shelf;
+slider_show(slider.filter.biquad.rbj.frequency, slider.page == slider.page.filters.biquad.rbj);
 slider_show(
-  slider.filter.biquad.gain,
-  slider.page == slider.page.filters.biquad && (
-    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.peaking ||
-    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.low_shelf ||
-    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.high_shelf
+  slider.filter.biquad.rbj.gain,
+  slider.page == slider.page.filters.biquad.rbj && (
+    slider.filter.biquad.rbj.struct.type == _.filter.biquad.rbj.struct.type.peaking ||
+    slider.filter.biquad.rbj.struct.type == _.filter.biquad.rbj.struct.type.low_shelf ||
+    slider.filter.biquad.rbj.struct.type == _.filter.biquad.rbj.struct.type.high_shelf
   )
 );
 slider_show(
-  slider.filter.biquad.width.type.non_shelving,
-  slider.page == slider.page.filters.biquad && (
-    slider.filter.biquad.struct.type != _.filter.biquad.struct.type.low_shelf &&
-    slider.filter.biquad.struct.type != _.filter.biquad.struct.type.high_shelf
+  slider.filter.biquad.rbj.width.type.non_shelving,
+  slider.page == slider.page.filters.biquad.rbj && (
+    slider.filter.biquad.rbj.struct.type != _.filter.biquad.rbj.struct.type.low_shelf &&
+    slider.filter.biquad.rbj.struct.type != _.filter.biquad.rbj.struct.type.high_shelf
   )
 );
 slider_show(
-  slider.filter.biquad.width.type.shelving,
-  slider.page == slider.page.filters.biquad && (
-    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.low_shelf ||
-    slider.filter.biquad.struct.type == _.filter.biquad.struct.type.high_shelf
+  slider.filter.biquad.rbj.width.type.shelving,
+  slider.page == slider.page.filters.biquad.rbj && (
+    slider.filter.biquad.rbj.struct.type == _.filter.biquad.rbj.struct.type.low_shelf ||
+    slider.filter.biquad.rbj.struct.type == _.filter.biquad.rbj.struct.type.high_shelf
   )
 );
-slider.filter.biquad.width.type.value =
-  slider.filter.biquad.struct.type != _.filter.biquad.struct.type.low_shelf &&
-  slider.filter.biquad.struct.type != _.filter.biquad.struct.type.high_shelf
-  ? slider.filter.biquad.width.type.non_shelving
-  : slider.filter.biquad.width.type.shelving;
-slider.filter.biquad.width.type.non_shelving = min(slider.filter.biquad.width.type.value, 1);
-slider.filter.biquad.width.type.shelving = slider.filter.biquad.width.type.value;
-slider.filter.biquad.width.type =
-    slider.filter.biquad.width.type.value == 0 ? _.filter.biquad.struct.width.type.Q
-  : slider.filter.biquad.width.type.value == 1 ? _.filter.biquad.struct.width.type.bandwidth
-  : slider.filter.biquad.width.type.value == 2 ? _.filter.biquad.struct.width.type.S;
+slider.filter.biquad.rbj.width.type.value =
+  slider.filter.biquad.rbj.struct.type != _.filter.biquad.rbj.struct.type.low_shelf &&
+  slider.filter.biquad.rbj.struct.type != _.filter.biquad.rbj.struct.type.high_shelf
+  ? slider.filter.biquad.rbj.width.type.non_shelving
+  : slider.filter.biquad.rbj.width.type.shelving;
+slider.filter.biquad.rbj.width.type.non_shelving = min(slider.filter.biquad.rbj.width.type.value, 1);
+slider.filter.biquad.rbj.width.type.shelving = slider.filter.biquad.rbj.width.type.value;
+slider.filter.biquad.rbj.width.type =
+    slider.filter.biquad.rbj.width.type.value == 0 ? _.filter.biquad.rbj.struct.width.type.Q
+  : slider.filter.biquad.rbj.width.type.value == 1 ? _.filter.biquad.rbj.struct.width.type.bandwidth
+  : slider.filter.biquad.rbj.width.type.value == 2 ? _.filter.biquad.rbj.struct.width.type.S;
 slider_show(
-  slider.filter.biquad.width.value.Q,
-  slider.page == slider.page.filters.biquad && slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.Q
+  slider.filter.biquad.rbj.width.value.Q,
+  slider.page == slider.page.filters.biquad.rbj && slider.filter.biquad.rbj.width.type == _.filter.biquad.rbj.struct.width.type.Q
 );
 slider_show(
-  slider.filter.biquad.width.value.bandwidth,
-  slider.page == slider.page.filters.biquad && slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.bandwidth
+  slider.filter.biquad.rbj.width.value.bandwidth,
+  slider.page == slider.page.filters.biquad.rbj && slider.filter.biquad.rbj.width.type == _.filter.biquad.rbj.struct.width.type.bandwidth
 );
 slider_show(
-  slider.filter.biquad.width.value.S,
-  slider.page == slider.page.filters.biquad && slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.S
+  slider.filter.biquad.rbj.width.value.S,
+  slider.page == slider.page.filters.biquad.rbj && slider.filter.biquad.rbj.width.type == _.filter.biquad.rbj.struct.width.type.S
 );
-slider.filter.biquad.width.value =
-    slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.Q ? slider.filter.biquad.width.value.Q
-  : slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.bandwidth ? slider.filter.biquad.width.value.bandwidth
-  : slider.filter.biquad.width.type == _.filter.biquad.struct.width.type.S ? slider.filter.biquad.width.value.S;
+slider.filter.biquad.rbj.width.value =
+    slider.filter.biquad.rbj.width.type == _.filter.biquad.rbj.struct.width.type.Q ? slider.filter.biquad.rbj.width.value.Q
+  : slider.filter.biquad.rbj.width.type == _.filter.biquad.rbj.struct.width.type.bandwidth ? slider.filter.biquad.rbj.width.value.bandwidth
+  : slider.filter.biquad.rbj.width.type == _.filter.biquad.rbj.struct.width.type.S ? slider.filter.biquad.rbj.width.value.S;
 slider.channel = -1; loop(num_ch, slider.channel += 1;
-  _.filter.biquad.configure(
-    instance.filters.biquad[slider.channel],
-    slider.filter.biquad.struct.type,
-    slider.filter.biquad.frequency,
-    slider.filter.biquad.gain,
-    slider.filter.biquad.width.type,
-    slider.filter.biquad.width.value
+  _.filter.biquad.rbj.configure(
+    instance.filters.biquad.rbj[slider.channel],
+    slider.filter.biquad.rbj.struct.type,
+    slider.filter.biquad.rbj.frequency,
+    slider.filter.biquad.rbj.gain,
+    slider.filter.biquad.rbj.width.type,
+    slider.filter.biquad.rbj.width.value
   );
 );
 
@@ -332,11 +396,29 @@ slider.channel = -1; loop(num_ch, slider.channel += 1;
 
 @sample
 
-slider.page == slider.page.circular_buffer ? (
+slider.page == slider.page.noises ? (
+  sample.channel = -1; loop(num_ch, sample.channel += 1;
+    slider.noises.type == slider.noises.type.white ? (
+      sample.noise = _.noise.white();
+    )
+    : slider.noises.type == slider.noises.type.pink ? (
+      sample.noise.pink = instance.noise.pinks[sample.channel];
+      sample.noise = _.noise.pink(sample.noise.pink);
+    )
+    : slider.noises.type == slider.noises.type.brown ? (
+      sample.noise.brown = instance.noise.browns[sample.channel];
+      sample.noise = _.noise.brown(sample.noise.brown);
+    );
+    spl(sample.channel) = sample.noise * slider.noises.gain.amplitude;
+  );
+)
+: slider.page == slider.page.circular_buffer ? (
   sample.channel = -1; loop(num_ch, sample.channel += 1;
     sample.sample = spl(sample.channel);
     sample.delay_line = instance.delay_lines[sample.channel];
+    sample.delay_line.waveform = instance.delay_lines.waveforms[sample.channel];
     _.circular_buffer.push(sample.delay_line, sample.sample);
+    _.waveform.push(sample.delay_line.waveform, sample.sample);
     sample.old_sample = _.circular_buffer.get(sample.delay_line, -slider.delay.length);
     spl(sample.channel) = (sample.sample + sample.old_sample) * 0.5;
   );
@@ -345,27 +427,35 @@ slider.page == slider.page.circular_buffer ? (
   _.rms.push(instance.rms, spl0);
   slider.rms = _.amplitude_to_db(_.rms.get(instance.rms));
 )
-: slider.page == slider.page.filters.biquad ? (
+: slider.page == slider.page.filters.biquad.rbj ? (
   sample.channel = -1; loop(num_ch, sample.channel += 1;
-    spl(sample.channel) = _.filter.biquad.filter(instance.filters.biquad[sample.channel], spl(sample.channel));
+    spl(sample.channel) = _.filter.biquad.rbj.filter(instance.filters.biquad.rbj[sample.channel], spl(sample.channel));
+  );
+)
+: slider.page == slider.page.filters.biquad.svf ? (
+  sample.channel = -1; loop(num_ch, sample.channel += 1;
+    spl(sample.channel) = _.filter.biquad.svf.filter(instance.filters.biquad.svf[sample.channel], spl(sample.channel));
   );
 )
 : slider.page == slider.page.discrete_fourier_transform ? (
   _.circular_buffer.push(instance.dft.samples, spl0);
 );
 
-//   l_width__extra_large__2() l_width__small()
+//   _.width.extra_large.2     _.width.small
 @gfx 672                       384
 
 _.gfx();
+
+gfx.width = _.width.extra_large.2 - _.space.2;
+gfx.height = _.width.small - _.space.2;
 
 _.background_color(_.color.gray.reaper);
 _.color(_.color.gray.warm.50);
 _.rounded_rectangle_fill(
   _.space.0,
   _.space.0,
-  _.width.extra_large.2 - _.space.2,
-  _.width.small - _.space.2,
+  gfx.width,
+  gfx.height,
   _.border_radius.large
 );
 
@@ -389,8 +479,10 @@ _.print(
     ? "Circular Buffer (Delay)"
     : slider.page == slider.page.rms
     ? "RMS"
-    : slider.page == slider.page.filters.biquad
-    ? "Filters"
+    : slider.page == slider.page.filters.biquad.rbj
+    ? "Filters · Biquad · RBJ"
+    : slider.page == slider.page.filters.biquad.svf
+    ? "Filters · Biquad · SVF"
     : slider.page == slider.page.discrete_fourier_transform
     ? "Discrete Fourier Transform",
   _.font_size.extra_small,
@@ -898,16 +990,16 @@ slider.page == slider.page.bezier_curves ? (
   );
 )
 : slider.page == slider.page.circular_buffer ? (
-  gfx_set(1);
-  gfx.channel = -1; loop(num_ch, gfx.channel += 1;
-    _.circular_buffer.to_array(instance.delay_lines[gfx.channel], instance.delay_lines.array);
-    _.graphs.line(
-      instance.delay_lines.array,
-      0 * gfx_ext_retina,
-      10 + (130 + 10 + 10) * gfx.channel * gfx_ext_retina,
-      400 * gfx_ext_retina,
-      130 * gfx_ext_retina,
-      1
+  gfx.waveform.height = (gfx.height - (gfx.body.padding + gfx.title.height)) / num_ch;
+  gfx.y = gfx.body.padding + gfx.title.height - gfx.waveform.height; gfx.channel = -1; loop(num_ch, gfx.channel += 1; gfx.y += gfx.waveform.height;
+    gfx.delay_line.waveform = instance.delay_lines.waveforms[gfx.channel];
+    _.color(_.color.gray.warm.500);
+    _.waveform.draw(
+      gfx.delay_line.waveform,
+      0,
+      gfx.y,
+      gfx.width,
+      gfx.waveform.height
     );
   );
 )

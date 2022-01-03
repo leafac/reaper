@@ -1,0 +1,135 @@
+desc:TheBallDropDelay
+
+
+/*
+Ideas:
+-Set one rate, auto sets  other rates
+-Gravity
+-Drop Distance
+-Elasticity/Density
+-Smearing/Blurring
+-Pitch changes/modulation
+-High-Pass/Low-Pass
+-Saturation
+-Bit Crushing!
+-Stereo-izing (widening over time)
+-Detect Transients, each new transient is a ball!
+-channel offset slider
+
+Mercury: 0.38 g.
+Venus: 0.9 g.
+Moon: 0.17 g.
+Mars: 0.38 g.
+Jupiter: 2.53 g.
+Saturn: 1.07 g.
+Uranus: 0.89 g.
+Neptune: 1.14 g.
+ (as presets)
+ 
+HW: Do a measured Bounce 
+    Pull up the paper for bounce musical
+    Measuring tape, Camera, also FPS
+
+To-Do:
+Elasticity: How much energy decays per bounce.
+Velocity: in order to determine amplitude & maybe even freq content
+Time & speed of subsequent bounces & count of subsequent bounces
+-Scaling all this stuff to fall on a certain grid
+-GUI
+
+Philosophical: 
+ Is each sample a ball
+
+*/
+
+slider1:position.initial=1<0.1,2,0.1>Height (m)
+slider2:gravity=1<0.1,3,0.01>Gravity (g)
+slider3:elasticity=0.8<0,0.99,0.1>Elasticity
+slider4:sound_decay=2.5<0.5,3,0.1>Magic Number
+slider5:random_divider=2<0.1,3,0.1>Random Dividah
+slider6:time_step=0.001<0.001,0.1,0.001>Time Step
+
+import leafac.jsfx-inc
+
+@init
+_.init();
+delay_lines = _.memory.new(num_ch);
+channel = -1; loop(num_ch, channel += 1;
+  delay_lines[channel] = 
+  _.circular_buffer.new(_.milliseconds_to_samples(20000));
+ );
+ 
+tap.struct = _.struct.define ();
+tap.struct.amplitude = _.struct.define.field (tap.struct);
+tap.struct.time = _.struct.define.field (tap.struct);
+taps = _.array.new (30);
+tap.index = -1; loop(taps[_.array.struct.size],
+  tap.index += 1 ;
+  taps[_.array.struct.data][tap.index] = _.struct.new(tap.struct);
+  ); 
+
+//gfx time positions
+positions = _.array.new (5120);
+
+
+@slider
+
+//formulae
+acceleration = gravity * 9.8; 
+//sound_decay = 2;
+
+//equations of motion
+bounce_time.seconds = sqrt(position.initial * 2 / acceleration);
+velocity = acceleration * bounce_time.seconds; //calculates the velocity
+
+//data storage loops
+tap.index = -1; loop(taps[_.array.struct.size],
+  tap.index += 1 ;
+  tap = taps[_.array.struct.data][tap.index];
+  bounce_time.samples = _.milliseconds_to_samples(1000 * bounce_time.seconds);
+  velocity *= elasticity;
+  amplitude = velocity / (sound_decay + (rand()-0.5)/random_divider) ;
+  peak_time = velocity / acceleration ;
+  bounce_time.seconds +=  2 * peak_time ;
+  tap[tap.struct.time] = bounce_time.samples;
+  tap[tap.struct.amplitude] = amplitude;
+);
+
+positions.time_increment = 20 / 1000 / positions[_.array.struct.size];
+velocity = 0;
+position = position.initial;
+positions.index = -1; loop(positions[_.array.struct.size], positions.index += 1;
+  positions[_.array.struct.data][positions.index] = position;
+  velocity += -acceleration * positions.time_increment;
+  position = max(position + velocity, 0);
+  position == 0 ? velocity = -velocity * elasticity;
+);
+
+@serialize
+
+0; 
+
+@sample
+
+
+channel = -1; loop(num_ch, channel += 1;
+  delay_line = delay_lines[channel];
+  _.circular_buffer.push(delay_line, spl(channel));
+  tap.index = -1; loop(taps[_.array.struct.size],
+    tap.index += 1 ;
+    tap = taps[_.array.struct.data][tap.index];
+    spl(channel) += tap[tap.struct.amplitude] *
+      _.circular_buffer.get(
+      delay_line, -tap[tap.struct.time]);
+      );
+); 
+
+@gfx
+
+stroke_width = 5;
+x.increment = gfx_w / positions[_.array.struct.size];
+positions.index = -1; x = 0; loop(positions[_.array.struct.size], positions.index += 1; x += x.increment;
+  position = positions[_.array.struct.data][positions.index];
+  y = gfx_h - position / 2 * gfx_h;
+  gfx_rect(x, y, stroke_width, stroke_width);
+);

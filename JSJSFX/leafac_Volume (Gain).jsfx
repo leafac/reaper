@@ -1,0 +1,120 @@
+desc:leafac_Volume (Gain)
+
+TODO:
+Draw waveforms
+  Fix opacity
+    Maybe use gfx_dest and do offscreen drawing
+  Extract a ‘reset’ function for arrays, circular buffers, and waveforms
+  Deal with uninitialized variables when drawing (what’s ±infitity doing?)
+Draw volume over time
+Prevent extra work if UI isn’t showing
+Listen for MIDI messages
+
+slider1:slider.volume.range=0<0,3,1{10dB,30dB,100dB,Custom}>Range
+
+slider3:slider.volume.db=0<-10,10,0.01>Volume (dB)
+slider4:slider.volume.db=0<-30,30,0.1>Volume (dB)
+slider5:slider.volume.db=0<-100,100,1>Volume (dB)
+
+slider6:slider.volume.range.custom.minimum=-120<-120,120,1>Minumum (dB)
+slider7:slider.volume.range.custom.maximum=0<-120,120,1>Maximum (dB)
+slider8:slider.volume.range.custom.volume=1<0,1,0.000001>Volume (dB) (Assign this to MIDI)
+
+import leafac.jsfx-inc
+
+@init
+
+_.init();
+
+slider.volume.linear.follower = _.db_to_amplitude(0);
+slider.volume.linear.maximum_change = _.db_to_amplitude(-60);
+
+instance.waveforms.inputs = _.memory.new(num_ch);
+instance.waveforms.outputs = _.memory.new(num_ch);
+init.channel = -1; loop(num_ch, init.channel += 1;
+  instance.waveforms.inputs[init.channel] = _.waveform.new(10000, _.milliseconds_to_samples(5000));
+  instance.waveforms.outputs[init.channel] = _.waveform.new(10000, _.milliseconds_to_samples(5000));
+);
+
+instance.volume_line = _.line.new(10000, _.milliseconds_to_samples(5000));
+
+@slider
+
+slider_show(1 << 2, slider.volume.range == 0);
+slider_show(1 << 3, slider.volume.range == 1);
+slider_show(1 << 4, slider.volume.range == 2);
+
+slider_show(slider.volume.range.custom.minimum, slider.volume.range == 3);
+slider_show(slider.volume.range.custom.maximum, slider.volume.range == 3);
+slider_show(slider.volume.range.custom.volume, slider.volume.range == 3);
+
+slider.volume.range == 3 ?
+  slider.volume.db = _.map(
+    slider.volume.range.custom.volume,
+    0, 1,
+    slider.volume.range.custom.minimum, slider.volume.range.custom.maximum
+  );
+
+slider.volume.linear.target = _.db_to_amplitude(slider.volume.db);
+
+@serialize
+
+"NOOP: Necessary to force some values into existence, for example, ‘num_ch’ in the ‘@init’ block";
+
+@sample
+
+slider.volume.linear.follower = _.follower(slider.volume.linear.follower, slider.volume.linear.target, slider.volume.linear.maximum_change);
+sample.channel = -1; loop(num_ch, sample.channel += 1;
+  sample.input = spl(sample.channel);
+  sample.output = sample.input * slider.volume.linear.follower;
+  spl(sample.channel) = sample.output;
+  sample.waveform.input = instance.waveforms.inputs[sample.channel];
+  _.waveform.push(sample.waveform.input, sample.input);
+  sample.waveform.output = instance.waveforms.outputs[sample.channel];
+  _.waveform.push(sample.waveform.output, sample.output);
+);
+_.line.push(instance.volume_line, slider.volume.linear.follower);
+
+//   _.width.extra_large.2     _.width.small
+@gfx 672                       384
+
+_.gfx();
+
+_.background_color(_.color.gray.reaper);
+_.color(_.color.gray.warm.50);
+_.rounded_rectangle_fill(
+  _.space.0,
+  _.space.0,
+  gfx_w,
+  gfx_h,
+  _.border_radius.large
+);
+
+gfx.waveform.height = gfx_h / num_ch;
+gfx.waveform.y = -gfx.waveform.height;
+gfx.channel = -1; loop(num_ch, gfx.channel += 1;
+  gfx.waveform.y += gfx.waveform.height;
+  gfx.waveform.input = instance.waveforms.inputs[gfx.channel];
+  gfx.waveform.output = instance.waveforms.outputs[gfx.channel];
+  _.color(_.color.gray.warm.500);
+  gfx_a = _.opacity.40;
+  _.waveform.draw(
+    gfx.waveform.input,
+    0,
+    gfx.waveform.y,
+    gfx_w,
+    gfx.waveform.height
+  );
+  _.color(_.color.gray.warm.800);
+  gfx_a = _.opacity.100;
+  _.waveform.draw(
+    gfx.waveform.output,
+    0,
+    gfx.waveform.y,
+    gfx_w,
+    gfx.waveform.height
+  );
+);
+
+_.color(_.color.gray.red.600);
+_.line.draw(instance.volume_line, 0, 1, 0, 0, gfx_w, gfx_h, 0.5);
