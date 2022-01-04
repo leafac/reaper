@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 
 await fs.writeFile(
-  "leafac_Stress test - Filters - JSJSFX.jsfx",
+  "/Users/leafac/Library/Application Support/REAPER/Effects/leafac/leafac_Stress test - Filters - JSJSFX.jsfx",
   `
 desc: leafac_Stress test - Filters - JSJSFX
 
