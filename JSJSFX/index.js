@@ -37,3 +37,44 @@ ${[...new Array(1000).keys()]
   .join("\n")}
 `
 );
+
+await fs.writeFile(
+  "/Users/leafac/Library/Application Support/REAPER/Effects/leafac/leafac_Stress test - Filters - JSJSFX - Without Function Inlining.jsfx",
+  `
+desc: leafac_Stress test - Filters - JSJSFX - Without Function Inlining
+
+@init
+
+frequency = 500;
+Q = 0.707;
+
+g = tan($pi * frequency / srate);
+k = 1 / Q;
+a1 = 1 / (1 + g * (g + k));
+a2 = g * a1;
+a3 = g * a2;
+m0 = 0;
+m1 = 0;
+m2 = 1;
+
+function filter_sample(sample) (
+  this.v0 = sample;
+  this.v3 = this.v0 - this.ic2eq;
+  this.v1 = a1 * this.ic1eq + a2 * this.v3;
+  this.v2 = this.ic2eq + a2 * this.ic1eq + a3 * this.v3;
+  this.ic1eq = 2 * this.v1 - this.ic1eq;
+  this.ic2eq = 2 * this.v2 - this.ic2eq;
+  m0 * this.v0 + m1 * this.v1 + m2 * this.v2;
+);
+
+@sample
+
+${[...new Array(1000).keys()]
+  .map(
+    (index) => `
+      spl0 = filter.${index}.filter_sample(spl0);
+    `
+  )
+  .join("\n")}
+`
+);
