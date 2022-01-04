@@ -1,7 +1,3 @@
-1. Loop unrolling.
-2. Function inlining.
-
-1. Test the pseudo-objects version of the filters.
 2. Drawing waveforms with variables instead of memory
 
 desc:Stress test - Filters - Objects
