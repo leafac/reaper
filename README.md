@@ -1,4 +1,7 @@
 <!--
+Prepare project for video/audio editing: Set BPM to 240 so 1 measure is one second. (See comment on https://reaperblog.net/2017/02/custom-grid-size-toolbar/)
+
+
 
 Controlling REAPER with AutoHotkey
 
