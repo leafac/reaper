@@ -1,9 +1,9 @@
 import fs from "fs/promises";
 
 await fs.writeFile(
-  "/Users/leafac/Library/Application Support/REAPER/Effects/leafac/leafac_Stress test - Filters - JSJSFX.jsfx",
+  "/Users/leafac/Library/Application Support/REAPER/Effects/leafac/leafac_Stress test - Filters - JSJSFX - With Function Inlining.jsfx",
   `
-desc: leafac_Stress test - Filters - JSJSFX
+desc: leafac_Stress test - Filters - JSJSFX - With Function Inlining
 
 @init
 
