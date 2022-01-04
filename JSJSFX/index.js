@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import lodash from "lodash";
 
 await fs.writeFile(
   "/Users/leafac/Library/Application Support/REAPER/Effects/leafac/leafac_Stress test - Filters - JSJSFX - With Function Inlining.jsfx",
@@ -22,7 +23,7 @@ m2 = 1;
 @sample
 
 ${[...new Array(1000).keys()]
-  .map(index => `local.${index}.`)
+  .map((index) => `local.${index}.`)
   .map(
     (local) => `
       ${local}v0 = spl0;
@@ -76,5 +77,65 @@ ${[...new Array(1000).keys()]
     `
   )
   .join("\n")}
+`
+);
+
+const waveformsCount = 200;
+const slicesCount = 10000;
+// const waveformsCount = 200;
+// const slicesCount = 10000;
+
+await fs.writeFile(
+  "/Users/leafac/Library/Application Support/REAPER/Effects/leafac/leafac_Stress test - Waveforms - JSJSFX.jsfx",
+  `
+desc: leafac_Stress test - Waveforms - JSJSFX
+
+@init
+
+waveforms.samples_per_slice = 5000 * srate * 0.001 / ${slicesCount};
+waveforms.samples_per_slice.counter = -1;
+
+@sample
+
+waveforms.samples_per_slice.counter += 1;
+
+waveforms.samples_per_slice.counter == 0 ? (
+  ${lodash
+    .range(1, waveformsCount + 1)
+    .map(
+      (waveformIndex) => `
+        ${lodash
+          .range(slicesCount - 1, 0)
+          .map(
+            (sliceIndex) => `
+            waveform.${waveformIndex}.slice.n_${sliceIndex}.maximum = waveform.${waveformIndex}.slice.n_${
+              sliceIndex - 1
+            }.maximum;
+            waveform.${waveformIndex}.slice.n_${sliceIndex}.minimum = waveform.${waveformIndex}.slice.n_${
+              sliceIndex - 1
+            }.minimum;
+          `
+          )
+          .join("\n")}
+
+        waveform.${waveformIndex}.slice.n_0.maximum = -99999;
+        waveform.${waveformIndex}.slice.n_0.minimum =  99999;
+      `
+    )
+    .join("\n")}
+) : (
+  ${lodash
+    .range(1, waveformsCount + 1)
+    .map(
+      (waveformIndex) => `
+        waveform.${waveformIndex}.slice.n_0.maximum = max(spl0, waveform.${waveformIndex}.slice.n_0.maximum);
+        waveform.${waveformIndex}.slice.n_0.minimum = min(spl0, waveform.${waveformIndex}.slice.n_0.minimum);
+      `
+    )
+    .join("\n")}
+
+  waveforms.samples_per_slice.counter == waveforms.samples_per_slice ? waveforms.samples_per_slice.counter = -1;
+);
+
 `
 );

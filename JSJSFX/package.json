@@ -4,6 +4,7 @@
   },
   "type": "module",
   "dependencies": {
+    "lodash": "^4.17.21",
     "nodemon": "^2.0.15"
   }
 }
