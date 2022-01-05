@@ -25,7 +25,9 @@ await JSFX({
           hidden: true,
         },
       ],
-      init: `<initialize waveforms>`,
+      init: `
+waveform = 0;
+`,
       sample: `accumulate_sample(waveform, spl0);`,
       gfx: `draw(waveform);`,
     },
@@ -83,7 +85,21 @@ ${["init", "slider", "serialize", "block", "sample", "gfx"]
       `
 @${JSFXSection}
 "NOOP";
-${components.map((component) => component[JSFXSection] ?? ``).join("")}
+${[
+  {
+    init: `
+_.next_available_address = 0;
+function _.allocate(size) local(address) (
+  address = _.next_available_address;
+  _.next_available_address += size;
+  address;
+);
+`,
+  },
+  ...components,
+]
+  .map((component) => component[JSFXSection] ?? ``)
+  .join("")}
 `
   )
   .join("")}
