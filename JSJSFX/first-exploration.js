@@ -80,7 +80,7 @@ ${[...new Array(1000).keys()]
 `
 );
 
-const waveformsCount = 200;
+const waveformsCount = 64;
 const slicesCount = 10000;
 // const waveformsCount = 200;
 // const slicesCount = 10000;
