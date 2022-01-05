@@ -29,6 +29,7 @@ await JSFX({
       sample: `accumulate_sample(waveform, spl0);`,
       gfx: `draw(waveform);`,
     },
+
     {
       init: `<initialize line graph>`,
       sample: `accumulate_sample(line graph, spl0);`,
