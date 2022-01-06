@@ -1,4 +1,19 @@
 <!--
+ADD TO REAPACK
+
+leafac_Unselect (clear selection of) all tracks, items, envelope points, time selection, and loop points
+leafac_Select item under mouse cursor and set time selection to items
+
+
+MAP
+
+cmd+a & esc: leafac_Unselect (clear selection of) all tracks, items, envelope points, time selection, and loop points
+Media item / left click: leafac_Select item under mouse cursor and set time selection to items
+
+
+
+
+
 Prepare project for video/audio editing: Set BPM to 240 so 1 measure is one second. (See comment on https://reaperblog.net/2017/02/custom-grid-size-toolbar/)
 
 
