@@ -2,13 +2,11 @@
 ADD TO REAPACK
 
 leafac_Unselect (clear selection of) all tracks, items, envelope points, time selection, and loop points
-leafac_Select item under mouse cursor and set time selection to items
 
 
 MAP
 
-cmd+a & esc: leafac_Unselect (clear selection of) all tracks, items, envelope points, time selection, and loop points
-Media item / left click: leafac_Select item under mouse cursor and set time selection to items
+esc, Track > double click > default: leafac_Unselect (clear selection of) all tracks, items, envelope points, time selection, and loop points
 
 
 
