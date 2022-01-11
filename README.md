@@ -1,4 +1,7 @@
 <!--
+Use “play or stop” on MIDI editor
+
+
 ADD TO REAPACK
 
 leafac_Unselect (clear selection of) all tracks, items, envelope points, time selection, and loop points
@@ -6,7 +9,7 @@ leafac_Unselect (clear selection of) all tracks, items, envelope points, time se
 
 MAP
 
-esc, Track > double click > default: leafac_Unselect (clear selection of) all tracks, items, envelope points, time selection, and loop points
+esc: leafac_Unselect (clear selection of) all tracks, items, envelope points, time selection, and loop points
 
 
 
