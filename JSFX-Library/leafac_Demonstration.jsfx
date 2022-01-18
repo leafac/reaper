@@ -64,56 +64,6 @@ _.imaginary.phase(-1, -1) == -1.5 * $pi / 2
 ? #instance.tests += "PASS\n"
 : #instance.tests += "FAIL\n";
 
-#instance.tests += "Hyperbolic Functions: ";
-_.sinh(10) == 11013.23287 &&
-_.cosh(10) == 11013.23292 &&
-_.tanh(10) == 0.99999 &&
-_.coth(10) == 1.00000 &&
-_.sech(10) == 0.00009 &&
-_.csch(10) == 0.00009
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "Inverse Hyperbolic Functions: ";
-_.arsinh(10) == 2.99822 &&
-_.arcosh(10) == 2.99322 &&
-_.artanh(0.75) == 0.97295 &&
-_.arcoth(10) == 0.10033 &&
-_.arsech(0.75) == 0.79536 &&
-_.arcsch(10) == 0.09983
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "_.count_trailing_zeros(): ";
-_.count_trailing_zeros(1 /* 0001 */) == 0 &&
-_.count_trailing_zeros(2 /* 0010 */) == 1 &&
-_.count_trailing_zeros(3 /* 0011 */) == 0 &&
-_.count_trailing_zeros(4 /* 0100 */) == 2 &&
-_.count_trailing_zeros(5 /* 0101 */) == 0 &&
-_.count_trailing_zeros(6 /* 0110 */) == 1 &&
-_.count_trailing_zeros(7 /* 0111 */) == 0 &&
-_.count_trailing_zeros(8 /* 1000 */) == 3
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "_.follower(): ";
-_.follower(0.5, 0.7, 0.3) == 0.7 &&
-_.follower(0.7, 0.5, 0.3) == 0.5 &&
-_.follower(0.5, 0.7, 0.1) == 0.6 &&
-_.follower(0.7, 0.5, 0.1) == 0.6
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "_.map(): ";
-_.map(0.5, -1, 1, 20, 60) == 50
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "_.distance.euclidian(): ";
-_.distance.euclidian(6, 5, 3, 9) == 5
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
 #instance.tests += "_.enumeration: ";
 init.enumeration_1 = _.enumeration();
 init.enumeration_2 = _.enumeration();
