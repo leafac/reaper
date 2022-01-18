@@ -46,66 +46,6 @@ slider.noises.type.brown = 2;
 
 #instance.tests = "";
 
-#instance.tests += "_.milliseconds_to_samples(): ";
-_.milliseconds_to_samples(1000) == srate &&
-_.milliseconds_to_samples(500) == srate / 2 &&
-_.milliseconds_to_samples(0) == 0
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "_.samples_to_milliseconds(): ";
-_.samples_to_milliseconds(srate) == 1000 &&
-_.samples_to_milliseconds(srate / 2) == 500 &&
-_.samples_to_milliseconds(0) == 0
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "_.amplitude_to_db(): ";
-_.amplitude_to_db(0) == _.db.minimum &&
-_.amplitude_to_db(0.5) == -6.02059 &&
-_.amplitude_to_db(-0.5) == -6.02059 &&
-_.amplitude_to_db(1) == 0 &&
-_.amplitude_to_db(-1) == 0 &&
-_.amplitude_to_db(2) == 6.02059 &&
-_.amplitude_to_db(-2) == 6.02059
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "_.db_to_amplitude(): ";
-_.db_to_amplitude(-6.02059) == 0.5 &&
-_.db_to_amplitude(0) == 1 &&
-_.db_to_amplitude(6.02059) == 2
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "_.radians_to_degrees(): ";
-_.radians_to_degrees( 0   * $pi / 2) ==    0 &&
-_.radians_to_degrees( 1   * $pi / 2) ==   90 &&
-_.radians_to_degrees( 2   * $pi / 2) ==  180 &&
-_.radians_to_degrees( 3   * $pi / 2) ==  270 &&
-_.radians_to_degrees( 0.5 * $pi / 2) ==   45 &&
-_.radians_to_degrees(-0   * $pi / 2) == -  0 &&
-_.radians_to_degrees(-1   * $pi / 2) == - 90 &&
-_.radians_to_degrees(-2   * $pi / 2) == -180 &&
-_.radians_to_degrees(-3   * $pi / 2) == -270 &&
-_.radians_to_degrees(-0.5 * $pi / 2) == - 45
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
-#instance.tests += "_.degrees_to_radians(): ";
-_.degrees_to_radians(   0) ==  0   * $pi / 2 &&
-_.degrees_to_radians(  90) ==  1   * $pi / 2 &&
-_.degrees_to_radians( 180) ==  2   * $pi / 2 &&
-_.degrees_to_radians( 270) ==  3   * $pi / 2 &&
-_.degrees_to_radians(  45) ==  0.5 * $pi / 2 &&
-_.degrees_to_radians(-  0) == -0   * $pi / 2 &&
-_.degrees_to_radians(- 90) == -1   * $pi / 2 &&
-_.degrees_to_radians(-180) == -2   * $pi / 2 &&
-_.degrees_to_radians(-270) == -3   * $pi / 2 &&
-_.degrees_to_radians(- 45) == -0.5 * $pi / 2
-? #instance.tests += "PASS\n"
-: #instance.tests += "FAIL\n";
-
 #instance.tests += "_.imaginary.magnitude(): ";
 _.imaginary.magnitude( 1,  0) == 1 &&
 _.imaginary.magnitude( 0,  1) == 1 &&

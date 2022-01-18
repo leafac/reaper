@@ -135,30 +135,7 @@ LIBRARY
 
 @init
 
-// UNIT CONVERSIONS
 
-function _.milliseconds_to_samples(milliseconds) (
-  milliseconds * srate * 0.001;
-);
-function _.samples_to_milliseconds(samples) (
-  samples / srate * 1000;
-);
-
-function _.amplitude_to_db(amplitude) (
-  amplitude == 0
-  ? _.db.minimum
-  : 20 * log10(abs(amplitude));
-);
-function _.db_to_amplitude(db) (
-  10^(db / 20);
-);
-
-function _.radians_to_degrees(radians) (
-  radians / $pi * 180;
-);
-function _.degrees_to_radians(degrees) (
-  degrees / 180 * $pi;
-);
 
 // IMAGINARY NUMBERS
 
