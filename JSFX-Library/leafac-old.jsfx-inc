@@ -161,7 +161,6 @@ function _.imaginary.rectangular_to_polar(reals, imaginaries, magnitudes, phases
   );
 );
 
-
 // DATA STRUCTURES
 
 _.enumeration.index = 9990000;
@@ -169,42 +168,8 @@ function _.enumeration() (
   _.enumeration.index += 1;
 );
 
-_.memory.next_available_address = 0;
-function _.memory.new(size) local(address) (
-  address = _.memory.next_available_address;
-  _.memory.next_available_address += size;
-  memset(address, 0, size);
-  address;
-);
-
 function _.box() (
   _.memory.new(1);
-);
-
-function _.struct.define() (
-  _.box();
-);
-function _.struct.define.field(struct_definition) local(field) (
-  field = struct_definition[];
-  struct_definition[] += 1;
-  field;
-);
-function _.struct.new(struct_definition) (
-  _.memory.new(struct_definition[]);
-);
-
-// ARRAYS
-
-function _.array.init() (
-  _.array.struct = _.struct.define();
-  _.array.struct.size = _.struct.define.field(_.array.struct);
-  _.array.struct.data = _.struct.define.field(_.array.struct);
-);
-function _.array.new(size) local(array) (
-  array = _.struct.new(_.array.struct);
-  array[_.array.struct.size] = size;
-  array[_.array.struct.data] = _.memory.new(size);
-  array;
 );
 
 // CIRCULAR BUFFERS
