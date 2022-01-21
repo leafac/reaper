@@ -1069,9 +1069,3 @@ function _.bezier.cubic.draw(P0.x, P0.y, P1.x, P1.y, P2.x, P2.y, P3.x, P3.y) loc
     gfx_lineto(_.bezier.cubic(P0.x, P1.x, P2.x, P3.x, t), _.bezier.cubic(P0.y, P1.y, P2.y, P3.y, t), _.true);
   );
 );
-
-// INITIALIZATION
-
-function _.init() (
-  _.undefined = _.enumeration.new();
-);
