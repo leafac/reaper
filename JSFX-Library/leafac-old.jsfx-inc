@@ -2179,5 +2179,5 @@ function _.init() (
 
   _.waveform.init();
 
-  gfx_ext_retina = 1;
+  
 );
