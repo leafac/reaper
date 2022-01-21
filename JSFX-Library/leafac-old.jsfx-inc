@@ -740,24 +740,6 @@ function _.noise.init() (
 
 // DESIGN SYSTEM
 
-
-// STYLES SETTERS
-
-function _.font(size, style) (
-  gfx_setfont(1, "Arial", size, style);
-);
-function _.color(color) (
-  gfx_r = color[_.color.struct.red];
-  gfx_g = color[_.color.struct.green];
-  gfx_b = color[_.color.struct.blue];
-);
-function _.background_color(color) local(color.red, color.green, color.blue) (
-  color.red = color[_.color.struct.red];
-  color.green = color[_.color.struct.green];
-  color.blue = color[_.color.struct.blue];
-  gfx_clear = color.red * 255 + color.green * 255 * 256 + color.blue * 255 * 65536;
-);
-
 // DRAWING FUNCTIONS
 
 function _.print(
