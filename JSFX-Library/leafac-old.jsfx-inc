@@ -163,10 +163,6 @@ function _.imaginary.rectangular_to_polar(reals, imaginaries, magnitudes, phases
 
 // DATA STRUCTURES
 
-_.enumeration.index = 9990000;
-function _.enumeration() (
-  _.enumeration.index += 1;
-);
 
 function _.box() (
   _.memory.new(1);
@@ -287,21 +283,21 @@ function _.rms.get(rms) (
 function _.filter.biquad.rbj.init() (
   _.filter.biquad.rbj.struct = _.struct.define();
   _.filter.biquad.rbj.struct.type = _.struct.define.field(_.filter.biquad.rbj.struct);
-  _.filter.biquad.rbj.struct.type.low_pass = _.enumeration();
-  _.filter.biquad.rbj.struct.type.high_pass = _.enumeration();
-  _.filter.biquad.rbj.struct.type.band_pass.constant_skirt = _.enumeration();
-  _.filter.biquad.rbj.struct.type.band_pass.constant_peak = _.enumeration();
-  _.filter.biquad.rbj.struct.type.notch = _.enumeration();
-  _.filter.biquad.rbj.struct.type.all_pass = _.enumeration();
-  _.filter.biquad.rbj.struct.type.peaking = _.enumeration();
-  _.filter.biquad.rbj.struct.type.low_shelf = _.enumeration();
-  _.filter.biquad.rbj.struct.type.high_shelf = _.enumeration();
+  _.filter.biquad.rbj.struct.type.low_pass = _.enumeration.new();
+  _.filter.biquad.rbj.struct.type.high_pass = _.enumeration.new();
+  _.filter.biquad.rbj.struct.type.band_pass.constant_skirt = _.enumeration.new();
+  _.filter.biquad.rbj.struct.type.band_pass.constant_peak = _.enumeration.new();
+  _.filter.biquad.rbj.struct.type.notch = _.enumeration.new();
+  _.filter.biquad.rbj.struct.type.all_pass = _.enumeration.new();
+  _.filter.biquad.rbj.struct.type.peaking = _.enumeration.new();
+  _.filter.biquad.rbj.struct.type.low_shelf = _.enumeration.new();
+  _.filter.biquad.rbj.struct.type.high_shelf = _.enumeration.new();
   _.filter.biquad.rbj.struct.frequency = _.struct.define.field(_.filter.biquad.rbj.struct);
   _.filter.biquad.rbj.struct.gain = _.struct.define.field(_.filter.biquad.rbj.struct);
   _.filter.biquad.rbj.struct.width.type = _.struct.define.field(_.filter.biquad.rbj.struct);
-  _.filter.biquad.rbj.struct.width.type.Q = _.enumeration();
-  _.filter.biquad.rbj.struct.width.type.bandwidth = _.enumeration();
-  _.filter.biquad.rbj.struct.width.type.S = _.enumeration();
+  _.filter.biquad.rbj.struct.width.type.Q = _.enumeration.new();
+  _.filter.biquad.rbj.struct.width.type.bandwidth = _.enumeration.new();
+  _.filter.biquad.rbj.struct.width.type.S = _.enumeration.new();
   _.filter.biquad.rbj.struct.width.value = _.struct.define.field(_.filter.biquad.rbj.struct);
   _.filter.biquad.rbj.struct.b0_a0 = _.struct.define.field(_.filter.biquad.rbj.struct);
   _.filter.biquad.rbj.struct.b1_a0 = _.struct.define.field(_.filter.biquad.rbj.struct);
@@ -470,15 +466,15 @@ function _.filter.biquad.rbj.filter(filter, sample)
 function _.filter.biquad.svf.init() (
   _.filter.biquad.svf.struct = _.struct.define();
   _.filter.biquad.svf.struct.type = _.struct.define.field(_.filter.biquad.svf.struct);
-  _.filter.biquad.svf.struct.type.low_pass = _.enumeration();
-  _.filter.biquad.svf.struct.type.band_pass = _.enumeration();
-  _.filter.biquad.svf.struct.type.high_pass = _.enumeration();
-  _.filter.biquad.svf.struct.type.notch = _.enumeration();
-  _.filter.biquad.svf.struct.type.peak = _.enumeration();
-  _.filter.biquad.svf.struct.type.all_pass = _.enumeration();
-  _.filter.biquad.svf.struct.type.bell = _.enumeration();
-  _.filter.biquad.svf.struct.type.low_shelf = _.enumeration();
-  _.filter.biquad.svf.struct.type.high_shelf = _.enumeration();
+  _.filter.biquad.svf.struct.type.low_pass = _.enumeration.new();
+  _.filter.biquad.svf.struct.type.band_pass = _.enumeration.new();
+  _.filter.biquad.svf.struct.type.high_pass = _.enumeration.new();
+  _.filter.biquad.svf.struct.type.notch = _.enumeration.new();
+  _.filter.biquad.svf.struct.type.peak = _.enumeration.new();
+  _.filter.biquad.svf.struct.type.all_pass = _.enumeration.new();
+  _.filter.biquad.svf.struct.type.bell = _.enumeration.new();
+  _.filter.biquad.svf.struct.type.low_shelf = _.enumeration.new();
+  _.filter.biquad.svf.struct.type.high_shelf = _.enumeration.new();
   _.filter.biquad.svf.struct.frequency = _.struct.define.field(_.filter.biquad.svf.struct);
   _.filter.biquad.svf.struct.gain = _.struct.define.field(_.filter.biquad.svf.struct);
   _.filter.biquad.svf.struct.Q = _.struct.define.field(_.filter.biquad.svf.struct);
@@ -1077,5 +1073,5 @@ function _.bezier.cubic.draw(P0.x, P0.y, P1.x, P1.y, P2.x, P2.y, P3.x, P3.y) loc
 // INITIALIZATION
 
 function _.init() (
-  _.undefined = _.enumeration();
+  _.undefined = _.enumeration.new();
 );
