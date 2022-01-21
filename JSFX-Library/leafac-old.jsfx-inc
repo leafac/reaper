@@ -1078,16 +1078,4 @@ function _.bezier.cubic.draw(P0.x, P0.y, P1.x, P1.y, P2.x, P2.y, P3.x, P3.y) loc
 
 function _.init() (
   _.undefined = _.enumeration();
-  _.error = _.enumeration();
-
-  _.array.init();
-  _.circular_buffer.init();
-  _.moving_average.simple.init();
-  _.filter.init();
-  _.noise.init();
-  _.gfx.init();
-
-  _.waveform.init();
-
-  
 );
