@@ -742,31 +742,6 @@ function _.noise.init() (
 
 // DRAWING FUNCTIONS
 
-function _.print(
-  string,
-  font_size,
-  font_style,
-  text_align.horizontal,
-  text_align.vertical,
-  text_overflow,
-  color,
-  x,
-  y,
-  width,
-  height
-) (
-  _.font(font_size, font_style);
-  _.color(color);
-  gfx_x = x;
-  gfx_y = y;
-  gfx_drawstr(
-    string,
-    text_align.horizontal | text_align.vertical | text_overflow,
-    x + width,
-    y + height
-  );
-);
-
 function _.rounded_rectangle_fill(x, y, width, height, radius) (
   radius = min(min(radius, width / 2), height / 2);
   gfx_rect(x + radius, y, width - radius * 2, height);
