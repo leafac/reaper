@@ -1,4 +1,20 @@
 <!--
+Maybe multichannel is bad because it affects Sidechains for later plugins
+Test what denormalization is doing: adding noise (like dither) or a fixed small value (like ReEQ)
+On rms, don’t compute the root and convert to db directly
+Generate pink noise with stochastic model: inverse fft of magnitude with 3db slope and random phase
+Waveform visualizer for any plug-in (just sandwich)
+Yin
+Plugin doctor
+Idea of how to make circular buffers faster: have a notion of item size, so that you can store structs directly and cut one memory dereference
+Idea pf optmization for rms: dont store the size, store its reciprocal, so that a division turns into a multiplication 
+just call getchar so that mouse modifiers work
+Digital hardware (like lexicon) has adc and dac. So if you have several in the chain, doesn’t it mean a lot of latency? What about modular synths?
+
+
+Ping pong ball drop https://www.youtube.com/watch?app=desktop&v=ZGcpOFo_HDA
+
+
 Use “play or stop” on MIDI editor
 
 
