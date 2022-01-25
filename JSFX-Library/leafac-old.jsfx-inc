@@ -93,17 +93,6 @@ LIBRARY
   - Butterworth
   - First-order filters (6dB/octave slopes)
   - Moog & other analog filter emulation
-- Design system
-  - border-width
-  - opacity
-  - rotate
-  - scale
-  - brightness
-  - contrast
-  - saturate
-  - animations
-    - transition-duration
-    - transition-timing-function
 - Distance
   - Manhattan
 - Sort
@@ -737,8 +726,6 @@ function _.noise.init() (
   _.noise.pink.init();
   _.noise.brown.init();
 );
-
-// DESIGN SYSTEM
 
 // DRAWING FUNCTIONS
 
