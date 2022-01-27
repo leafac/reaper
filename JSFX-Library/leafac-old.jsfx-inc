@@ -729,16 +729,6 @@ function _.noise.init() (
 
 // DRAWING FUNCTIONS
 
-function _.rounded_rectangle_fill(x, y, width, height, radius) (
-  radius = min(min(radius, width / 2), height / 2);
-  gfx_rect(x + radius, y, width - radius * 2, height);
-  gfx_rect(x, y + radius, width, height - radius * 2);
-  gfx_circle(x + radius, y + radius, radius, 1);
-  gfx_circle(x + width - radius - 1, y + radius, radius, 1);
-  gfx_circle(x + radius, y + height - radius - 1, radius, 1);
-  gfx_circle(x + width - radius - 1, y + height - radius - 1, radius, 1);
-);
-
 function _.graphs.line(array, x, y, width, height, thickness)
          local(
            array.size,
