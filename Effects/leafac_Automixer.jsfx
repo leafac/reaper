@@ -1,4 +1,19 @@
-desc:leafac_Automixer
+desc:leafac_Automixer (Development)
+
+# Hold
+
+Currently have reaction time, which may act like hold, but isn’t hold, because it delays the camera switch when someone starts speaking
+The default may be too long, because I was trying to use reaction time as hold, to prevent flickering
+But there’s a bug: The reaction time debouncing doesn’t reset when a different candidate dominates
+
+
+# Wide-angle camera
+
+
+
+
+
+
 
 // https://github.com/leafac/reaper
 
@@ -19,10 +34,16 @@ slider4:rms_size_ms=300<0,1000,.1>Reaction time (RMS size in ms)
 slider5:strength=1<0,5,.01>Strength
 slider6:lookahead_ms=0<0,1000,.1>Lookahead (ms)
 
-slider15:instance_identifier=0<0,50,1>-Instance identifier
+slider15:instance_identifier=0<0,50,1>Instance identifier
 
-slider20:track_gain_maximum_difference_db=-20<-60,0,.1>-Track gain maximum difference (dB)
-slider21:track_gain_maximum_debounce_ms=350<0,1000,.1>-Track gain maximum reaction time (ms)
+// TODO: HIDE THESE SLIDERS
+slider20:track_gain_maximum_difference_db=-20<-60,0,.1>Track gain maximum difference (dB)
+slider21:track_gain_maximum_debounce_ms=100<0,1000,.1>Track gain maximum reaction time (ms)
+slider22:track_gain_maximum_hold_ms=2000<0,1000,.1>Track gain maximum hold (ms)
+
+slider24:track_gain_maximum_maximum_duration_ms=3000<0,10000,.1>Track gain maximum maximum duration after hold (ms)
+slider25:track_gain_maximum_maximum_duration_camera=0<0,20,1>Track gain maximum maximum duration camera (0 is disabled)
+slider26:track_gain_maximum_maximum_duration_duration_ms=4000<0,10000,.1>Track gain maximum maximum duration hold (ms)
 
 slider33:1<0,10,0.1>Track 1 priority
 slider34:1<0,10,0.1>Track 2 priority
@@ -73,11 +94,14 @@ rms_size_samples = max(1, ceil(srate * rms_size_ms / 1000));
 rms_sample_counter = -1;
 lookahead_samples = max(1, ceil(srate * lookahead_ms / 1000));
 lookahead_sample_counter = -1;
-pdc_delay = lookahead_samples;
+pdc_delay = lookahead_samples - 1;
 pdc_bot_ch = 0;
 pdc_top_ch = num_ch;
 track_gain_maximum_difference_amplitude = 10^(track_gain_maximum_difference_db / 20);
 track_gain_maximum_debounce_samples = max(1, ceil(srate * track_gain_maximum_debounce_ms / 1000));
+track_gain_maximum_hold_samples = max(1, ceil(srate * track_gain_maximum_hold_ms / 1000));
+track_gain_maximum_maximum_duration_samples = max(1, ceil(srate * track_gain_maximum_maximum_duration_ms / 1000));
+track_gain_maximum_maximum_duration_duration_samples = max(1, ceil(srate * track_gain_maximum_maximum_duration_duration_ms / 1000));
 
 address = 0;
 tracks_priorities = address; address += tracks_maximum;
@@ -171,7 +195,15 @@ abs(track_gain_maximum_gain - tracks_gains[gmem[instance_identifier]]) < track_g
   track_gain_maximum_debounce = track_gain_maximum_debounce_samples;
 ) : (
   track_gain_maximum_debounce -= 1;
-  track_gain_maximum_debounce == 0 ? gmem[instance_identifier] = track_gain_maximum_track;
+  track_gain_maximum_debounce <= 0 && track_gain_maximum_hold <= 0 ? (
+    gmem[instance_identifier] = track_gain_maximum_track;
+    track_gain_maximum_hold = track_gain_maximum_hold_samples;
+  );
+);
+track_gain_maximum_hold -= 1;
+track_gain_maximum_maximum_duration_camera > 0 && track_gain_maximum_hold < -track_gain_maximum_maximum_duration_samples ? (
+    gmem[instance_identifier] = track_gain_maximum_maximum_duration_camera - 1;
+    track_gain_maximum_hold = track_gain_maximum_maximum_duration_duration_samples;
 );
 
 @serialize
