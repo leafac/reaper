@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
+    <reapack name="leafac_Waveform.jsfx" type="effect">
+      <version name="1.0.0">
+        <source>https://github.com/leafac/reaper/raw/7e9a83b52be2bb82aa4f02ee8e3768fff241faa7/Effects/leafac_Waveform.jsfx</source>
+        <source>https://github.com/leafac/reaper/raw/7e9a83b52be2bb82aa4f02ee8e3768fff241faa7/Effects/leafac.jsfx-inc</source>
+      </version>
+    </reapack>
     <reapack name="leafac_Duplicate tracks without items.lua" type="script">
       <version name="0.0.1">
         <source main="main">https://github.com/leafac/reaper/raw/f508c2e3fd213f03b5c628b20bed4bdc048602d1/Scripts/leafac_Duplicate%20tracks%20without%20items.lua</source>
