@@ -1,0 +1,190 @@
+desc:leafac_Waveform (BETA)
+
+slider1:channels.slider=1<0,0,0{All,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64}>Channels
+slider2:duration.ms=5000<5,10000,5>Duration (ms)
+slider3:square_root=0<0,0,0{Off,On}>Square Root
+slider4:vertical=0<0,0,0{Horizontal,Vertical}>Orientation
+slider5:reset_on_start_of_playback=0<0,0,0{Off,On}>Reset on Start of Playback
+
+slider7:fill.color=0<0,0,0{Gray,Red,Orange,Amber,Yellow,Lime,Green,Emerald,Teal,Cyan,Sky,Blue,Indigo,Violet,Purple,Fuchsia,Pink,Rose}>Waveform Color
+
+slider9:grid=0<0,0,0{Off,On}>Grid
+slider10:grid.main.gap=48<24,192,1>Duration Gap (px)
+slider11:grid.cross.gap=24<24,192,1>Volume Gap (px)
+slider12:grid.color=0<0,0,0{Gray,Red,Orange,Amber,Yellow,Lime,Green,Emerald,Teal,Cyan,Sky,Blue,Indigo,Violet,Purple,Fuchsia,Pink,Rose}>Color
+slider13:grid.opacity=0<0,0,0{20%,30%,50%,75%,100%}>Opacity
+
+slider15:zoom=1<0.1,10,0.1>Zoom
+
+import leafac.jsfx-inc
+
+@init
+
+ext_noinit = 1.0;
+
+channels.all = 0;
+
+waveforms = _.memory.new(num_ch);
+channel = 0;
+loop(num_ch,
+  waveforms[channel] = _.waveform.new(10000);
+  channel += 1;
+);
+
+@slider
+
+channels = min(num_ch, channels.slider == channels.all ? num_ch : channels.slider);
+
+slider_show(grid.main.gap, grid);
+slider_show(grid.cross.gap, grid);
+slider_show(grid.color, grid);
+slider_show(grid.opacity, grid);
+
+@serialize
+
+version = 100;
+file_var(0, version);
+
+@block
+
+_.block();
+
+@sample
+
+_.sample.reset || _.gfx.reset || (reset_on_start_of_playback && _.sample.start_of_playback) ? (
+  channel = 0;
+  loop(channels,
+    _.waveform.reset(waveforms[channel]);
+    channel += 1;
+  );
+);
+
+_.gfx.running ? (
+  channel = 0;
+  loop(channels,
+    _.waveform.push(waveforms[channel], spl(channel));
+    channel += 1;
+  );
+);
+
+@gfx 448 256
+
+_.gfx();
+
+_.background_color(_.color.gray.warm.900);
+
+_.gfx.is_embedded_in_tcp_mcp ? (
+  gfx.x = _.space.0;
+  gfx.y = _.space.0;
+  gfx.width = gfx_w;
+  gfx.height = gfx_h;
+) : (
+  gfx.x = _.space.40;
+  gfx.y = _.space.32;
+  gfx.width = _.space.24;
+  gfx.height = _.space.24;
+
+  _.print(
+    "INSTRUCTIONS
+
+1. Click on the “+” on the REAPER interface above and enable either
+   “Show embedded UI in TCP” or “Show embedded UI in MCP”.
+2. Customize the display with the sliders above.
+3. Save as an FX chain.
+",
+    _.font_family.default,
+    _.font_size.extra_small,
+    _.font_style.regular,
+    _.letter_spacing.normal,
+    _.text_align.horizontal.left,
+    _.text_align.vertical.top,
+    _.text_overflow.visible,
+    _.color.gray.warm.200,
+    _.space.2, _.space.2,
+    _.space.0, _.space.0
+  );
+
+  _.color(_.color.gray.warm.400);
+  gfx_roundrect(
+    gfx.x, gfx.y,
+    gfx.width, gfx.height,
+    _.border_radius.none
+  );
+);
+
+_.sample.running ? (
+  gfx.waveform.x = _.space.0;
+  gfx.waveform.y = _.space.0;
+  vertical ? (
+    gfx.waveform.width = gfx.width / channels;
+    gfx.waveform.height = gfx.height;
+  ) : (
+    gfx.waveform.width = gfx.width;
+    gfx.waveform.height = gfx.height / channels;
+  );
+  gfx.channel = 0;
+  loop(channels,
+    _.waveform.draw(
+      waveforms[gfx.channel],
+      gfx.x + gfx.waveform.x, gfx.y + gfx.waveform.y,
+      gfx.waveform.width, gfx.waveform.height,
+      zoom,
+      duration.ms,
+      square_root,
+      vertical,
+
+      fill.color ==  0 ? _.color.gray.warm.500 :
+      fill.color ==  1 ? _.color.red.500 :
+      fill.color ==  2 ? _.color.orange.500 :
+      fill.color ==  3 ? _.color.amber.500 :
+      fill.color ==  4 ? _.color.yellow.500 :
+      fill.color ==  5 ? _.color.lime.500 :
+      fill.color ==  6 ? _.color.green.500 :
+      fill.color ==  7 ? _.color.emerald.500 :
+      fill.color ==  8 ? _.color.teal.500 :
+      fill.color ==  9 ? _.color.cyan.500 :
+      fill.color == 10 ? _.color.sky.500 :
+      fill.color == 11 ? _.color.blue.500 :
+      fill.color == 12 ? _.color.indigo.500 :
+      fill.color == 13 ? _.color.violet.500 :
+      fill.color == 14 ? _.color.purple.500 :
+      fill.color == 15 ? _.color.fuchsia.500 :
+      fill.color == 16 ? _.color.pink.500 :
+      fill.color == 17 ? _.color.rose.500,
+      
+      _.opacity.100,
+      grid ? grid.main.gap : _.undefined, grid ? grid.cross.gap : _.undefined,
+
+      grid.color ==  0 ? _.color.gray.warm.200 :
+      grid.color ==  1 ? _.color.red.200 :
+      grid.color ==  2 ? _.color.orange.200 :
+      grid.color ==  3 ? _.color.amber.200 :
+      grid.color ==  4 ? _.color.yellow.200 :
+      grid.color ==  5 ? _.color.lime.200 :
+      grid.color ==  6 ? _.color.green.200 :
+      grid.color ==  7 ? _.color.emerald.200 :
+      grid.color ==  8 ? _.color.teal.200 :
+      grid.color ==  9 ? _.color.cyan.200 :
+      grid.color == 10 ? _.color.sky.200 :
+      grid.color == 11 ? _.color.blue.200 :
+      grid.color == 12 ? _.color.indigo.200 :
+      grid.color == 13 ? _.color.violet.200 :
+      grid.color == 14 ? _.color.purple.200 :
+      grid.color == 15 ? _.color.fuchsia.200 :
+      grid.color == 16 ? _.color.pink.200 :
+      grid.color == 17 ? _.color.rose.200,
+
+      grid.opacity == 0 ? _.opacity.20 :
+      grid.opacity == 1 ? _.opacity.30 :
+      grid.opacity == 2 ? _.opacity.50 :
+      grid.opacity == 3 ? _.opacity.75 :
+      grid.opacity == 4 ? _.opacity.100
+    );
+    gfx.channel += 1;
+    vertical ? (
+      gfx.waveform.x += gfx.waveform.width;
+    ) : (
+      gfx.waveform.y += gfx.waveform.height;
+    );
+  );
+);

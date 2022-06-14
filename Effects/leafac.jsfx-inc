@@ -1,0 +1,2067 @@
+- What happens on samplerate changes? Some initialization depends on srate, for example, things that use ‘_.milliseconds_to_samples()’. Those things could go wrong. We could detect srate changes & reinitialize stuff. But that’s an annoying solution to a rare issue…
+
+Is it better to do _.db_to_linear(db) with exp(-x*log(10)/20) ???
+
+
+Use polygon to draw thick lines
+
+
+Is the GFX performance significantly better if we turn off retina?
+  Things get better, but it’s not 60FPS
+
+- Questions
+  - How do they communicate between audio & UI threads?
+  - Which thread does most of the work?
+  - How do they scroll the pane across the screen?
+- Sources
+  - JS: Inline Input Viewer (MCP embedded)
+    - How do they communicate between audio & UI threads?
+      - With a short circular buffer.
+      - The circular buffer is moved by copying all elements.
+    - Which thread does most of the work?
+      - Audio.
+    - How do they scroll the pane across the screen?
+      - No offscreen drawing.
+  - JS: Wave Scope
+    - Circular buffer by memcpy
+    - UI thread is doing the decimation
+    - Offscreen drawing
+  - JS: Oscilloscope Meter (Cockos)
+  - JS: Saike Tight Compressor
+  - JS: Smooth Limiter (by Geraint Luff)
+  - JS: Spectrograph Spectrogram Meter (Cockos)
+  - JS: Saike Spectral Analyzer (beta)
+  - JS: kawa_XY_BitCrusher (and other stuff by kawa)
+  - JUCE: AudioThumbnail
+- It would be nice to pretend that time didn’t pass, but put a separator?
+- Draw a line instead of a rectangle of width 1.
+
+Fonts: Consolas
+
+Idea for Plugin Doctor replacement: in the linear analysis (similar to Bertom’s EQ analyzer), have an option to draw lines showing the dB/octave slope.
+Plugin doctor replacement: different knees for different frequencies and different attack/release for different loud part durations (for measuring program-dependent attack/release)
+
+
+Branchless circular buffer: index -= (index == size) * size
+Noise suppressor based on dynamic eq (downward expansion). The parameter would be based on the noise profile. It’s unique because it’s similar to bertom in being 0latency, but it’s based on a noise profile. 
+
+
+
+
+Automixer
+Send MIDI signal on changes and capture them and transform them into OBS websockets events
+
+
+
+
+
+
+_.bezier.linear.draw(20, 20, 200, 300, _.color.red.500, _.stroke_width.4);
+_.bezier.quadratic.draw(20, 20, 0, 100, 200, 300, _.color.green.500, _.stroke_width.4);
+_.bezier.cubic.draw(20, 20, 0, 100, 100, 0, 200, 300, _.color.purple.500, _.stroke_width.4);
+
+
+- Both ‘_.sample.running’ and ‘_.gfx.running’ should be reset to numbers in terms of ‘samplesblock’, ‘srate’, and the framerate of @gfx
+
+Introduce the notion of sample_in_block_index, giving the index of the sample within the block
+
+  // TODO: Extract seconds to milliseconds converter.
+
+PITCH SHIFTER
+Extract pitch to ratio into library
+Crossfades should be equal-power instead of equal-amplitude
+Equal gain vs equal power
+cos(pi/2*x)
+1 - x^2 and 2*x - x^2,
+
+
+
+line a circular buffer
+
+Animation easing functions
+Basic animations, for example, pulsing
+A multiband compressor in which all the parameters are linked (the point is that compression is smoother; see Kenny’s video)
+
+
+gfx_setimgdim(0, 1000, 1000);
+gfx_dest = 0;
+_.rounded_rectangle_fill(
+  _.space.2, _.space.2,
+  _.space.52, _.space.52,
+  _.border_radius.extra_large,
+  _.color.red.500
+);
+gfx_dest = -1;
+gfx_a = _.opacity.50;
+gfx_blit(0, _.scale.100, _.rotate._2);
+
+gfx_muladdrect(
+  0, 0,
+  gfx_w, gfx_h,
+  _.contrast.150, _.contrast.150, _.contrast.150, _.opacity.100,
+  _.brightness.100, _.brightness.100, _.brightness.150, 1
+);
+_.blur(0, 0, gfx_w, gfx_h, _.blur.extra_large.3);
+
+
+
+EFFECTS
+
+- Memory visualizer
+  - https://forums.cockos.com/showthread.php?p=2039886
+  - https://forum.cockos.com/showthread.php?t=151992
+- De-Reverb
+  - https://www.youtube.com/watch?v=9c57YnS7ppA
+  - https://riddlermike.wordpress.com/2013/08/25/deverb-for-free-removing-reverb-using-free-plugins/
+- Dan Worrall’s idea of manipulating the stereo image with all-pass filters: https://www.youtube.com/watch?v=uZ9WQDojQt8
+- Static distortions
+  - Bit Crusher
+  - Rectifier
+    - Full-wave
+    - Half-wave
+  - Clipper
+  - Include oversampling options
+  - Bézier waveshaping
+- Noise generator (white, pink, brown, and maybe some other colors)
+- Gain
+  - Smooth automation & a reasonable range.
+- Mid-side encoder & decoder
+- Oscillator (Tone generator) LFO)
+- Burn-in speakers
+  - Gain
+  - Timer
+- DC Offset
+  - Set an arbitrary DC offset.
+  - Fix a DC offset with a high-pass filter
+- Tremolo
+- Oscilloscope
+  - Show waveforms when zoomed out
+  - When zoomed in, show a lollipop graph (https://www.youtube.com/watch?v=cIQ9IXSUzuM&t=18s) and draw the waveforms as they really will be when converted to analog
+- Meters
+  - Pretty much like the stock ones (LUFS, RMS, True Peak, and so forth) but plot results over time.
+- Monitor with low volume based on Dan Worrall’s video: https://www.youtube.com/watch?v=wgogJmeQFvY
+
+LIBRARY
+
+- SVF
+  - Remove ‘biquad’ from the name
+  - Add sliders in the demonstration effect.
+  - Add extensions from ReEQ (for example, interpolation of coeffiecients for morphing filters).
+  - Add functions to visualize the frequency response (again, borrow from ReEQ).
+- Data structures
+  - Arrays
+    - Use negative indices to tuck away the metadata on arrays?
+      - Change some .memory into .array
+  - Circular buffers
+    - Consider using pointer arithmetic to return the address to the current position. This is slightly annoing because it’s pointer arithmetic, but it may simplify the use of circular buffers.
+  - Circular counter
+    - Helper to only run a block of code every so often, for example, the block that only runs every 256 samples on Justin’s wavetable
+  - Memory-aligned memory allocator
+  - Matrix
+  - Follower
+    - [x] Fixed-slope
+    - Fixed length
+    - Different shapes
+    - Different maximums going up & down (attack & release)
+    - https://docs.juce.com/master/classdsp_1_1BallisticsFilter.html
+  - Delay line with waveforms
+- Mid-side encoding & decoding
+- Auxiliary mathematical functions
+  - Clip a number (using min & max)
+  - Map a number from a range to another range (similar to Processing’s map)
+  - Rectify
+    - Full-wave
+    - Half-wave
+  - frequency ↔ samples
+- Oscillators
+  - Band-limited versions, using Justin’s code
+- RMS
+  - Multichannel
+  - Exponentially weighted moving average
+  - Change window size
+- Oversampling.
+- Line graphs
+  - Zoom horizontally & vertically (range)
+  - Line or area under curve
+- Moving averages
+  - Simple moving average
+    - Change window size
+  - Moving average Hull
+  - Median averaging
+- RBJ Filters
+  - Include formula to convert between width types (Q, BW, and S)
+    - Use to keep sliders in sync so that width doesn’t change when you change type
+- Frequency spectrum analyzer
+- Colorpicker
+- Filters
+  - Windowed-sinc
+  - Butterworth
+  - First-order filters (6dB/octave slopes)
+  - Moog & other analog filter emulation
+- Distance
+  - Manhattan
+- Sort
+  - Smallest
+  - Find the median
+  - Largest
+- Search (for example, binary search)
+- Bézier
+  - Color
+  - Thickness
+- Noise
+  - Gaussian
+  - Perlin
+- Random distributions
+  - Uniform
+  - Gaussian
+- Hilbert curve
+- Raycaster
+- degrees ↔ radians
+- amplitude_to_db -> linear_to_db
+- FFT (mostly to understand it)
+- Slew Rate
+- Phase
+  - Unwrap
+  - Reduce noise by checking small values & returning 0
+- FFT blurring
+- Logarithmic sliders
+
+@init
+
+// CONSTANTS
+
+_.true = 1;
+_.false = 0;
+_.infinity = 10^20;
+_.infinitesimal = 1 / _.infinity;
+_.undefined = 99990000;
+_.error = 99990001;
+
+// OPERATING SYSTEM DETECTION
+
+// https://forum.cockos.com/showpost.php?p=1593240&postcount=3
+_.windows = strcmp(sprintf(#, "%.0f", 0.5), "1") == 0;
+
+// UNIT CONVERSIONS
+
+function _.milliseconds_to_samples(milliseconds) (
+  milliseconds * srate / 1000;
+);
+function _.milliseconds_to_samples.test() (
+  _.milliseconds_to_samples(1000) == srate &&
+  _.milliseconds_to_samples(500) == srate / 2 &&
+  _.milliseconds_to_samples(0) == 0;
+);
+function _.samples_to_milliseconds(samples) (
+  samples / srate * 1000;
+);
+function _.samples_to_milliseconds.test() (
+  _.samples_to_milliseconds(srate) == 1000 &&
+  _.samples_to_milliseconds(srate / 2) == 500 &&
+  _.samples_to_milliseconds(0) == 0;
+);
+
+function _.linear_to_db(linear) (
+  20 * log10(abs(linear) + _.infinitesimal);
+);
+function _.linear_to_db.test() (
+  _.linear_to_db(0) == -400 &&
+  _.linear_to_db(0.5) == -6.02059 &&
+  _.linear_to_db(-0.5) == -6.02059 &&
+  _.linear_to_db(1) == 0 &&
+  _.linear_to_db(-1) == 0 &&
+  _.linear_to_db(2) == 6.02059 &&
+  _.linear_to_db(-2) == 6.02059;
+);
+function _.db_to_linear(db) (
+  10^(db / 20);
+);
+function _.db_to_linear.test() (
+  _.db_to_linear(-6.02059) == 0.5 &&
+  _.db_to_linear(0) == 1 &&
+  _.db_to_linear(6.02059) == 2;
+);
+
+function _.power_to_db(power) (
+  10 * log10(abs(power) + _.infinitesimal);
+);
+function _.power_to_db.test() (
+  _.power_to_db(0) == -200 &&
+  _.power_to_db(0.5) == -3.010299956639812 &&
+  _.power_to_db(-0.5) == -3.010299956639812 &&
+  _.power_to_db(1) == 0 &&
+  _.power_to_db(-1) == 0 &&
+  _.power_to_db(2) == 3.010299956639812 &&
+  _.power_to_db(-2) == 3.010299956639812;
+);
+function _.db_to_power(db) (
+  10^(db / 10);
+);
+function _.db_to_power.test() (
+  _.db_to_power(-3.010299956639812) == 0.5 &&
+  _.db_to_power(0) == 1 &&
+  _.db_to_power(3.010299956639812) == 2;
+);
+
+function _.radians_to_degrees(radians) (
+  radians * 180 / $pi;
+);
+function _.radians_to_degrees.test() (
+  _.radians_to_degrees( 0   * $pi / 2) ==    0 &&
+  _.radians_to_degrees( 1   * $pi / 2) ==   90 &&
+  _.radians_to_degrees( 2   * $pi / 2) ==  180 &&
+  _.radians_to_degrees( 3   * $pi / 2) ==  270 &&
+  _.radians_to_degrees( 0.5 * $pi / 2) ==   45 &&
+  _.radians_to_degrees(-0   * $pi / 2) == -  0 &&
+  _.radians_to_degrees(-1   * $pi / 2) == - 90 &&
+  _.radians_to_degrees(-2   * $pi / 2) == -180 &&
+  _.radians_to_degrees(-3   * $pi / 2) == -270 &&
+  _.radians_to_degrees(-0.5 * $pi / 2) == - 45;
+);
+function _.degrees_to_radians(degrees) (
+  degrees / 180 * $pi;
+);
+function _.degrees_to_radians.test() (
+  _.degrees_to_radians(   0) ==  0   * $pi / 2 &&
+  _.degrees_to_radians(  90) ==  1   * $pi / 2 &&
+  _.degrees_to_radians( 180) ==  2   * $pi / 2 &&
+  _.degrees_to_radians( 270) ==  3   * $pi / 2 &&
+  _.degrees_to_radians(  45) ==  0.5 * $pi / 2 &&
+  _.degrees_to_radians(-  0) == -0   * $pi / 2 &&
+  _.degrees_to_radians(- 90) == -1   * $pi / 2 &&
+  _.degrees_to_radians(-180) == -2   * $pi / 2 &&
+  _.degrees_to_radians(-270) == -3   * $pi / 2 &&
+  _.degrees_to_radians(- 45) == -0.5 * $pi / 2;
+);
+
+// IMAGINARY NUMBERS
+
+// http://www.dspguide.com/CH8.PDF
+// http://www.dspguide.com/CH30.PDF
+
+function _.imaginary.magnitude(real, imaginary) (
+  sqrt(sqr(real) + sqr(imaginary));
+);
+function _.imaginary.magnitude.test() (
+  _.imaginary.magnitude( 0,  0) == 0 &&
+  _.imaginary.magnitude( 3,  4) == 5 &&
+  _.imaginary.magnitude(-3, -4) == 5 &&
+  _.imaginary.magnitude( 1,  1) == sqrt(2);
+);
+
+function _.imaginary.phase(real, imaginary) (
+  atan2(imaginary, real);
+);
+function _.imaginary.phase.test() (
+  _.imaginary.phase( 0,  0) ==  0 * $pi / 4 &&
+  _.imaginary.phase( 1,  0) ==  0 * $pi / 4 &&
+  _.imaginary.phase( 1,  1) ==  1 * $pi / 4 &&
+  _.imaginary.phase( 0,  1) ==  2 * $pi / 4 &&
+  _.imaginary.phase(-1,  1) ==  3 * $pi / 4 &&
+  _.imaginary.phase(-1,  0) ==  4 * $pi / 4 &&
+  _.imaginary.phase(-1, -1) == -3 * $pi / 4 &&
+  _.imaginary.phase( 0, -1) == -2 * $pi / 4 &&
+  _.imaginary.phase( 1, -1) == -1 * $pi / 4;
+);
+
+function _.imaginary.real(magnitude, phase) (
+  magnitude * cos(phase);
+);
+function _.imaginary.real.test() (
+  _.imaginary.real(0, 0 * $pi / 4) ==  0 &&
+  _.imaginary.real(1, 0 * $pi / 4) ==  1 &&
+  _.imaginary.real(1, 2 * $pi / 4) ==  0 &&
+  _.imaginary.real(1, 4 * $pi / 4) == -1;
+);
+
+function _.imaginary.imaginary(magnitude, phase) (
+  magnitude * sin(phase);
+);
+function _.imaginary.imaginary.test() (
+  _.imaginary.imaginary(0,  0 * $pi / 4) ==  0 &&
+  _.imaginary.imaginary(1,  0 * $pi / 4) ==  0 &&
+  _.imaginary.imaginary(1,  2 * $pi / 4) ==  1 &&
+  _.imaginary.imaginary(1, -2 * $pi / 4) == -1;
+);
+
+// TODO: Tests
+function _.imaginary.plus.real(left.real, left.imaginary, right.real, right.imaginary) (
+  left.real + right.real;
+);
+function _.imaginary.plus.imaginary(left.real, left.imaginary, right.real, right.imaginary) (
+  left.imaginary + right.imaginary;
+);
+function _.imaginary.minus.real(left.real, left.imaginary, right.real, right.imaginary) (
+  left.real - right.real;
+);
+function _.imaginary.minus.imaginary(left.real, left.imaginary, right.real, right.imaginary) (
+  left.imaginary - right.imaginary;
+);
+function _.imaginary.times.real(left.real, left.imaginary, right.real, right.imaginary) (
+  left.real * right.real - left.imaginary * right.imaginary;
+);
+function _.imaginary.times.imaginary(left.real, left.imaginary, right.real, right.imaginary) (
+  left.imaginary * right.real + left.real * right.imaginary;
+);
+function _.imaginary.divided_by.real(left.real, left.imaginary, right.real, right.imaginary) (
+  (left.real * right.real + left.imaginary * right.imaginary) / (sqr(right.real) + sqr(right.imaginary));
+);
+function _.imaginary.divided_by.imaginary(left.real, left.imaginary, right.real, right.imaginary) (
+  (left.imaginary * right.real - left.real * right.imaginary) / (sqr(right.real) + sqr(right.imaginary));
+);
+function _.imaginary.times.magnitude(left.magnitude, left.phase, right.magnitude, right.phase) (
+  left.magnitude * right.magnitude;
+);
+function _.phase.times.phase(left.magnitude, left.phase, right.magnitude, right.phase) (
+  left.phase + right.phase;
+);
+function _.phase.divided_by.magnitude(left.magnitude, left.phase, right.magnitude, right.phase) (
+  left.magnitude / right.magnitude;
+);
+function _.phase.divided_by.phase(left.magnitude, left.phase, right.magnitude, right.phase) (
+  left.phase - right.phase;
+);
+
+// HYPERBOLIC FUNCTIONS
+
+// https://en.wikipedia.org/wiki/Hyperbolic_functions#Exponential_definitions
+function _.sinh(x) (
+  (exp(x) - exp(-x)) / 2;
+);
+function _.cosh(x) (
+  (exp(x) + exp(-x)) / 2;
+);
+function _.tanh(x)
+local(e_2x) (
+  e_2x = exp(2 * x);
+  (e_2x - 1) / (e_2x + 1);
+);
+function _.coth(x)
+local(e_2x) (
+  e_2x = exp(2 * x);
+  (e_2x + 1) / (e_2x - 1);
+);
+function _.sech(x) (
+  2 / (exp(x) + exp(-x));
+);
+function _.csch(x) (
+  2 / (exp(x) - exp(-x));
+);
+function _.hyperbolic_functions.test() (
+  _.sinh(10) == 11013.23287 &&
+  _.cosh(10) == 11013.23292 &&
+  _.tanh(10) == 0.99999 &&
+  _.coth(10) == 1.00000 &&
+  _.sech(10) == 0.00009 &&
+  _.csch(10) == 0.00009;
+);
+
+// https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions#Definitions_in_terms_of_logarithms
+function _.arsinh(x) (
+  log(x + sqrt(sqr(x) + 1));
+);
+function _.arcosh(x) (
+  log(x + sqrt(sqr(x) - 1));
+);
+function _.artanh(x) (
+  log((1 + x) / (1 - x)) / 2;
+);
+function _.arcoth(x) (
+  log((x + 1) / (x - 1)) / 2;
+);
+function _.arsech(x) (
+  log((1 + sqrt(1 - sqr(x))) / x);
+);
+function _.arcsch(x) (
+  log(1 / x + sqrt((1 / sqr(x)) + 1));
+);
+function _.hyperbolic_functions.inverse.test() (
+  _.arsinh(10) == 2.99822 &&
+  _.arcosh(10) == 2.99322 &&
+  _.artanh(0.75) == 0.97295 &&
+  _.arcoth(10) == 0.10033 &&
+  _.arsech(0.75) == 0.79536 &&
+  _.arcsch(10) == 0.09983;
+);
+
+// NUMERICAL FUNCTIONS
+
+function _.count_trailing_zeros(number.positive)
+local(trailing_zeros) (
+  trailing_zeros = 0;
+  while (number.positive & 1 << trailing_zeros == 0) (
+    trailing_zeros += 1;
+  );
+  trailing_zeros;
+);
+function _.count_trailing_zeros.test() (
+  _.count_trailing_zeros(1 /* 0001 */) == 0 &&
+  _.count_trailing_zeros(2 /* 0010 */) == 1 &&
+  _.count_trailing_zeros(3 /* 0011 */) == 0 &&
+  _.count_trailing_zeros(4 /* 0100 */) == 2 &&
+  _.count_trailing_zeros(5 /* 0101 */) == 0 &&
+  _.count_trailing_zeros(6 /* 0110 */) == 1 &&
+  _.count_trailing_zeros(7 /* 0111 */) == 0 &&
+  _.count_trailing_zeros(8 /* 1000 */) == 3;
+);
+
+function _.map(value, from.minimum, from.maximum, to.minimum, to.maximum) (
+  (value - from.minimum) / (from.maximum - from.minimum) * (to.maximum - to.minimum) + to.minimum;
+);
+function _.map.test() (
+  _.map(0.5, -1, 1, 20, 60) == 50;
+);
+
+function _.clip(value, minimum, maximum) (
+  min(max(value, minimum), maximum);
+);
+function _.clip(value, limit) (
+  _.clip(value, -limit, limit);
+);
+function _.clip.test() (
+  _.clip(0, -1, 1) == 0 &&
+  _.clip(2, -1, 1) == 1 &&
+  _.clip(-2, -1, 1) == -1 &&
+  _.clip(2, 1) == 1 &&
+  _.clip(-2, 1) == -1;
+);
+
+function _.follower(follower, target, maximum_change) (
+  follower + _.clip(target - follower, maximum_change);
+);
+function _.follower(follower, target) (
+  _.follower(follower, target, 0.0001);
+);
+function _.follower.test() (
+  _.follower(0.5, 0.7, 0.3) == 0.7 &&
+  _.follower(0.7, 0.5, 0.3) == 0.5 &&
+  _.follower(0.5, 0.7, 0.1) == 0.6 &&
+  _.follower(0.7, 0.5, 0.1) == 0.6;
+);
+
+function _.wrap.minimum(value, minimum, maximum) (
+  value >= minimum ? value : value + (maximum - minimum);
+);
+function _.wrap.minimum(value, maximum) (
+  _.wrap.minimum(value, 0, maximum);
+);
+function _.wrap.maximum(value, minimum, maximum) (
+  value < maximum ? value : value - (maximum - minimum);
+);
+function _.wrap.maximum(value, maximum) (
+  _.wrap.maximum(value, 0, maximum);
+);
+function _.wrap(value, minimum, maximum) (
+  _.wrap.maximum(_.wrap.minimum(value, minimum, maximum), minimum, maximum);
+);
+function _.wrap(value, maximum) (
+  _.wrap(value, 0, maximum);
+);
+function _.wrap.test() (
+  _.wrap.minimum(1, 2) == 1 &&
+  _.wrap.minimum(-1, 2) == 1 &&
+  _.wrap.maximum(1, 2) == 1 &&
+  _.wrap.maximum(3, 2) == 1 &&
+  _.wrap(-1, 2) == 1 &&
+  _.wrap(3, 2) == 1;
+);
+
+function _.circular_counter(circular_counter, minimum, maximum, step) (
+  circular_counter += step;
+  _.wrap.maximum(circular_counter, minimum, maximum);
+);
+function _.circular_counter(circular_counter, minimum, maximum) (
+  _.circular_counter(circular_counter, minimum, maximum, 1);
+);
+function _.circular_counter(circular_counter, maximum) (
+  _.circular_counter(circular_counter, 0, maximum);
+);
+
+/*
+  TODO:
+  - Add support for negative steps.
+  - Test.
+*/
+function _.circular_counter.wrapped(circular_counter, minimum, step) (
+  circular_counter < minimum + step;
+);
+function _.circular_counter.wrapped(circular_counter, step) (
+  _.circular_counter.wrapped(circular_counter, 0, step)
+);
+function _.circular_counter.wrapped(circular_counter) (
+  _.circular_counter.wrapped(circular_counter, 1)
+);
+
+function _.circular_counter.test()
+local(circular_counter) (
+  circular_counter = 0;
+  (circular_counter = _.circular_counter(circular_counter, 3)) == 1 &&
+  (circular_counter = _.circular_counter(circular_counter, 0, 3)) == 2 &&
+  (circular_counter = _.circular_counter(circular_counter, 0, 3, 1)) == 0 &&
+  (circular_counter = _.circular_counter(circular_counter, 1, 3, 1.7)) == 1.7 &&
+  (circular_counter = _.circular_counter(circular_counter, 1, 3, 1.7)) == 1.4;
+);
+
+// TODO: Test.
+function _.square_root_with_sign(number) (
+  sqrt(abs(number)) * sign(number);
+);
+
+// DISTANCES
+
+// https://en.wikipedia.org/wiki/Euclidean_distance
+function _.distance.euclidian(p1, p2, q1, q2) (
+  sqrt(sqr(q1 - p1) + sqr(q2 - p2));
+);
+function _.distance.euclidian.test() (
+  _.distance.euclidian(6, 5, 3, 9) == 5;
+);
+
+// ENUMERATIONS
+
+_.enumeration.index = 9990000;
+function _.enumeration.new() (
+  _.enumeration.index += 1;
+);
+function _.enumeration.test() (
+  _.enumeration.new() != _.enumeration.new();
+);
+
+// MEMORY ALLOCATION
+
+_.memory.next_available_address = 0;
+function _.memory.new(length)
+local(address) (
+  address = _.memory.next_available_address;
+  _.memory.next_available_address += length;
+  memset(address, 0, length);
+  address;
+);
+_.memory.alignment_length = 65536;
+function _.memory.aligned.new(length) (
+  floor(_.memory.next_available_address / _.memory.alignment_length) !=
+    floor((_.memory.next_available_address + length - 1) / _.memory.alignment_length) ?
+    _.memory.next_available_address = ceil(_.memory.next_available_address / _.memory.alignment_length) * _.memory.alignment_length;
+  _.memory.new(length);
+);
+function _.memory.test()
+local(result) (
+  _.memory.alignment_length = 5;
+  result = _.memory.next_available_address == 0 &&
+  _.memory.new(3) == 0 &&
+  _.memory.new(3) == 3 &&
+  _.memory.aligned.new(3) == 6 &&
+  _.memory.aligned.new(3) == 10;
+  _.memory.alignment_length = 65536;
+  result;
+);
+
+// IMAGE ALLOCATION
+
+_.image.main = -1;
+_.image.next_available_index = 0;
+function _.image.new()
+local(image) (
+  image = _.image.next_available_index;
+  _.image.next_available_index += 1;
+  image;
+);
+function _.image.test() (
+  _.image.next_available_index == 0 &&
+  _.image.new() == 0 &&
+  _.image.new() == 1;
+);
+
+// ARRAYS
+
+_.array.length = -1;
+function _.array.new(length)
+local(array) (
+  array = _.memory.new(length + 1) + 1;
+  array[_.array.length] = length;
+  array;
+);
+function _.array.test()
+local(array) (
+  array = _.array.new(5);
+  array[0] = 100;
+  array[1] = 101;
+  array[2] = 102;
+  array[3] = 103;
+  array[4] = 104;
+  array[_.array.length] == 5 &&
+  array[0] == 100 &&
+  array[1] == 101 &&
+  array[2] == 102 &&
+  array[3] == 103 &&
+  array[4] == 104;
+);
+
+// CIRCULAR BUFFER
+
+_.circular_buffer.length = -1;
+_.circular_buffer.write_index = -2;
+function _.circular_buffer.new(length)
+local(circular_buffer) (
+  circular_buffer = _.memory.new(2 + length) + 2;
+  circular_buffer[_.circular_buffer.length] = length;
+  circular_buffer[_.circular_buffer.write_index] = 0;
+  circular_buffer;
+);
+function _.circular_buffer.reset(circular_buffer) (
+  memset(circular_buffer, 0, circular_buffer[_.circular_buffer.length]);
+);
+function _.circular_buffer.push(circular_buffer, value)
+local(length, write_index) (
+  length = circular_buffer[_.circular_buffer.length];
+  write_index = circular_buffer[_.circular_buffer.write_index];
+  circular_buffer[write_index] = value;
+  write_index = _.circular_counter(write_index, length);
+  circular_buffer[_.circular_buffer.write_index] = write_index;
+  value;
+);
+function _.circular_buffer.get(circular_buffer, offset)
+local(length, write_index, read_index) (
+  length = circular_buffer[_.circular_buffer.length];
+  write_index = circular_buffer[_.circular_buffer.write_index];
+  read_index = _.wrap.minimum(write_index + offset, length);
+  circular_buffer[read_index];
+);
+function _.circular_buffer.get.interpolated.linear(circular_buffer, offset)
+local(
+  offset.ceil,
+  offset.floor,
+  x.n,
+  x.n_1,
+  x.n_1.weight
+) (
+  offset.ceil = ceil(offset);
+  offset.floor = floor(offset);
+  x.n = _.circular_buffer.get(circular_buffer, offset.ceil);
+  x.n_1 = _.circular_buffer.get(circular_buffer, offset.floor);
+  x.n_1.weight = offset.ceil - offset;
+  x.n_1 * x.n_1.weight + x.n * (1 - x.n_1.weight);
+);
+function _.circular_buffer.test()
+local(circular_buffer, result) (
+  circular_buffer = _.circular_buffer.new(3);
+  _.circular_buffer.push(circular_buffer, 1000);
+  _.circular_buffer.push(circular_buffer, 1010);
+  _.circular_buffer.push(circular_buffer, 1020);
+  _.circular_buffer.push(circular_buffer, 1030);
+  result = _.circular_buffer.get(circular_buffer, -1) == 1030 &&
+           _.circular_buffer.get(circular_buffer, -2) == 1020 &&
+           _.circular_buffer.get(circular_buffer, -3) == 1010 &&
+           _.circular_buffer.get.interpolated.linear(circular_buffer, -1.5) == 1025 &&
+           _.circular_buffer.get.interpolated.linear(circular_buffer, -2.75) == 1012.50;
+  _.circular_buffer.reset(circular_buffer);
+  result && _.circular_buffer.get(circular_buffer, -1) == 0 &&
+            _.circular_buffer.get(circular_buffer, -2) == 0 &&
+            _.circular_buffer.get(circular_buffer, -3) == 0;
+);
+
+// TESTS
+
+function _.tests() (
+  #_.tests = "Open the editor and check for variables that shouldn’t be global.\n\n";
+  #_.tests += "_.milliseconds_to_samples.test(): "; _.milliseconds_to_samples.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.samples_to_milliseconds.test(): "; _.samples_to_milliseconds.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.linear_to_db.test(): "; _.linear_to_db.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.db_to_linear.test(): "; _.db_to_linear.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.power_to_db.test(): "; _.power_to_db.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.db_to_power.test(): "; _.db_to_power.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.radians_to_degrees.test(): "; _.radians_to_degrees.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.degrees_to_radians.test(): "; _.degrees_to_radians.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.imaginary.magnitude.test(): "; _.imaginary.magnitude.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.imaginary.phase.test(): "; _.imaginary.phase.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.imaginary.real.test(): "; _.imaginary.real.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.imaginary.imaginary.test(): "; _.imaginary.imaginary.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.hyperbolic_functions.test(): "; _.hyperbolic_functions.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.hyperbolic_functions.inverse.test(): "; _.hyperbolic_functions.inverse.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.count_trailing_zeros.test(): "; _.count_trailing_zeros.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.map.test(): "; _.map.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.clip.test(): "; _.clip.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.follower.test(): "; _.follower.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.wrap.test(): "; _.wrap.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.circular_counter.test(): "; _.circular_counter.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.distance.euclidian.test(): "; _.distance.euclidian.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.enumeration.test(): "; _.enumeration.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.memory.test(): "; _.memory.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.image.test(): "; _.image.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.array.test(): "; _.array.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.circular_buffer.test(): "; _.circular_buffer.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+);
+
+_.sample.play_state = _.undefined;
+_.sample.play_state.stopped = 0;
+_.sample.play_state.playing = 1;
+_.sample.play_state.paused = 2;
+_.sample.play_state.recording = 5;
+_.sample.play_state.record_paused = 6;
+_.sample.play_position = play_position;
+function _.block() (
+  // https://forums.cockos.com/showpost.php?p=1827391&postcount=2
+  _.sample.reset = !_.sample.running;
+  _.sample.running = 3;
+  _.gfx.running = max(0, _.gfx.running - 1);
+
+  _.sample.start_of_playback =
+    (
+      (
+        _.sample.play_state == _.sample.play_state.stopped ||
+        _.sample.play_state == _.sample.play_state.paused ||
+        _.sample.play_state == _.sample.play_state.record_paused
+      ) && (
+        play_state == _.sample.play_state.playing ||
+        play_state == _.sample.play_state.recording
+      )
+    ) ||
+    abs(play_position - _.sample.play_position) > samplesblock / srate * 5;
+  _.sample.play_state = play_state;
+  _.sample.play_position = play_position;
+);
+
+// DESIGN SYSTEM
+
+// https://github.com/leafac/css/blob/8619f41d7102bd2562737b492241c267be3eb7cf/source/index.ts
+
+gfx_ext_retina = 1;
+
+_.color.red = 0;
+_.color.green = 1;
+_.color.blue = 2;
+function _.color.new(red, green, blue)
+local(color) (
+  color = _.memory.new(3);
+  color[_.color.red] = red;
+  color[_.color.green] = green;
+  color[_.color.blue] = blue;
+  color;
+);
+
+function _.color(color) (
+  gfx_r = color[_.color.red];
+  gfx_g = color[_.color.green];
+  gfx_b = color[_.color.blue];
+);
+
+function _.background_color(color) (
+  gfx_clear = color[_.color.red] * 255 + color[_.color.green] * 255 * 256 + color[_.color.blue] * 255 * 65536;
+);
+
+function _.font(family, size, style) (
+  gfx_setfont(1, family, size, style);
+);
+
+// TODO: ‘letter_spacing’ doesn’t work with ‘text_align’
+function _.print(
+  string,
+  font_family,
+  font_size,
+  font_style,
+  letter_spacing,
+  text_align.horizontal,
+  text_align.vertical,
+  text_overflow,
+  color,
+  x, y,
+  width, height,
+)
+local(offset, character) (
+  letter_spacing *= font_size;
+  _.font(font_family, font_size, font_style);
+  _.color(color);
+  gfx_x = x;
+  gfx_y = y;
+  letter_spacing == _.letter_spacing.normal
+  ? gfx_drawstr(
+      string,
+      text_align.horizontal | text_align.vertical | text_overflow,
+      x + width,
+      y + height
+    )
+  : (
+    offset = -1; loop(strlen(string), offset += 1;
+      strcpy_substr(character, string, offset, 1);
+      gfx_drawstr(character);
+      gfx_x += letter_spacing;
+    );
+  );
+);
+
+function _.rounded_rectangle_fill(x, y, width, height, radius, color) (
+  radius = min(min(radius, width / 2), height / 2);
+  _.color(color);
+  gfx_rect(x + radius, y, width - radius * 2, height);
+  gfx_rect(x, y + radius, width, height - radius * 2);
+  gfx_circle(x + radius, y + radius, radius, 1);
+  gfx_circle(x + width - radius - 1, y + radius, radius, 1);
+  gfx_circle(x + radius, y + height - radius - 1, radius, 1);
+  gfx_circle(x + width - radius - 1, y + height - radius - 1, radius, 1);
+);
+
+function _.blur(x, y, width, height, blur) (
+  loop(blur,
+    gfx_x = x; gfx_y = y;
+    gfx_blurto(gfx_x + width, gfx_y + height);
+  );
+);
+
+// BÉZIER CURVES
+// https://en.wikipedia.org/wiki/Bézier_curve
+// https://ciechanow.ski/drawing-bezier-curves/
+
+function _.bezier.linear(P0, P1, t) (
+  P0 + t * (P1 - P0);
+);
+
+function _.bezier.linear.draw(P0.x, P0.y, P1.x, P1.y, color, stroke_width)
+local(steps, t, t.increment) (
+  steps = _.distance.euclidian(P0.x, P0.y, P1.x, P1.y);
+  gfx_x = P0.x;
+  gfx_y = P0.y;
+  t.increment = 1 / steps;
+  _.color(color);
+  t = 0; loop(steps, t += t.increment;
+    gfx_rect(_.bezier.linear(P0.x, P1.x, t), _.bezier.linear(P0.y, P1.y, t), stroke_width, stroke_width);
+  );
+);
+
+function _.bezier.quadratic(P0, P1, P2, t) (
+  P1 + sqr(1 - t) * (P0 - P1)  + sqr(t) * (P2 - P1);
+);
+
+function _.bezier.quadratic.draw(P0.x, P0.y, P1.x, P1.y, P2.x, P2.y, color, stroke_width)
+local(steps, t, t.increment) (
+  steps = _.distance.euclidian(P0.x, P0.y, P1.x, P1.y) +
+          _.distance.euclidian(P1.x, P1.y, P2.x, P2.y);
+  gfx_x = P0.x;
+  gfx_y = P0.y;
+  t.increment = 1 / steps;
+  _.color(color);
+  t = 0; loop(steps, t += t.increment;
+    gfx_rect(_.bezier.quadratic(P0.x, P1.x, P2.x, t), _.bezier.quadratic(P0.y, P1.y, P2.y, t), stroke_width, stroke_width);
+  );
+);
+
+function _.bezier.cubic(P0, P1, P2, P3, t) (
+  pow(1 - t, 3) * P0 + 3 * sqr(1 - t) * t * P1 + 3 * (1 - t) * sqr(t) * P2 + pow(t, 3) * P3;
+);
+
+function _.bezier.cubic.draw(P0.x, P0.y, P1.x, P1.y, P2.x, P2.y, P3.x, P3.y, color, stroke_width)
+local(steps, t, t.increment) (
+  steps = _.distance.euclidian(P0.x, P0.y, P1.x, P1.y) +
+          _.distance.euclidian(P1.x, P1.y, P2.x, P2.y) +
+          _.distance.euclidian(P2.x, P2.y, P3.x, P3.y);
+  gfx_x = P0.x;
+  gfx_y = P0.y;
+  t.increment = 1 / steps;
+  _.color(color);
+  t = 0; loop(steps, t += t.increment;
+    gfx_rect(_.bezier.cubic(P0.x, P1.x, P2.x, P3.x, t), _.bezier.cubic(P0.y, P1.y, P2.y, P3.y, t), stroke_width, stroke_width);
+  );
+);
+
+_.gfx.refresh_rate = 30;
+
+_.gfx.initialize = _.true;
+function _.gfx() (
+  _.gfx.initialize ? ( _.gfx.initialize = _.false;
+
+    _.mode.default = 0;
+    _.mode.additive = 1;
+    _.mode.disable_source_alfa = 2;
+    _.mode.disable_filter = 4;
+
+    _.rem = 16;
+    _.ch = 8.4;
+
+    _.font_family.macos.avenir_next = "Avenir Next";
+    _.font_family.macos.futura = "Futura";
+    _.font_family.macos.gill_sans = "Gill Sans";
+    _.font_family.macos.helvetica_neue = "Helvetica Neue";
+    _.font_family.macos.menlo = "Menlo";
+    _.font_family.default = _.windows ? "TODO" : _.font_family.macos.avenir_next;
+
+    _.font_size.extra_small.2 = gfx_ext_retina * 0.625 * _.rem;
+    _.line_height.extra_small.2 = gfx_ext_retina * 0.875 * _.rem;
+    _.font_size.extra_small = gfx_ext_retina * 0.75 * _.rem;
+    _.line_height.extra_small = gfx_ext_retina * 1 * _.rem;
+    _.font_size.small = gfx_ext_retina * 0.875 * _.rem;
+    _.line_height.small = gfx_ext_retina * 1.25 * _.rem;
+    _.font_size.base = gfx_ext_retina * 1 * _.rem;
+    _.line_height.base = gfx_ext_retina * 1.5 * _.rem;
+    _.font_size.large = gfx_ext_retina * 1.125 * _.rem;
+    _.line_height.large = gfx_ext_retina * 1.75 * _.rem;
+    _.font_size.extra_large = gfx_ext_retina * 1.25 * _.rem;
+    _.line_height.extra_large = gfx_ext_retina * 1.75 * _.rem;
+    _.font_size.extra_large.2 = gfx_ext_retina * 1.5 * _.rem;
+    _.line_height.extra_large.2 = gfx_ext_retina * 2 * _.rem;
+    _.font_size.extra_large.3 = gfx_ext_retina * 1.875 * _.rem;
+    _.line_height.extra_large.3 = gfx_ext_retina * 2.25 * _.rem;
+    _.font_size.extra_large.4 = gfx_ext_retina * 2.25 * _.rem;
+    _.line_height.extra_large.4 = gfx_ext_retina * 2.5 * _.rem;
+    _.font_size.extra_large.5 = gfx_ext_retina * 3 * _.rem;
+    _.line_height.extra_large.5 = gfx_ext_retina * 3 * _.rem;
+    _.font_size.extra_large.6 = gfx_ext_retina * 3.75 * _.rem;
+    _.line_height.extra_large.6 = gfx_ext_retina * 3.75 * _.rem;
+    _.font_size.extra_large.7 = gfx_ext_retina * 4.5 * _.rem;
+    _.line_height.extra_large.7 = gfx_ext_retina * 4.5 * _.rem;
+    _.font_size.extra_large.8 = gfx_ext_retina * 6 * _.rem;
+    _.line_height.extra_large.8 = gfx_ext_retina * 6 * _.rem;
+    _.font_size.extra_large.9 = gfx_ext_retina * 8 * _.rem;
+    _.line_height.extra_large.9 = gfx_ext_retina * 8 * _.rem;
+
+    _.font_style.regular = '';
+    _.font_style.bold = 'b';
+    _.font_style.italic = 'i';
+    _.font_style.bold_italic = 'bi';
+
+    _.letter_spacing.tighter = -0.05;
+    _.letter_spacing.tight = -0.025;
+    _.letter_spacing.normal = 0;
+    _.letter_spacing.wide = 0.025;
+    _.letter_spacing.wider = 0.05;
+    _.letter_spacing.widest = 0.1;
+
+    _.text_align.horizontal.left = 0;
+    _.text_align.horizontal.center = 1;
+    _.text_align.horizontal.right = 2;
+    _.text_align.vertical.top = 0;
+    _.text_align.vertical.center = 4;
+    _.text_align.vertical.bottom = 8;
+
+    _.text_overflow.hidden = 0;
+    _.text_overflow.visible = 256;
+
+    _.width.0 = gfx_ext_retina * 0 * _.rem;
+    _.width.extra_small = gfx_ext_retina * 20 * _.rem;
+    _.width.small = gfx_ext_retina * 24 * _.rem;
+    _.width.medium = gfx_ext_retina * 28 * _.rem;
+    _.width.large = gfx_ext_retina * 32 * _.rem;
+    _.width.extra_large = gfx_ext_retina * 36 * _.rem;
+    _.width.extra_large.2 = gfx_ext_retina * 42 * _.rem;
+    _.width.extra_large.3 = gfx_ext_retina * 48 * _.rem;
+    _.width.extra_large.4 = gfx_ext_retina * 56 * _.rem;
+    _.width.extra_large.5 = gfx_ext_retina * 64 * _.rem;
+    _.width.extra_large.6 = gfx_ext_retina * 72 * _.rem;
+    _.width.extra_large.7 = gfx_ext_retina * 80 * _.rem;
+    _.width.prose = gfx_ext_retina * 65 * _.ch;
+
+    _.space._96 = gfx_ext_retina * -24 * _.rem;
+    _.space._80 = gfx_ext_retina * -20 * _.rem;
+    _.space._72 = gfx_ext_retina * -18 * _.rem;
+    _.space._64 = gfx_ext_retina * -16 * _.rem;
+    _.space._60 = gfx_ext_retina * -15 * _.rem;
+    _.space._56 = gfx_ext_retina * -14 * _.rem;
+    _.space._52 = gfx_ext_retina * -13 * _.rem;
+    _.space._48 = gfx_ext_retina * -12 * _.rem;
+    _.space._44 = gfx_ext_retina * -11 * _.rem;
+    _.space._40 = gfx_ext_retina * -10 * _.rem;
+    _.space._36 = gfx_ext_retina * -9 * _.rem;
+    _.space._32 = gfx_ext_retina * -8 * _.rem;
+    _.space._28 = gfx_ext_retina * -7 * _.rem;
+    _.space._24 = gfx_ext_retina * -6 * _.rem;
+    _.space._20 = gfx_ext_retina * -5 * _.rem;
+    _.space._16 = gfx_ext_retina * -4 * _.rem;
+    _.space._14 = gfx_ext_retina * -3.5 * _.rem;
+    _.space._12 = gfx_ext_retina * -3 * _.rem;
+    _.space._11 = gfx_ext_retina * -2.75 * _.rem;
+    _.space._10 = gfx_ext_retina * -2.5 * _.rem;
+    _.space._9 = gfx_ext_retina * -2.25 * _.rem;
+    _.space._8 = gfx_ext_retina * -2 * _.rem;
+    _.space._7 = gfx_ext_retina * -1.75 * _.rem;
+    _.space._6 = gfx_ext_retina * -1.5 * _.rem;
+    _.space._5 = gfx_ext_retina * -1.25 * _.rem;
+    _.space._4 = gfx_ext_retina * -1 * _.rem;
+    _.space._3_5 = gfx_ext_retina * -0.875 * _.rem;
+    _.space._3 = gfx_ext_retina * -0.75 * _.rem;
+    _.space._2_5 = gfx_ext_retina * -0.625 * _.rem;
+    _.space._2 = gfx_ext_retina * -0.5 * _.rem;
+    _.space._1_5 = gfx_ext_retina * -0.375 * _.rem;
+    _.space._1 = gfx_ext_retina * -0.25 * _.rem;
+    _.space._0_5 = gfx_ext_retina * -0.125 * _.rem;
+    _.space._px = gfx_ext_retina * -1;
+    _.space.0 = gfx_ext_retina * 0;
+    _.space.px = gfx_ext_retina * 1;
+    _.space.0_5 = gfx_ext_retina * 0.125 * _.rem;
+    _.space.1 = gfx_ext_retina * 0.25 * _.rem;
+    _.space.1_5 = gfx_ext_retina * 0.375 * _.rem;
+    _.space.2 = gfx_ext_retina * 0.5 * _.rem;
+    _.space.2_5 = gfx_ext_retina * 0.625 * _.rem;
+    _.space.3 = gfx_ext_retina * 0.75 * _.rem;
+    _.space.3_5 = gfx_ext_retina * 0.875 * _.rem;
+    _.space.4 = gfx_ext_retina * 1 * _.rem;
+    _.space.5 = gfx_ext_retina * 1.25 * _.rem;
+    _.space.6 = gfx_ext_retina * 1.5 * _.rem;
+    _.space.7 = gfx_ext_retina * 1.75 * _.rem;
+    _.space.8 = gfx_ext_retina * 2 * _.rem;
+    _.space.9 = gfx_ext_retina * 2.25 * _.rem;
+    _.space.10 = gfx_ext_retina * 2.5 * _.rem;
+    _.space.11 = gfx_ext_retina * 2.75 * _.rem;
+    _.space.12 = gfx_ext_retina * 3 * _.rem;
+    _.space.14 = gfx_ext_retina * 3.5 * _.rem;
+    _.space.16 = gfx_ext_retina * 4 * _.rem;
+    _.space.20 = gfx_ext_retina * 5 * _.rem;
+    _.space.24 = gfx_ext_retina * 6 * _.rem;
+    _.space.28 = gfx_ext_retina * 7 * _.rem;
+    _.space.32 = gfx_ext_retina * 8 * _.rem;
+    _.space.36 = gfx_ext_retina * 9 * _.rem;
+    _.space.40 = gfx_ext_retina * 10 * _.rem;
+    _.space.44 = gfx_ext_retina * 11 * _.rem;
+    _.space.48 = gfx_ext_retina * 12 * _.rem;
+    _.space.52 = gfx_ext_retina * 13 * _.rem;
+    _.space.56 = gfx_ext_retina * 14 * _.rem;
+    _.space.60 = gfx_ext_retina * 15 * _.rem;
+    _.space.64 = gfx_ext_retina * 16 * _.rem;
+    _.space.72 = gfx_ext_retina * 18 * _.rem;
+    _.space.80 = gfx_ext_retina * 20 * _.rem;
+    _.space.96 = gfx_ext_retina * 24 * _.rem;
+
+    _.border_width.0 = gfx_ext_retina * 0;
+    _.border_width.px = 1;
+    _.border_width.1 = gfx_ext_retina * 1;
+    _.border_width.2 = gfx_ext_retina * 2;
+    _.border_width.4 = gfx_ext_retina * 4;
+    _.border_width.8 = gfx_ext_retina * 8;
+
+    _.border_radius.none = gfx_ext_retina * 0;
+    _.border_radius.small = gfx_ext_retina * 0.125 * _.rem;
+    _.border_radius.base = gfx_ext_retina * 0.25 * _.rem;
+    _.border_radius.medium = gfx_ext_retina * 0.375 * _.rem;
+    _.border_radius.large = gfx_ext_retina * 0.5 * _.rem;
+    _.border_radius.extra_large = gfx_ext_retina * 0.75 * _.rem;
+    _.border_radius.extra_large.2 = gfx_ext_retina * 1 * _.rem;
+    _.border_radius.extra_large.3 = gfx_ext_retina * 1.5 * _.rem;
+    _.border_radius.full = gfx_ext_retina * 9999;
+
+    _.stroke_width.0 = gfx_ext_retina * 0;
+    _.stroke_width.px = 1;
+    _.stroke_width.1 = gfx_ext_retina * 1;
+    _.stroke_width.2 = gfx_ext_retina * 2;
+    _.stroke_width.4 = gfx_ext_retina * 4;
+    _.stroke_width.8 = gfx_ext_retina * 8;
+
+    _.opacity.0 = 0;
+    _.opacity.5 = 0.05;
+    _.opacity.10 = 0.1;
+    _.opacity.20 = 0.2;
+    _.opacity.25 = 0.25;
+    _.opacity.30 = 0.3;
+    _.opacity.40 = 0.4;
+    _.opacity.50 = 0.5;
+    _.opacity.60 = 0.6;
+    _.opacity.70 = 0.7;
+    _.opacity.75 = 0.75;
+    _.opacity.80 = 0.8;
+    _.opacity.90 = 0.9;
+    _.opacity.95 = 0.95;
+    _.opacity.100 = 1;
+
+    _.rotate._180 = _.degrees_to_radians(-180);
+    _.rotate._90 = _.degrees_to_radians(-90);
+    _.rotate._45 = _.degrees_to_radians(-45);
+    _.rotate._12 = _.degrees_to_radians(-12);
+    _.rotate._6 = _.degrees_to_radians(-6);
+    _.rotate._3 = _.degrees_to_radians(-3);
+    _.rotate._2 = _.degrees_to_radians(-2);
+    _.rotate._1 = _.degrees_to_radians(-1);
+    _.rotate.0 = _.degrees_to_radians(0);
+    _.rotate.1 = _.degrees_to_radians(1);
+    _.rotate.2 = _.degrees_to_radians(2);
+    _.rotate.3 = _.degrees_to_radians(3);
+    _.rotate.6 = _.degrees_to_radians(6);
+    _.rotate.12 = _.degrees_to_radians(12);
+    _.rotate.45 = _.degrees_to_radians(45);
+    _.rotate.90 = _.degrees_to_radians(90);
+    _.rotate.180 = _.degrees_to_radians(180);
+
+    _.scale.0 = 0;
+    _.scale.50 = 0.5;
+    _.scale.75 = 0.75;
+    _.scale.90 = 0.9;
+    _.scale.95 = 0.95;
+    _.scale.100 = 1;
+    _.scale.105 = 1.05;
+    _.scale.110 = 1.1;
+    _.scale.125 = 1.25;
+    _.scale.150 = 1.5;
+
+    _.brightness.0 = -1;
+    _.brightness.50 = -0.5;
+    _.brightness.75 = -0.25;
+    _.brightness.90 = -0.1;
+    _.brightness.95 = -0.05;
+    _.brightness.100 = 0;
+    _.brightness.105 = 0.05;
+    _.brightness.110 = 0.1;
+    _.brightness.125 = 0.25;
+    _.brightness.150 = 0.5;
+    _.brightness.200 = 1;
+
+    _.contrast.0 = 0;
+    _.contrast.50 = 0.5;
+    _.contrast.75 = 0.75;
+    _.contrast.100 = 1;
+    _.contrast.125 = 1.25;
+    _.contrast.150 = 1.5;
+    _.contrast.200 = 2;
+
+    _.blur.none = 0;
+    _.blur.small = 4;
+    _.blur.base = 8;
+    _.blur.medium = 12;
+    _.blur.large = 16;
+    _.blur.extra_large = 24;
+    _.blur.extra_large.2 = 40;
+    _.blur.extra_large.3 = 64;
+
+    _.transition_duration.75 = 75;
+    _.transition_duration.100 = 100;
+    _.transition_duration.150 = 150;
+    _.transition_duration.200 = 200;
+    _.transition_duration.300 = 300;
+    _.transition_duration.500 = 500;
+    _.transition_duration.700 = 700;
+    _.transition_duration.1000 = 1000;
+
+    /*
+    for (const color of `
+        --color--black: #000000;
+        --color--white: #ffffff;
+        --color--gray--blue--50: #f8fafc;
+        --color--gray--blue--100: #f1f5f9;
+        --color--gray--blue--200: #e2e8f0;
+        --color--gray--blue--300: #cbd5e1;
+        --color--gray--blue--400: #94a3b8;
+        --color--gray--blue--500: #64748b;
+        --color--gray--blue--600: #475569;
+        --color--gray--blue--700: #334155;
+        --color--gray--blue--800: #1e293b;
+        --color--gray--blue--900: #0f172a;
+        --color--gray--cool--50: #f9fafb;
+        --color--gray--cool--100: #f3f4f6;
+        --color--gray--cool--200: #e5e7eb;
+        --color--gray--cool--300: #d1d5db;
+        --color--gray--cool--400: #9ca3af;
+        --color--gray--cool--500: #6b7280;
+        --color--gray--cool--600: #4b5563;
+        --color--gray--cool--700: #374151;
+        --color--gray--cool--800: #1f2937;
+        --color--gray--cool--900: #111827;
+        --color--gray--medium--50: #fafafa;
+        --color--gray--medium--100: #f4f4f5;
+        --color--gray--medium--200: #e4e4e7;
+        --color--gray--medium--300: #d4d4d8;
+        --color--gray--medium--400: #a1a1aa;
+        --color--gray--medium--500: #71717a;
+        --color--gray--medium--600: #52525b;
+        --color--gray--medium--700: #3f3f46;
+        --color--gray--medium--800: #27272a;
+        --color--gray--medium--900: #18181b;
+        --color--gray--true--50: #fafafa;
+        --color--gray--true--100: #f5f5f5;
+        --color--gray--true--200: #e5e5e5;
+        --color--gray--true--300: #d4d4d4;
+        --color--gray--true--400: #a3a3a3;
+        --color--gray--true--500: #737373;
+        --color--gray--true--600: #525252;
+        --color--gray--true--700: #404040;
+        --color--gray--true--800: #262626;
+        --color--gray--true--900: #171717;
+        --color--gray--warm--50: #fafaf9;
+        --color--gray--warm--100: #f5f5f4;
+        --color--gray--warm--200: #e7e5e4;
+        --color--gray--warm--300: #d6d3d1;
+        --color--gray--warm--400: #a8a29e;
+        --color--gray--warm--500: #78716c;
+        --color--gray--warm--600: #57534e;
+        --color--gray--warm--700: #44403c;
+        --color--gray--warm--800: #292524;
+        --color--gray--warm--900: #1c1917;
+        --color--red--50: #fef2f2;
+        --color--red--100: #fee2e2;
+        --color--red--200: #fecaca;
+        --color--red--300: #fca5a5;
+        --color--red--400: #f87171;
+        --color--red--500: #ef4444;
+        --color--red--600: #dc2626;
+        --color--red--700: #b91c1c;
+        --color--red--800: #991b1b;
+        --color--red--900: #7f1d1d;
+        --color--orange--50: #fff7ed;
+        --color--orange--100: #ffedd5;
+        --color--orange--200: #fed7aa;
+        --color--orange--300: #fdba74;
+        --color--orange--400: #fb923c;
+        --color--orange--500: #f97316;
+        --color--orange--600: #ea580c;
+        --color--orange--700: #c2410c;
+        --color--orange--800: #9a3412;
+        --color--orange--900: #7c2d12;
+        --color--amber--50: #fffbeb;
+        --color--amber--100: #fef3c7;
+        --color--amber--200: #fde68a;
+        --color--amber--300: #fcd34d;
+        --color--amber--400: #fbbf24;
+        --color--amber--500: #f59e0b;
+        --color--amber--600: #d97706;
+        --color--amber--700: #b45309;
+        --color--amber--800: #92400e;
+        --color--amber--900: #78350f;
+        --color--yellow--50: #fefce8;
+        --color--yellow--100: #fef9c3;
+        --color--yellow--200: #fef08a;
+        --color--yellow--300: #fde047;
+        --color--yellow--400: #facc15;
+        --color--yellow--500: #eab308;
+        --color--yellow--600: #ca8a04;
+        --color--yellow--700: #a16207;
+        --color--yellow--800: #854d0e;
+        --color--yellow--900: #713f12;
+        --color--lime--50: #f7fee7;
+        --color--lime--100: #ecfccb;
+        --color--lime--200: #d9f99d;
+        --color--lime--300: #bef264;
+        --color--lime--400: #a3e635;
+        --color--lime--500: #84cc16;
+        --color--lime--600: #65a30d;
+        --color--lime--700: #4d7c0f;
+        --color--lime--800: #3f6212;
+        --color--lime--900: #365314;
+        --color--green--50: #f0fdf4;
+        --color--green--100: #dcfce7;
+        --color--green--200: #bbf7d0;
+        --color--green--300: #86efac;
+        --color--green--400: #4ade80;
+        --color--green--500: #22c55e;
+        --color--green--600: #16a34a;
+        --color--green--700: #15803d;
+        --color--green--800: #166534;
+        --color--green--900: #14532d;
+        --color--emerald--50: #ecfdf5;
+        --color--emerald--100: #d1fae5;
+        --color--emerald--200: #a7f3d0;
+        --color--emerald--300: #6ee7b7;
+        --color--emerald--400: #34d399;
+        --color--emerald--500: #10b981;
+        --color--emerald--600: #059669;
+        --color--emerald--700: #047857;
+        --color--emerald--800: #065f46;
+        --color--emerald--900: #064e3b;
+        --color--teal--50: #f0fdfa;
+        --color--teal--100: #ccfbf1;
+        --color--teal--200: #99f6e4;
+        --color--teal--300: #5eead4;
+        --color--teal--400: #2dd4bf;
+        --color--teal--500: #14b8a6;
+        --color--teal--600: #0d9488;
+        --color--teal--700: #0f766e;
+        --color--teal--800: #115e59;
+        --color--teal--900: #134e4a;
+        --color--cyan--50: #ecfeff;
+        --color--cyan--100: #cffafe;
+        --color--cyan--200: #a5f3fc;
+        --color--cyan--300: #67e8f9;
+        --color--cyan--400: #22d3ee;
+        --color--cyan--500: #06b6d4;
+        --color--cyan--600: #0891b2;
+        --color--cyan--700: #0e7490;
+        --color--cyan--800: #155e75;
+        --color--cyan--900: #164e63;
+        --color--sky--50: #f0f9ff;
+        --color--sky--100: #e0f2fe;
+        --color--sky--200: #bae6fd;
+        --color--sky--300: #7dd3fc;
+        --color--sky--400: #38bdf8;
+        --color--sky--500: #0ea5e9;
+        --color--sky--600: #0284c7;
+        --color--sky--700: #0369a1;
+        --color--sky--800: #075985;
+        --color--sky--900: #0c4a6e;
+        --color--blue--50: #eff6ff;
+        --color--blue--100: #dbeafe;
+        --color--blue--200: #bfdbfe;
+        --color--blue--300: #93c5fd;
+        --color--blue--400: #60a5fa;
+        --color--blue--500: #3b82f6;
+        --color--blue--600: #2563eb;
+        --color--blue--700: #1d4ed8;
+        --color--blue--800: #1e40af;
+        --color--blue--900: #1e3a8a;
+        --color--indigo--50: #eef2ff;
+        --color--indigo--100: #e0e7ff;
+        --color--indigo--200: #c7d2fe;
+        --color--indigo--300: #a5b4fc;
+        --color--indigo--400: #818cf8;
+        --color--indigo--500: #6366f1;
+        --color--indigo--600: #4f46e5;
+        --color--indigo--700: #4338ca;
+        --color--indigo--800: #3730a3;
+        --color--indigo--900: #312e81;
+        --color--violet--50: #f5f3ff;
+        --color--violet--100: #ede9fe;
+        --color--violet--200: #ddd6fe;
+        --color--violet--300: #c4b5fd;
+        --color--violet--400: #a78bfa;
+        --color--violet--500: #8b5cf6;
+        --color--violet--600: #7c3aed;
+        --color--violet--700: #6d28d9;
+        --color--violet--800: #5b21b6;
+        --color--violet--900: #4c1d95;
+        --color--purple--50: #faf5ff;
+        --color--purple--100: #f3e8ff;
+        --color--purple--200: #e9d5ff;
+        --color--purple--300: #d8b4fe;
+        --color--purple--400: #c084fc;
+        --color--purple--500: #a855f7;
+        --color--purple--600: #9333ea;
+        --color--purple--700: #7e22ce;
+        --color--purple--800: #6b21a8;
+        --color--purple--900: #581c87;
+        --color--fuchsia--50: #fdf4ff;
+        --color--fuchsia--100: #fae8ff;
+        --color--fuchsia--200: #f5d0fe;
+        --color--fuchsia--300: #f0abfc;
+        --color--fuchsia--400: #e879f9;
+        --color--fuchsia--500: #d946ef;
+        --color--fuchsia--600: #c026d3;
+        --color--fuchsia--700: #a21caf;
+        --color--fuchsia--800: #86198f;
+        --color--fuchsia--900: #701a75;
+        --color--pink--50: #fdf2f8;
+        --color--pink--100: #fce7f3;
+        --color--pink--200: #fbcfe8;
+        --color--pink--300: #f9a8d4;
+        --color--pink--400: #f472b6;
+        --color--pink--500: #ec4899;
+        --color--pink--600: #db2777;
+        --color--pink--700: #be185d;
+        --color--pink--800: #9d174d;
+        --color--pink--900: #831843;
+        --color--rose--50: #fff1f2;
+        --color--rose--100: #ffe4e6;
+        --color--rose--200: #fecdd3;
+        --color--rose--300: #fda4af;
+        --color--rose--400: #fb7185;
+        --color--rose--500: #f43f5e;
+        --color--rose--600: #e11d48;
+        --color--rose--700: #be123c;
+        --color--rose--800: #9f1239;
+        --color--rose--900: #881337;
+      `
+      .trim()
+      .split("\n")) {
+      let [_, name, red, green, blue] = color
+        .trim()
+        .match(/^--(.*?): #([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2});$/);
+      name = name.replaceAll("--", ".");
+      red = parseInt(red, 16) / 255;
+      green = parseInt(green, 16) / 255;
+      blue = parseInt(blue, 16) / 255;
+      console.log(`_.${name} = _.color.new(${red}, ${green}, ${blue});`);
+    }
+    */
+    _.color.black = _.color.new(0, 0, 0);
+    _.color.white = _.color.new(1, 1, 1);
+    _.color.gray.blue.50 = _.color.new(0.9725490196078431, 0.9803921568627451, 0.9882352941176471);
+    _.color.gray.blue.100 = _.color.new(0.9450980392156862, 0.9607843137254902, 0.9764705882352941);
+    _.color.gray.blue.200 = _.color.new(0.8862745098039215, 0.9098039215686274, 0.9411764705882353);
+    _.color.gray.blue.300 = _.color.new(0.796078431372549, 0.8352941176470589, 0.8823529411764706);
+    _.color.gray.blue.400 = _.color.new(0.5803921568627451, 0.6392156862745098, 0.7215686274509804);
+    _.color.gray.blue.500 = _.color.new(0.39215686274509803, 0.4549019607843137, 0.5450980392156862);
+    _.color.gray.blue.600 = _.color.new(0.2784313725490196, 0.3333333333333333, 0.4117647058823529);
+    _.color.gray.blue.700 = _.color.new(0.2, 0.2549019607843137, 0.3333333333333333);
+    _.color.gray.blue.800 = _.color.new(0.11764705882352941, 0.1607843137254902, 0.23137254901960785);
+    _.color.gray.blue.900 = _.color.new(0.058823529411764705, 0.09019607843137255, 0.16470588235294117);
+    _.color.gray.cool.50 = _.color.new(0.9764705882352941, 0.9803921568627451, 0.984313725490196);
+    _.color.gray.cool.100 = _.color.new(0.9529411764705882, 0.9568627450980393, 0.9647058823529412);
+    _.color.gray.cool.200 = _.color.new(0.8980392156862745, 0.9058823529411765, 0.9215686274509803);
+    _.color.gray.cool.300 = _.color.new(0.8196078431372549, 0.8352941176470589, 0.8588235294117647);
+    _.color.gray.cool.400 = _.color.new(0.611764705882353, 0.6392156862745098, 0.6862745098039216);
+    _.color.gray.cool.500 = _.color.new(0.4196078431372549, 0.4470588235294118, 0.5019607843137255);
+    _.color.gray.cool.600 = _.color.new(0.29411764705882354, 0.3333333333333333, 0.38823529411764707);
+    _.color.gray.cool.700 = _.color.new(0.21568627450980393, 0.2549019607843137, 0.3176470588235294);
+    _.color.gray.cool.800 = _.color.new(0.12156862745098039, 0.1607843137254902, 0.21568627450980393);
+    _.color.gray.cool.900 = _.color.new(0.06666666666666667, 0.09411764705882353, 0.15294117647058825);
+    _.color.gray.medium.50 = _.color.new(0.9803921568627451, 0.9803921568627451, 0.9803921568627451);
+    _.color.gray.medium.100 = _.color.new(0.9568627450980393, 0.9568627450980393, 0.9607843137254902);
+    _.color.gray.medium.200 = _.color.new(0.8941176470588236, 0.8941176470588236, 0.9058823529411765);
+    _.color.gray.medium.300 = _.color.new(0.8313725490196079, 0.8313725490196079, 0.8470588235294118);
+    _.color.gray.medium.400 = _.color.new(0.6313725490196078, 0.6313725490196078, 0.6666666666666666);
+    _.color.gray.medium.500 = _.color.new(0.44313725490196076, 0.44313725490196076, 0.47843137254901963);
+    _.color.gray.medium.600 = _.color.new(0.3215686274509804, 0.3215686274509804, 0.3568627450980392);
+    _.color.gray.medium.700 = _.color.new(0.24705882352941178, 0.24705882352941178, 0.27450980392156865);
+    _.color.gray.medium.800 = _.color.new(0.15294117647058825, 0.15294117647058825, 0.16470588235294117);
+    _.color.gray.medium.900 = _.color.new(0.09411764705882353, 0.09411764705882353, 0.10588235294117647);
+    _.color.gray.true.50 = _.color.new(0.9803921568627451, 0.9803921568627451, 0.9803921568627451);
+    _.color.gray.true.100 = _.color.new(0.9607843137254902, 0.9607843137254902, 0.9607843137254902);
+    _.color.gray.true.200 = _.color.new(0.8980392156862745, 0.8980392156862745, 0.8980392156862745);
+    _.color.gray.true.300 = _.color.new(0.8313725490196079, 0.8313725490196079, 0.8313725490196079);
+    _.color.gray.true.400 = _.color.new(0.6392156862745098, 0.6392156862745098, 0.6392156862745098);
+    _.color.gray.true.500 = _.color.new(0.45098039215686275, 0.45098039215686275, 0.45098039215686275);
+    _.color.gray.true.600 = _.color.new(0.3215686274509804, 0.3215686274509804, 0.3215686274509804);
+    _.color.gray.true.700 = _.color.new(0.25098039215686274, 0.25098039215686274, 0.25098039215686274);
+    _.color.gray.true.800 = _.color.new(0.14901960784313725, 0.14901960784313725, 0.14901960784313725);
+    _.color.gray.true.900 = _.color.new(0.09019607843137255, 0.09019607843137255, 0.09019607843137255);
+    _.color.gray.warm.50 = _.color.new(0.9803921568627451, 0.9803921568627451, 0.9764705882352941);
+    _.color.gray.warm.100 = _.color.new(0.9607843137254902, 0.9607843137254902, 0.9568627450980393);
+    _.color.gray.warm.200 = _.color.new(0.9058823529411765, 0.8980392156862745, 0.8941176470588236);
+    _.color.gray.warm.300 = _.color.new(0.8392156862745098, 0.8274509803921568, 0.8196078431372549);
+    _.color.gray.warm.400 = _.color.new(0.6588235294117647, 0.6352941176470588, 0.6196078431372549);
+    _.color.gray.warm.500 = _.color.new(0.47058823529411764, 0.44313725490196076, 0.4235294117647059);
+    _.color.gray.warm.600 = _.color.new(0.3411764705882353, 0.3254901960784314, 0.3058823529411765);
+    _.color.gray.warm.700 = _.color.new(0.26666666666666666, 0.25098039215686274, 0.23529411764705882);
+    _.color.gray.warm.800 = _.color.new(0.1607843137254902, 0.1450980392156863, 0.1411764705882353);
+    _.color.gray.warm.900 = _.color.new(0.10980392156862745, 0.09803921568627451, 0.09019607843137255);
+    _.color.red.50 = _.color.new(0.996078431372549, 0.9490196078431372, 0.9490196078431372);
+    _.color.red.100 = _.color.new(0.996078431372549, 0.8862745098039215, 0.8862745098039215);
+    _.color.red.200 = _.color.new(0.996078431372549, 0.792156862745098, 0.792156862745098);
+    _.color.red.300 = _.color.new(0.9882352941176471, 0.6470588235294118, 0.6470588235294118);
+    _.color.red.400 = _.color.new(0.9725490196078431, 0.44313725490196076, 0.44313725490196076);
+    _.color.red.500 = _.color.new(0.9372549019607843, 0.26666666666666666, 0.26666666666666666);
+    _.color.red.600 = _.color.new(0.8627450980392157, 0.14901960784313725, 0.14901960784313725);
+    _.color.red.700 = _.color.new(0.7254901960784313, 0.10980392156862745, 0.10980392156862745);
+    _.color.red.800 = _.color.new(0.6, 0.10588235294117647, 0.10588235294117647);
+    _.color.red.900 = _.color.new(0.4980392156862745, 0.11372549019607843, 0.11372549019607843);
+    _.color.orange.50 = _.color.new(1, 0.9686274509803922, 0.9294117647058824);
+    _.color.orange.100 = _.color.new(1, 0.9294117647058824, 0.8352941176470589);
+    _.color.orange.200 = _.color.new(0.996078431372549, 0.8431372549019608, 0.6666666666666666);
+    _.color.orange.300 = _.color.new(0.9921568627450981, 0.7294117647058823, 0.4549019607843137);
+    _.color.orange.400 = _.color.new(0.984313725490196, 0.5725490196078431, 0.23529411764705882);
+    _.color.orange.500 = _.color.new(0.9764705882352941, 0.45098039215686275, 0.08627450980392157);
+    _.color.orange.600 = _.color.new(0.9176470588235294, 0.34509803921568627, 0.047058823529411764);
+    _.color.orange.700 = _.color.new(0.7607843137254902, 0.2549019607843137, 0.047058823529411764);
+    _.color.orange.800 = _.color.new(0.6039215686274509, 0.20392156862745098, 0.07058823529411765);
+    _.color.orange.900 = _.color.new(0.48627450980392156, 0.17647058823529413, 0.07058823529411765);
+    _.color.amber.50 = _.color.new(1, 0.984313725490196, 0.9215686274509803);
+    _.color.amber.100 = _.color.new(0.996078431372549, 0.9529411764705882, 0.7803921568627451);
+    _.color.amber.200 = _.color.new(0.9921568627450981, 0.9019607843137255, 0.5411764705882353);
+    _.color.amber.300 = _.color.new(0.9882352941176471, 0.8274509803921568, 0.30196078431372547);
+    _.color.amber.400 = _.color.new(0.984313725490196, 0.7490196078431373, 0.1411764705882353);
+    _.color.amber.500 = _.color.new(0.9607843137254902, 0.6196078431372549, 0.043137254901960784);
+    _.color.amber.600 = _.color.new(0.8509803921568627, 0.4666666666666667, 0.023529411764705882);
+    _.color.amber.700 = _.color.new(0.7058823529411765, 0.3254901960784314, 0.03529411764705882);
+    _.color.amber.800 = _.color.new(0.5725490196078431, 0.25098039215686274, 0.054901960784313725);
+    _.color.amber.900 = _.color.new(0.47058823529411764, 0.20784313725490197, 0.058823529411764705);
+    _.color.yellow.50 = _.color.new(0.996078431372549, 0.9882352941176471, 0.9098039215686274);
+    _.color.yellow.100 = _.color.new(0.996078431372549, 0.9764705882352941, 0.7647058823529411);
+    _.color.yellow.200 = _.color.new(0.996078431372549, 0.9411764705882353, 0.5411764705882353);
+    _.color.yellow.300 = _.color.new(0.9921568627450981, 0.8784313725490196, 0.2784313725490196);
+    _.color.yellow.400 = _.color.new(0.9803921568627451, 0.8, 0.08235294117647059);
+    _.color.yellow.500 = _.color.new(0.9176470588235294, 0.7019607843137254, 0.03137254901960784);
+    _.color.yellow.600 = _.color.new(0.792156862745098, 0.5411764705882353, 0.01568627450980392);
+    _.color.yellow.700 = _.color.new(0.6313725490196078, 0.3843137254901961, 0.027450980392156862);
+    _.color.yellow.800 = _.color.new(0.5215686274509804, 0.30196078431372547, 0.054901960784313725);
+    _.color.yellow.900 = _.color.new(0.44313725490196076, 0.24705882352941178, 0.07058823529411765);
+    _.color.lime.50 = _.color.new(0.9686274509803922, 0.996078431372549, 0.9058823529411765);
+    _.color.lime.100 = _.color.new(0.9254901960784314, 0.9882352941176471, 0.796078431372549);
+    _.color.lime.200 = _.color.new(0.8509803921568627, 0.9764705882352941, 0.615686274509804);
+    _.color.lime.300 = _.color.new(0.7450980392156863, 0.9490196078431372, 0.39215686274509803);
+    _.color.lime.400 = _.color.new(0.6392156862745098, 0.9019607843137255, 0.20784313725490197);
+    _.color.lime.500 = _.color.new(0.5176470588235295, 0.8, 0.08627450980392157);
+    _.color.lime.600 = _.color.new(0.396078431372549, 0.6392156862745098, 0.050980392156862744);
+    _.color.lime.700 = _.color.new(0.30196078431372547, 0.48627450980392156, 0.058823529411764705);
+    _.color.lime.800 = _.color.new(0.24705882352941178, 0.3843137254901961, 0.07058823529411765);
+    _.color.lime.900 = _.color.new(0.21176470588235294, 0.3254901960784314, 0.0784313725490196);
+    _.color.green.50 = _.color.new(0.9411764705882353, 0.9921568627450981, 0.9568627450980393);
+    _.color.green.100 = _.color.new(0.8627450980392157, 0.9882352941176471, 0.9058823529411765);
+    _.color.green.200 = _.color.new(0.7333333333333333, 0.9686274509803922, 0.8156862745098039);
+    _.color.green.300 = _.color.new(0.5254901960784314, 0.9372549019607843, 0.6745098039215687);
+    _.color.green.400 = _.color.new(0.2901960784313726, 0.8705882352941177, 0.5019607843137255);
+    _.color.green.500 = _.color.new(0.13333333333333333, 0.7725490196078432, 0.3686274509803922);
+    _.color.green.600 = _.color.new(0.08627450980392157, 0.6392156862745098, 0.2901960784313726);
+    _.color.green.700 = _.color.new(0.08235294117647059, 0.5019607843137255, 0.23921568627450981);
+    _.color.green.800 = _.color.new(0.08627450980392157, 0.396078431372549, 0.20392156862745098);
+    _.color.green.900 = _.color.new(0.0784313725490196, 0.3254901960784314, 0.17647058823529413);
+    _.color.emerald.50 = _.color.new(0.9254901960784314, 0.9921568627450981, 0.9607843137254902);
+    _.color.emerald.100 = _.color.new(0.8196078431372549, 0.9803921568627451, 0.8980392156862745);
+    _.color.emerald.200 = _.color.new(0.6549019607843137, 0.9529411764705882, 0.8156862745098039);
+    _.color.emerald.300 = _.color.new(0.43137254901960786, 0.9058823529411765, 0.7176470588235294);
+    _.color.emerald.400 = _.color.new(0.20392156862745098, 0.8274509803921568, 0.6);
+    _.color.emerald.500 = _.color.new(0.06274509803921569, 0.7254901960784313, 0.5058823529411764);
+    _.color.emerald.600 = _.color.new(0.0196078431372549, 0.5882352941176471, 0.4117647058823529);
+    _.color.emerald.700 = _.color.new(0.01568627450980392, 0.47058823529411764, 0.3411764705882353);
+    _.color.emerald.800 = _.color.new(0.023529411764705882, 0.37254901960784315, 0.27450980392156865);
+    _.color.emerald.900 = _.color.new(0.023529411764705882, 0.3058823529411765, 0.23137254901960785);
+    _.color.teal.50 = _.color.new(0.9411764705882353, 0.9921568627450981, 0.9803921568627451);
+    _.color.teal.100 = _.color.new(0.8, 0.984313725490196, 0.9450980392156862);
+    _.color.teal.200 = _.color.new(0.6, 0.9647058823529412, 0.8941176470588236);
+    _.color.teal.300 = _.color.new(0.3686274509803922, 0.9176470588235294, 0.8313725490196079);
+    _.color.teal.400 = _.color.new(0.17647058823529413, 0.8313725490196079, 0.7490196078431373);
+    _.color.teal.500 = _.color.new(0.0784313725490196, 0.7215686274509804, 0.6509803921568628);
+    _.color.teal.600 = _.color.new(0.050980392156862744, 0.5803921568627451, 0.5333333333333333);
+    _.color.teal.700 = _.color.new(0.058823529411764705, 0.4627450980392157, 0.43137254901960786);
+    _.color.teal.800 = _.color.new(0.06666666666666667, 0.3686274509803922, 0.34901960784313724);
+    _.color.teal.900 = _.color.new(0.07450980392156863, 0.3058823529411765, 0.2901960784313726);
+    _.color.cyan.50 = _.color.new(0.9254901960784314, 0.996078431372549, 1);
+    _.color.cyan.100 = _.color.new(0.8117647058823529, 0.9803921568627451, 0.996078431372549);
+    _.color.cyan.200 = _.color.new(0.6470588235294118, 0.9529411764705882, 0.9882352941176471);
+    _.color.cyan.300 = _.color.new(0.403921568627451, 0.9098039215686274, 0.9764705882352941);
+    _.color.cyan.400 = _.color.new(0.13333333333333333, 0.8274509803921568, 0.9333333333333333);
+    _.color.cyan.500 = _.color.new(0.023529411764705882, 0.7137254901960784, 0.8313725490196079);
+    _.color.cyan.600 = _.color.new(0.03137254901960784, 0.5686274509803921, 0.6980392156862745);
+    _.color.cyan.700 = _.color.new(0.054901960784313725, 0.4549019607843137, 0.5647058823529412);
+    _.color.cyan.800 = _.color.new(0.08235294117647059, 0.3686274509803922, 0.4588235294117647);
+    _.color.cyan.900 = _.color.new(0.08627450980392157, 0.3058823529411765, 0.38823529411764707);
+    _.color.sky.50 = _.color.new(0.9411764705882353, 0.9764705882352941, 1);
+    _.color.sky.100 = _.color.new(0.8784313725490196, 0.9490196078431372, 0.996078431372549);
+    _.color.sky.200 = _.color.new(0.7294117647058823, 0.9019607843137255, 0.9921568627450981);
+    _.color.sky.300 = _.color.new(0.49019607843137253, 0.8274509803921568, 0.9882352941176471);
+    _.color.sky.400 = _.color.new(0.2196078431372549, 0.7411764705882353, 0.9725490196078431);
+    _.color.sky.500 = _.color.new(0.054901960784313725, 0.6470588235294118, 0.9137254901960784);
+    _.color.sky.600 = _.color.new(0.00784313725490196, 0.5176470588235295, 0.7803921568627451);
+    _.color.sky.700 = _.color.new(0.011764705882352941, 0.4117647058823529, 0.6313725490196078);
+    _.color.sky.800 = _.color.new(0.027450980392156862, 0.34901960784313724, 0.5215686274509804);
+    _.color.sky.900 = _.color.new(0.047058823529411764, 0.2901960784313726, 0.43137254901960786);
+    _.color.blue.50 = _.color.new(0.9372549019607843, 0.9647058823529412, 1);
+    _.color.blue.100 = _.color.new(0.8588235294117647, 0.9176470588235294, 0.996078431372549);
+    _.color.blue.200 = _.color.new(0.7490196078431373, 0.8588235294117647, 0.996078431372549);
+    _.color.blue.300 = _.color.new(0.5764705882352941, 0.7725490196078432, 0.9921568627450981);
+    _.color.blue.400 = _.color.new(0.3764705882352941, 0.6470588235294118, 0.9803921568627451);
+    _.color.blue.500 = _.color.new(0.23137254901960785, 0.5098039215686274, 0.9647058823529412);
+    _.color.blue.600 = _.color.new(0.1450980392156863, 0.38823529411764707, 0.9215686274509803);
+    _.color.blue.700 = _.color.new(0.11372549019607843, 0.3058823529411765, 0.8470588235294118);
+    _.color.blue.800 = _.color.new(0.11764705882352941, 0.25098039215686274, 0.6862745098039216);
+    _.color.blue.900 = _.color.new(0.11764705882352941, 0.22745098039215686, 0.5411764705882353);
+    _.color.indigo.50 = _.color.new(0.9333333333333333, 0.9490196078431372, 1);
+    _.color.indigo.100 = _.color.new(0.8784313725490196, 0.9058823529411765, 1);
+    _.color.indigo.200 = _.color.new(0.7803921568627451, 0.8235294117647058, 0.996078431372549);
+    _.color.indigo.300 = _.color.new(0.6470588235294118, 0.7058823529411765, 0.9882352941176471);
+    _.color.indigo.400 = _.color.new(0.5058823529411764, 0.5490196078431373, 0.9725490196078431);
+    _.color.indigo.500 = _.color.new(0.38823529411764707, 0.4, 0.9450980392156862);
+    _.color.indigo.600 = _.color.new(0.30980392156862746, 0.27450980392156865, 0.8980392156862745);
+    _.color.indigo.700 = _.color.new(0.2627450980392157, 0.2196078431372549, 0.792156862745098);
+    _.color.indigo.800 = _.color.new(0.21568627450980393, 0.18823529411764706, 0.6392156862745098);
+    _.color.indigo.900 = _.color.new(0.19215686274509805, 0.1803921568627451, 0.5058823529411764);
+    _.color.violet.50 = _.color.new(0.9607843137254902, 0.9529411764705882, 1);
+    _.color.violet.100 = _.color.new(0.9294117647058824, 0.9137254901960784, 0.996078431372549);
+    _.color.violet.200 = _.color.new(0.8666666666666667, 0.8392156862745098, 0.996078431372549);
+    _.color.violet.300 = _.color.new(0.7686274509803922, 0.7098039215686275, 0.9921568627450981);
+    _.color.violet.400 = _.color.new(0.6549019607843137, 0.5450980392156862, 0.9803921568627451);
+    _.color.violet.500 = _.color.new(0.5450980392156862, 0.3607843137254902, 0.9647058823529412);
+    _.color.violet.600 = _.color.new(0.48627450980392156, 0.22745098039215686, 0.9294117647058824);
+    _.color.violet.700 = _.color.new(0.42745098039215684, 0.1568627450980392, 0.8509803921568627);
+    _.color.violet.800 = _.color.new(0.3568627450980392, 0.12941176470588237, 0.7137254901960784);
+    _.color.violet.900 = _.color.new(0.2980392156862745, 0.11372549019607843, 0.5843137254901961);
+    _.color.purple.50 = _.color.new(0.9803921568627451, 0.9607843137254902, 1);
+    _.color.purple.100 = _.color.new(0.9529411764705882, 0.9098039215686274, 1);
+    _.color.purple.200 = _.color.new(0.9137254901960784, 0.8352941176470589, 1);
+    _.color.purple.300 = _.color.new(0.8470588235294118, 0.7058823529411765, 0.996078431372549);
+    _.color.purple.400 = _.color.new(0.7529411764705882, 0.5176470588235295, 0.9882352941176471);
+    _.color.purple.500 = _.color.new(0.6588235294117647, 0.3333333333333333, 0.9686274509803922);
+    _.color.purple.600 = _.color.new(0.5764705882352941, 0.2, 0.9176470588235294);
+    _.color.purple.700 = _.color.new(0.49411764705882355, 0.13333333333333333, 0.807843137254902);
+    _.color.purple.800 = _.color.new(0.4196078431372549, 0.12941176470588237, 0.6588235294117647);
+    _.color.purple.900 = _.color.new(0.34509803921568627, 0.10980392156862745, 0.5294117647058824);
+    _.color.fuchsia.50 = _.color.new(0.9921568627450981, 0.9568627450980393, 1);
+    _.color.fuchsia.100 = _.color.new(0.9803921568627451, 0.9098039215686274, 1);
+    _.color.fuchsia.200 = _.color.new(0.9607843137254902, 0.8156862745098039, 0.996078431372549);
+    _.color.fuchsia.300 = _.color.new(0.9411764705882353, 0.6705882352941176, 0.9882352941176471);
+    _.color.fuchsia.400 = _.color.new(0.9098039215686274, 0.4745098039215686, 0.9764705882352941);
+    _.color.fuchsia.500 = _.color.new(0.8509803921568627, 0.27450980392156865, 0.9372549019607843);
+    _.color.fuchsia.600 = _.color.new(0.7529411764705882, 0.14901960784313725, 0.8274509803921568);
+    _.color.fuchsia.700 = _.color.new(0.6352941176470588, 0.10980392156862745, 0.6862745098039216);
+    _.color.fuchsia.800 = _.color.new(0.5254901960784314, 0.09803921568627451, 0.5607843137254902);
+    _.color.fuchsia.900 = _.color.new(0.4392156862745098, 0.10196078431372549, 0.4588235294117647);
+    _.color.pink.50 = _.color.new(0.9921568627450981, 0.9490196078431372, 0.9725490196078431);
+    _.color.pink.100 = _.color.new(0.9882352941176471, 0.9058823529411765, 0.9529411764705882);
+    _.color.pink.200 = _.color.new(0.984313725490196, 0.8117647058823529, 0.9098039215686274);
+    _.color.pink.300 = _.color.new(0.9764705882352941, 0.6588235294117647, 0.8313725490196079);
+    _.color.pink.400 = _.color.new(0.9568627450980393, 0.4470588235294118, 0.7137254901960784);
+    _.color.pink.500 = _.color.new(0.9254901960784314, 0.2823529411764706, 0.6);
+    _.color.pink.600 = _.color.new(0.8588235294117647, 0.15294117647058825, 0.4666666666666667);
+    _.color.pink.700 = _.color.new(0.7450980392156863, 0.09411764705882353, 0.36470588235294116);
+    _.color.pink.800 = _.color.new(0.615686274509804, 0.09019607843137255, 0.30196078431372547);
+    _.color.pink.900 = _.color.new(0.5137254901960784, 0.09411764705882353, 0.2627450980392157);
+    _.color.rose.50 = _.color.new(1, 0.9450980392156862, 0.9490196078431372);
+    _.color.rose.100 = _.color.new(1, 0.8941176470588236, 0.9019607843137255);
+    _.color.rose.200 = _.color.new(0.996078431372549, 0.803921568627451, 0.8274509803921568);
+    _.color.rose.300 = _.color.new(0.9921568627450981, 0.6431372549019608, 0.6862745098039216);
+    _.color.rose.400 = _.color.new(0.984313725490196, 0.44313725490196076, 0.5215686274509804);
+    _.color.rose.500 = _.color.new(0.9568627450980393, 0.24705882352941178, 0.3686274509803922);
+    _.color.rose.600 = _.color.new(0.8823529411764706, 0.11372549019607843, 0.2823529411764706);
+    _.color.rose.700 = _.color.new(0.7450980392156863, 0.07058823529411765, 0.23529411764705882);
+    _.color.rose.800 = _.color.new(0.6235294117647059, 0.07058823529411765, 0.2235294117647059);
+    _.color.rose.900 = _.color.new(0.5333333333333333, 0.07450980392156863, 0.21568627450980393);
+  );
+
+  _.sample.running = max(0, _.sample.running - 1);
+  _.gfx.reset = !_.gfx.running;
+  _.gfx.running = ceil(srate / (samplesblock * _.gfx.refresh_rate) * 15);
+
+  _.gfx.is_embedded_in_tcp_mcp = gfx_ext_flags & 1;
+
+  gfx_getchar(); // This makes the mouse state (mouse_cap, for example, which buttons are pressed) available
+);
+
+// GFX COMPONENTS
+
+// FRAMES-PER-SECOND
+
+_.frames_per_second.frames = _.undefined;
+_.frames_per_second.frames.count = 0;
+_.frames_per_second.time.previous = time();
+
+function _.frames_per_second()
+local(time.current) (
+  _.frames_per_second.frames.count += 1;
+  time.current = time();
+  _.frames_per_second.time.previous != time.current ? (
+    _.frames_per_second.frames = _.frames_per_second.frames.count;
+    _.frames_per_second.frames.count = 0;
+    _.frames_per_second.time.previous = time.current;
+  );
+  _.frames_per_second.frames != _.undefined ? (
+    _.color(_.color.red.500);
+    gfx_a = _.opacity.100;
+    gfx_rect(_.space.0, _.space.0, _.space.12, _.space.4);
+    _.print(
+      sprintf(#, "%d FPS", _.frames_per_second.frames),
+      _.font_family.default,
+      _.font_size.extra_small.2,
+      _.font_style.bold,
+      _.letter_spacing.widest,
+      _.text_align.horizontal.left,
+      _.text_align.vertical.top,
+      _.text_overflow.visible,
+      _.color.red.50,
+      _.space.1, _.space.0_5,
+      _.space.0, _.space.0
+    );
+  );
+);
+
+// WAVEFORMS
+
+/*
+
+- Click and drag to zoom?
+
+---
+
+- Rename main/cross to duration/volume
+
+---
+
+- Drawing is off-by-one to the right in Horizontal mode and one pixel too large in Vertical mode
+
+---
+
+- Make the waveform smoother at bigger buffer sizes:
+  - Use ‘time_precise()’?
+  - Do the ‘read_index’ following the ‘write_index’ situation for the ‘image’ as well, because of @blocks?
+
+---
+
+Follow up with Craig Benedict Valentine Badynee
+
+---
+
+Have a version of the MCP FX that looks at a side-chain and shows the difference, similar to what I want to do to a compressor.
+
+---
+
+slider6:rectified=0<0,0,0{False,True}>Rectified?
+slider7:scroll=0<0,0,0{False,True}>Scroll?
+  - cursor.width, cursor.color, cursor.opacity
+
+slider8:erase_on_wrap=0<0,0,0{False,True}>Erase on Wrap?
+
+---
+
+Stroke
+  stroke.width, stroke.color, stroke.opacity
+
+
+---
+
+- Spectral peaks
+- Harrison Mixbus?
+
+*/
+
+_.waveform.line.maximum = 0;
+_.waveform.line.minimum = 1;
+_.waveform.samples_in_line = 2;
+_.waveform.samples_per_line = 3;
+_.waveform.lines.maximum = 4;
+_.waveform.lines.minimum = 5;
+
+function _.waveform.new(lines.length.maximum)
+local(waveform) (
+  waveform = _.memory.new(6);
+  waveform[_.waveform.line.maximum] = -_.infinity;
+  waveform[_.waveform.line.minimum] = _.infinity;
+  waveform[_.waveform.samples_in_line] = 0;
+  waveform[_.waveform.samples_per_line] = _.infinity;
+  waveform[_.waveform.lines.maximum] = _.circular_buffer.new(lines.length.maximum + 50);
+  waveform[_.waveform.lines.minimum] = _.circular_buffer.new(lines.length.maximum + 50);
+  waveform;
+);
+
+function _.waveform.reset(waveform)
+local(lines.maximum, lines.minimum) (
+  lines.maximum = waveform[_.waveform.lines.maximum];
+  lines.minimum = waveform[_.waveform.lines.minimum];
+  _.circular_buffer.reset(lines.maximum);
+  _.circular_buffer.reset(lines.minimum);
+);
+
+function _.waveform.push(waveform, sample)
+local(
+  line.maximum,
+  line.minimum,
+  samples_in_line,
+  samples_per_line,
+  lines.maximum,
+  lines.minimum,
+) (
+  line.maximum = waveform[_.waveform.line.maximum];
+  line.minimum = waveform[_.waveform.line.minimum];
+  samples_in_line = waveform[_.waveform.samples_in_line];
+  samples_per_line = waveform[_.waveform.samples_per_line];
+  lines.maximum = waveform[_.waveform.lines.maximum];
+  lines.minimum = waveform[_.waveform.lines.minimum];
+
+  line.maximum = max(line.maximum, sample);
+  line.minimum = min(line.minimum, sample);
+
+  samples_in_line = _.circular_counter(samples_in_line, samples_per_line);
+  _.circular_counter.wrapped(samples_in_line) ? (
+    _.circular_buffer.push(lines.maximum, line.maximum);
+    _.circular_buffer.push(lines.minimum, line.minimum);
+    line.maximum = -_.infinity;
+    line.minimum = _.infinity;
+  );
+
+  waveform[_.waveform.line.maximum] = line.maximum;
+  waveform[_.waveform.line.minimum] = line.minimum;
+  waveform[_.waveform.samples_in_line] = samples_in_line;
+
+  sample;
+);
+
+function _.waveform.draw(
+  waveform,
+  x, y,
+  width, height,
+  zoom,
+  duration.ms,
+  square_root,
+  vertical,
+  fill.color, fill.opacity,
+  grid.main.gap, grid.cross.gap,
+  grid.color, grid.opacity,
+)
+local(
+  lines.maximum,
+  lines.minimum,
+  main.length,
+  cross.length,
+  grid.main,
+  grid.main.label,
+  grid.main.start.x,
+  grid.main.start.y,
+  grid.main.end.x,
+  grid.main.end.y,
+  grid.main.label.x,
+  grid.main.label.y,
+  grid.cross,
+  grid.cross.label,
+  grid.cross.start.x,
+  grid.cross.start.y,
+  grid.cross.end.x,
+  grid.cross.end.y,
+  grid.cross.label.x,
+  grid.cross.label.y,
+  line.main,
+  offset,
+  line.maximum,
+  line.minimum,
+  line.cross.maximum,
+  line.cross.minimum,
+  line.main.start.x,
+  line.main.start.y,
+  line.main.end.x,
+  line.main.end.y,
+  duration.samples,
+  samples_per_line,
+) (
+  lines.maximum = waveform[_.waveform.lines.maximum];
+  lines.minimum = waveform[_.waveform.lines.minimum];
+
+  vertical ? (
+    main.length = height;
+    cross.length = width;
+  ) : (
+    main.length = width;
+    cross.length = height;
+  );
+
+  line.main = 0;
+  offset = -1;
+  _.color(fill.color);
+  gfx_a = fill.opacity;
+  loop(main.length,
+    line.maximum = _.circular_buffer.get(lines.maximum, offset);
+    line.minimum = _.circular_buffer.get(lines.minimum, offset);
+
+    square_root ? (
+      line.maximum = _.square_root_with_sign(line.maximum);
+      line.minimum = _.square_root_with_sign(line.minimum);
+    );
+
+    line.maximum *= zoom;
+    line.minimum *= zoom;
+
+    line.maximum = _.clip(line.maximum, -1, 1);
+    line.minimum = _.clip(line.minimum, -1, 1);
+
+    line.cross.maximum = cross.length / 2 * (1 - line.maximum);
+    line.cross.minimum = cross.length / 2 * (1 - line.minimum);
+
+    vertical ? (
+      line.main.start.x = line.cross.minimum;
+      line.main.start.y = line.main;
+      line.main.end.x = line.cross.maximum;
+      line.main.end.y = line.main.start.y;
+    ) : (
+      line.main.start.x = main.length - line.main;
+      line.main.start.y = line.cross.maximum;
+      line.main.end.x = line.main.start.x;
+      line.main.end.y = line.cross.minimum;
+    );
+
+    gfx_line(
+      x + line.main.start.x,
+      y + line.main.start.y,
+      x + line.main.end.x,
+      y + line.main.end.y
+    );
+
+    line.main += 1;
+    offset -= 1;
+  );
+
+  _.color(grid.color);
+  gfx_a = grid.opacity;
+  grid.main.gap != _.undefined ? (
+    grid.main = grid.main.gap;
+    while (grid.main <= main.length) (
+      grid.main.label = duration.ms / main.length * grid.main / 1000;
+      vertical ? (
+        grid.main.start.x = 0;
+        grid.main.start.y = grid.main;
+        grid.main.end.x = cross.length;
+        grid.main.end.y = grid.main.start.y;
+        grid.main.label.x = grid.main.start.x + _.space.0_5;
+        grid.main.label.y = grid.main.start.y - _.space.3;
+      ) : (
+        grid.main.start.x = main.length - grid.main;
+        grid.main.start.y = 0;
+        grid.main.end.x = grid.main.start.x;
+        grid.main.end.y = cross.length;
+        grid.main.label.x = grid.main.start.x + _.space.0_5;
+        grid.main.label.y = grid.main.start.y + _.space.0_5;
+      );
+      gfx_line(
+        x + grid.main.start.x, y + grid.main.start.y,
+        x + grid.main.end.x, y + grid.main.end.y
+      );
+      _.print(
+        sprintf(#, "%.1fs", grid.main.label),
+        _.font_family.default,
+        _.font_size.extra_small.2,
+        _.font_style.bold,
+        _.letter_spacing.normal,
+        _.text_align.horizontal.left,
+        _.text_align.vertical.top,
+        _.text_overflow.visible,
+        grid.color,
+        x + grid.main.label.x, y + grid.main.label.y,
+        _.space.0, _.space.0
+      );
+      grid.main += grid.main.gap;
+    );
+  );
+  grid.cross.gap != _.undefined ? (
+    grid.cross = grid.cross.gap;
+    while(grid.cross < cross.length / 2) (
+      grid.cross.label = grid.cross / (cross.length / 2);
+      square_root ? grid.cross.label = sqr(grid.cross.label);
+      grid.cross.label /= zoom;
+      grid.cross.label = _.linear_to_db(grid.cross.label);
+      vertical ? (
+        grid.cross.start.x = cross.length / 2 - grid.cross;
+        grid.cross.start.y = 0;
+        grid.cross.end.x = grid.cross.start.x;
+        grid.cross.end.y = main.length;
+        grid.cross.label.x = grid.cross.start.x + _.space.0_5;
+        grid.cross.label.y = grid.cross.start.y + _.space.0_5;
+      ) : (
+        grid.cross.start.x = 0;
+        grid.cross.start.y = cross.length / 2 - grid.cross;
+        grid.cross.end.x = main.length;
+        grid.cross.end.y = grid.cross.start.y;
+        grid.cross.label.x = grid.cross.start.x + _.space.0_5;
+        grid.cross.label.y = grid.cross.start.y - _.space.3;
+      );
+      gfx_line(
+        x + grid.cross.start.x, y + grid.cross.start.y,
+        x + grid.cross.end.x, y + grid.cross.end.y
+      );
+      _.print(
+        sprintf(#, "%.1fdB", grid.cross.label),
+        _.font_family.default,
+        _.font_size.extra_small.2,
+        _.font_style.bold,
+        _.letter_spacing.normal,
+        _.text_align.horizontal.left,
+        _.text_align.vertical.top,
+        _.text_overflow.visible,
+        grid.color,
+        x + grid.cross.label.x, y + grid.cross.label.y,
+        _.space.0, _.space.0
+      );
+      vertical ? (
+        grid.cross.start.x = cross.length / 2 + grid.cross;
+        grid.cross.start.y = 0;
+        grid.cross.end.x = grid.cross.start.x;
+        grid.cross.end.y = main.length;
+        grid.cross.label.x = grid.cross.start.x + _.space.0_5;
+        grid.cross.label.y = grid.cross.start.y + _.space.0_5;
+      ) : (
+        grid.cross.start.x = 0;
+        grid.cross.start.y = cross.length / 2 + grid.cross;
+        grid.cross.end.x = main.length;
+        grid.cross.end.y = grid.cross.start.y;
+        grid.cross.label.x = grid.cross.start.x + _.space.0_5;
+        grid.cross.label.y = grid.cross.start.y - _.space.3;
+      );
+      gfx_line(
+        x + grid.cross.start.x, y + grid.cross.start.y,
+        x + grid.cross.end.x, y + grid.cross.end.y
+      );
+      _.print(
+        sprintf(#, "%.1fdB", grid.cross.label),
+        _.font_family.default,
+        _.font_size.extra_small.2,
+        _.font_style.bold,
+        _.letter_spacing.normal,
+        _.text_align.horizontal.left,
+        _.text_align.vertical.top,
+        _.text_overflow.visible,
+        grid.color,
+        x + grid.cross.label.x, y + grid.cross.label.y,
+        _.space.0, _.space.0
+      );
+      grid.cross += grid.cross.gap;
+    );
+  );
+
+  duration.samples = _.milliseconds_to_samples(duration.ms);
+  samples_per_line = duration.samples / main.length;
+
+  waveform[_.waveform.samples_per_line] = samples_per_line;
+);
