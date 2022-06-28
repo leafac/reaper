@@ -2,6 +2,10 @@
 <index version="1" name="Leandro Facchinetti">
   <category name="Utility">
     <reapack name="leafac_Waveform.jsfx" type="effect">
+      <version name="1.1.0">
+        <source file="leafac_Waveform/leafac_Waveform.jsfx">https://github.com/leafac/reaper/raw/67af35d6f1120740a20a8cbb851944aaf9819da9/Effects/leafac_Waveform.jsfx</source>
+        <source file="leafac_Waveform/leafac.jsfx-inc">https://github.com/leafac/reaper/raw/67af35d6f1120740a20a8cbb851944aaf9819da9/Effects/leafac.jsfx-inc</source>
+      </version>
       <version name="1.0.0">
         <source>https://github.com/leafac/reaper/raw/7e9a83b52be2bb82aa4f02ee8e3768fff241faa7/Effects/leafac_Waveform.jsfx</source>
         <source>https://github.com/leafac/reaper/raw/7e9a83b52be2bb82aa4f02ee8e3768fff241faa7/Effects/leafac.jsfx-inc</source>
