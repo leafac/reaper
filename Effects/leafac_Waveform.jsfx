@@ -1,6 +1,7 @@
-desc:leafac_Waveform (BETA)
+desc:leafac_Waveform
 
-slider1:channels.slider=1<0,0,0{All,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64}>Channels
+// FIXME slider1:channels.slider=1<0,0,0{All,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64}>Channels
+slider1:channels.slider=0<0,0,0{Mono,Stereo}>Channels
 slider2:duration.ms=5000<5,10000,5>Duration (ms)
 slider3:square_root=0<0,0,0{Off,On}>Square Root
 slider4:vertical=0<0,0,0{Horizontal,Vertical}>Orientation
@@ -10,7 +11,7 @@ slider7:fill.color=0<0,0,0{Gray,Red,Orange,Amber,Yellow,Lime,Green,Emerald,Teal,
 
 slider9:grid=0<0,0,0{Off,On}>Grid
 slider10:grid.main.gap=48<24,192,1>Duration Gap (px)
-slider11:grid.cross.gap=24<24,192,1>Volume Gap (px)
+slider11:grid.cross.gap=96<96,192,1>Volume Gap (px)
 slider12:grid.color=0<0,0,0{Gray,Red,Orange,Amber,Yellow,Lime,Green,Emerald,Teal,Cyan,Sky,Blue,Indigo,Violet,Purple,Fuchsia,Pink,Rose}>Color
 slider13:grid.opacity=0<0,0,0{20%,30%,50%,75%,100%}>Opacity
 
@@ -24,6 +25,11 @@ ext_noinit = 1.0;
 
 channels.all = 0;
 
+zoom.default = 1;
+zoom.minimum = 0.1;
+zoom.maximum = 10;
+zoom.increment = 0.1;
+
 waveforms = _.memory.new(num_ch);
 channel = 0;
 loop(num_ch,
@@ -33,7 +39,8 @@ loop(num_ch,
 
 @slider
 
-channels = min(num_ch, channels.slider == channels.all ? num_ch : channels.slider);
+// FIXME channels = min(num_ch, channels.slider == channels.all ? num_ch : channels.slider);
+channels = channels.slider + 1;
 
 slider_show(grid.main.gap, grid);
 slider_show(grid.cross.gap, grid);
@@ -71,48 +78,39 @@ _.gfx.running ? (
 
 _.gfx();
 
-_.background_color(_.color.gray.warm.900);
+gfx.interactive_area = _.interactive_area(gfx.interactive_area, gfx.x, gfx.y, gfx.width, gfx.height);
 
-_.gfx.is_embedded_in_tcp_mcp ? (
-  gfx.x = _.space.0;
-  gfx.y = _.space.0;
-  gfx.width = gfx_w;
-  gfx.height = gfx_h;
-) : (
-  gfx.x = _.space.40;
-  gfx.y = _.space.32;
-  gfx.width = _.space.24;
-  gfx.height = _.space.24;
-
-  _.print(
-    "INSTRUCTIONS
-
-1. Click on the “+” on the REAPER interface above and enable either
-   “Show embedded UI in TCP” or “Show embedded UI in MCP”.
-2. Customize the display with the sliders above.
-3. Save as an FX chain.
-",
-    _.font_family.default,
-    _.font_size.extra_small,
-    _.font_style.regular,
-    _.letter_spacing.normal,
-    _.text_align.horizontal.left,
-    _.text_align.vertical.top,
-    _.text_overflow.visible,
-    _.color.gray.warm.200,
-    _.space.2, _.space.2,
-    _.space.0, _.space.0
-  );
-
-  _.color(_.color.gray.warm.400);
-  gfx_roundrect(
-    gfx.x, gfx.y,
-    gfx.width, gfx.height,
-    _.border_radius.none
-  );
+_.bitmap.get(gfx.interactive_area, _.interactive_area.active) ? (
+  zoom -= _.gfx.mouse.y.difference * (_.gfx.keyboard.control ? 0.01 : 0.1);
+  zoom = _.slider(zoom, zoom.minimum, zoom.maximum, zoom.increment);
 );
 
+_.bitmap.get(gfx.interactive_area, _.interactive_area.hover) && _.gfx.mouse.left.double_click ? zoom = zoom.default;
+
 _.sample.running ? (
+  _.background_color(_.color.gray.warm.900);
+
+  _.gfx.is_embedded_in_tcp_or_mcp ? (
+    gfx.x = _.space.0;
+    gfx.y = _.space.0;
+    gfx.width = gfx_w;
+    gfx.height = gfx_h;
+  ) : (
+    gfx.x = _.space.40;
+    gfx.y = _.space.32;
+    gfx.width = _.space.24;
+    gfx.height = _.space.24;
+  );
+
+  _.bitmap.get(gfx.interactive_area, _.interactive_area.hover) ||
+  _.bitmap.get(gfx.interactive_area, _.interactive_area.active) ? (
+    _.color(
+      _.bitmap.get(gfx.interactive_area, _.interactive_area.active) ? _.color.gray.warm.700 :
+      _.bitmap.get(gfx.interactive_area, _.interactive_area.hover) ? _.color.gray.warm.800
+    );
+    gfx_rect(gfx.x, gfx.y, gfx.width, gfx.height);
+  );
+
   gfx.waveform.x = _.space.0;
   gfx.waveform.y = _.space.0;
   vertical ? (
@@ -185,6 +183,37 @@ _.sample.running ? (
       gfx.waveform.x += gfx.waveform.width;
     ) : (
       gfx.waveform.y += gfx.waveform.height;
+    );
+  );
+
+  gfx_a = 1; // FIXME: ‘_.print()’ should receive ‘gfx_a’ & ‘_.color()’ should have an optional ‘gfx_a’
+
+  !_.gfx.is_embedded_in_tcp_or_mcp ? (
+    _.print(
+    "INSTRUCTIONS
+
+1. Click on the “+” on the REAPER interface above and enable either
+   “Show embedded UI in TCP” or “Show embedded UI in MCP”.
+2. Customize the display with the sliders above.
+3. Save as an FX chain.
+",
+      _.font_family.default,
+      _.font_size.extra_small,
+      _.font_style.regular,
+      _.letter_spacing.normal,
+      _.text_align.horizontal.left,
+      _.text_align.vertical.top,
+      _.text_overflow.visible,
+      _.color.gray.warm.200,
+      _.space.2, _.space.2,
+      _.space.0, _.space.0
+    );
+
+    _.color(_.color.gray.warm.400);
+    gfx_roundrect(
+      gfx.x, gfx.y,
+      gfx.width, gfx.height,
+      _.border_radius.none
     );
   );
 );

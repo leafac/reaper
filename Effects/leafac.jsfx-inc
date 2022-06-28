@@ -1,7 +1,22 @@
 - What happens on samplerate changes? Some initialization depends on srate, for example, things that use ‘_.milliseconds_to_samples()’. Those things could go wrong. We could detect srate changes & reinitialize stuff. But that’s an annoying solution to a rare issue…
 
+Waveform: Reset on duration change?
+
+Resetting may be to eager with 15 frames, specially when the machine is under heavy load: See Waveform on TCP when you hit play
+
 Is it better to do _.db_to_linear(db) with exp(-x*log(10)/20) ???
 
+‘_.gfx.refresh_rate’ is dependent on whether the plugin is on MCP/TCP
+
+‘_.gfx.refresh_rate’ should be called frame_rate
+
+Waveform: Have a setting for storing samples even when not visible
+
+‘ext_noinit’ part of library?
+
+Feature request: a way to get a hold of default minimum maximum increment of a slider programmatically
+
+Waveform: Multichannel is broken (stereo works fine)
 
 Use polygon to draw thick lines
 
@@ -526,6 +541,32 @@ function _.clip.test() (
   _.clip(-2, 1) == -1;
 );
 
+// TODO: Other rounding techniques, ‘ceil()’, and ‘round()’ (‘floor(___ + 0.5 * increment)’)
+function _.quantize(value, minimum, increment) (
+  floor((value - minimum) / increment) * increment + minimum;
+);
+function _.quantize.tests() (
+  _.quantize(1.25, 0, 1) == 1 &&
+  _.quantize(1.5, 0, 1) == 1 &&
+  _.quantize(1.75, 0, 1) == 1 &&
+  _.quantize(3, 1, 5) == 1 &&
+  _.quantize(7, 1, 5) == 6 &&
+  _.quantize(15, 1, 5) == 11;
+);
+
+// TEST
+// TODO: Use quantize if possible
+function _.truncate(number, digits)
+local(factor) (
+  factor = 10^digits;
+  floor(number * factor) / factor;
+);
+
+// TEST
+function _.slider(value, minimum, maximum, increment) (
+  _.clip(_.quantize(value, minimum, increment), minimum, maximum);
+);
+
 function _.follower(follower, target, maximum_change) (
   follower + _.clip(target - follower, maximum_change);
 );
@@ -566,6 +607,7 @@ function _.wrap.test() (
   _.wrap(3, 2) == 1;
 );
 
+// TODO: Rename to increment?
 function _.circular_counter(circular_counter, minimum, maximum, step) (
   circular_counter += step;
   _.wrap.maximum(circular_counter, minimum, maximum);
@@ -760,6 +802,30 @@ local(circular_buffer, result) (
             _.circular_buffer.get(circular_buffer, -3) == 0;
 );
 
+// BITMAPS
+
+function _.bitmap.get(bitmap, index) (
+  (bitmap >> index) & 1;
+);
+function _.bitmap.set(bitmap, index, value) (
+  value ? bitmap | (1 << index) : bitmap & ((1 << index) ~ $~32);
+);
+function _.bitmap.test() (
+  _.bitmap.get(6 /* 110 */, 0) == 0 &&
+  _.bitmap.get(6 /* 110 */, 1) == 1 &&
+  _.bitmap.get(6 /* 110 */, 2) == 1 &&
+  _.bitmap.get(6 /* 110 */, 3) == 0 &&
+  _.bitmap.set(6 /* 110 */, 0, 1) ==  7 /*  111 */ &&
+  _.bitmap.set(6 /* 110 */, 1, 1) ==  6 /*  110 */ &&
+  _.bitmap.set(6 /* 110 */, 2, 1) ==  6 /*  110 */ &&
+  _.bitmap.set(6 /* 110 */, 3, 1) == 14 /* 1110 */ &&
+  _.bitmap.set(6 /* 110 */, 0, 0) ==  6 /*  110 */ &&
+  _.bitmap.set(6 /* 110 */, 1, 0) ==  4 /*  100 */ &&
+  _.bitmap.set(6 /* 110 */, 2, 0) ==  2 /*  010 */ &&
+  _.bitmap.set(6 /* 110 */, 3, 0) ==  6 /* 0110 */;
+);
+
+
 // TESTS
 
 function _.tests() (
@@ -781,6 +847,7 @@ function _.tests() (
   #_.tests += "_.count_trailing_zeros.test(): "; _.count_trailing_zeros.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
   #_.tests += "_.map.test(): "; _.map.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
   #_.tests += "_.clip.test(): "; _.clip.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.quantize.tests(): "; _.quantize.tests() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
   #_.tests += "_.follower.test(): "; _.follower.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
   #_.tests += "_.wrap.test(): "; _.wrap.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
   #_.tests += "_.circular_counter.test(): "; _.circular_counter.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
@@ -790,6 +857,7 @@ function _.tests() (
   #_.tests += "_.image.test(): "; _.image.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
   #_.tests += "_.array.test(): "; _.array.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
   #_.tests += "_.circular_buffer.test(): "; _.circular_buffer.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.bitmap.test(): "; _.bitmap.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
 );
 
 _.sample.play_state = _.undefined;
@@ -1690,9 +1758,83 @@ function _.gfx() (
   _.gfx.reset = !_.gfx.running;
   _.gfx.running = ceil(srate / (samplesblock * _.gfx.refresh_rate) * 15);
 
-  _.gfx.is_embedded_in_tcp_mcp = gfx_ext_flags & 1;
+  _.gfx.is_embedded_in_tcp_or_mcp = gfx_ext_flags & 1;
 
   gfx_getchar(); // This makes the mouse state (mouse_cap, for example, which buttons are pressed) available
+
+  // TODO: Think about a naming convention for private variables, for example, ‘_.gfx.mouse.x.previous’
+  //       Or perhaps just make it ‘local’ and rely on the fact that it’ll be preserved across invocations
+
+  _.gfx.mouse.x = mouse_x;
+  _.gfx.mouse.x.difference = _.gfx.mouse.x - _.gfx.mouse.x.previous;
+  _.gfx.mouse.x.previous = _.gfx.mouse.x;
+
+  _.gfx.mouse.y = mouse_y;
+  _.gfx.mouse.y.difference = _.gfx.mouse.y - _.gfx.mouse.y.previous;
+  _.gfx.mouse.y.previous = _.gfx.mouse.y;
+
+  _.gfx.mouse.left = mouse_cap & 1;
+  _.gfx.mouse.right = mouse_cap & 2;
+  _.gfx.mouse.middle = mouse_cap & 64;
+
+  _.gfx.keyboard.control = mouse_cap & 4;
+  _.gfx.keyboard.shift = mouse_cap & 8;
+  _.gfx.keyboard.alt = mouse_cap & 16;
+  _.gfx.keyboard.meta = mouse_cap & 32;
+
+  _.gfx.mouse.wheel = mouse_wheel;
+  mouse_wheel = 0;
+  _.gfx.mouse.wheel.horizontal = mouse_hwheel;
+  mouse_hwheel = 0;
+
+  _.gfx.mouse.left.down = !_.gfx.mouse.left.previous && _.gfx.mouse.left;
+  _.gfx.mouse.left.up = _.gfx.mouse.left.previous && !_.gfx.mouse.left;
+  _.gfx.mouse.right.down = !_.gfx.mouse.right.previous && _.gfx.mouse.right;
+  _.gfx.mouse.right.up = _.gfx.mouse.right.previous && !_.gfx.mouse.right;
+  _.gfx.mouse.middle.down = !_.gfx.mouse.middle.previous && _.gfx.mouse.middle;
+  _.gfx.mouse.middle.up = _.gfx.mouse.middle.previous && !_.gfx.mouse.middle;
+
+  _.gfx.mouse.wheel.scroll = _.gfx.mouse.wheel != 0;
+  _.gfx.mouse.wheel.horizontal.scroll = _.gfx.mouse.wheel.horizontal != 0;
+
+  // TODO: This ‘15’ should be with respect to the refresh rate
+  _.gfx.mouse.left.double_click = _.gfx.mouse.left.down && _.gfx.mouse.left.double_click.timer > 0;
+  _.gfx.mouse.left.down ? _.gfx.mouse.left.double_click.timer = 15;
+  _.gfx.mouse.left.double_click ? _.gfx.mouse.left.double_click.timer = 0;
+  _.gfx.mouse.left.double_click.timer = max(0, _.gfx.mouse.left.double_click.timer - 1);
+
+  _.gfx.mouse.right.double_click = _.gfx.mouse.right.down && _.gfx.mouse.right.double_click.timer > 0;
+  _.gfx.mouse.right.down ? _.gfx.mouse.right.double_click.timer = 15;
+  _.gfx.mouse.right.double_click ? _.gfx.mouse.right.double_click.timer = 0;
+  _.gfx.mouse.right.double_click.timer = max(0, _.gfx.mouse.right.double_click.timer - 1);
+
+  _.gfx.mouse.middle.double_click = _.gfx.mouse.middle.down && _.gfx.mouse.middle.double_click.timer > 0;
+  _.gfx.mouse.middle.down ? _.gfx.mouse.middle.double_click.timer = 15;
+  _.gfx.mouse.middle.double_click ? _.gfx.mouse.middle.double_click.timer = 0;
+  _.gfx.mouse.middle.double_click.timer = max(0, _.gfx.mouse.middle.double_click.timer - 1);
+
+  _.gfx.mouse.left.previous = _.gfx.mouse.left;
+  _.gfx.mouse.right.previous = _.gfx.mouse.right;
+  _.gfx.mouse.middle.previous = _.gfx.mouse.middle;
+);
+
+// GFX INTERACTIVITY
+
+_.interactive_area.hover = 0;
+_.interactive_area.active = 1;
+_.interactive_area.disabled = 2;
+
+// TODO: Other notions of collision, for example, circular
+function _.interactive_area(interactive_area, x, y, width, height)
+local(hover, active) (
+  hover = _.bitmap.get(interactive_area, _.interactive_area.hover);
+  active = _.bitmap.get(interactive_area, _.interactive_area.active);
+
+  hover = x < _.gfx.mouse.x && _.gfx.mouse.x < x + width && y < _.gfx.mouse.y && _.gfx.mouse.y < y + height;
+  active = (hover && _.gfx.mouse.left.down) || (active && _.gfx.mouse.left);
+
+  interactive_area = _.bitmap.set(interactive_area, _.interactive_area.hover, hover);
+  interactive_area = _.bitmap.set(interactive_area, _.interactive_area.active, active);
 );
 
 // GFX COMPONENTS
@@ -1736,15 +1878,7 @@ local(time.current) (
 
 /*
 
-- Click and drag to zoom?
-
----
-
 - Rename main/cross to duration/volume
-
----
-
-- Drawing is off-by-one to the right in Horizontal mode and one pixel too large in Vertical mode
 
 ---
 
@@ -1765,14 +1899,12 @@ Have a version of the MCP FX that looks at a side-chain and shows the difference
 slider6:rectified=0<0,0,0{False,True}>Rectified?
 slider7:scroll=0<0,0,0{False,True}>Scroll?
   - cursor.width, cursor.color, cursor.opacity
-
 slider8:erase_on_wrap=0<0,0,0{False,True}>Erase on Wrap?
 
 ---
 
 Stroke
   stroke.width, stroke.color, stroke.opacity
-
 
 ---
 
