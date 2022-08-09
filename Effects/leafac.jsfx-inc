@@ -1,3 +1,8 @@
+Change the way mouse movement works to not take in account the changes in coordinate between frames, but remember the coordinate that caused the last change in the parameter
+
+
+
+
 - What happens on samplerate changes? Some initialization depends on srate, for example, things that use ‘_.milliseconds_to_samples()’. Those things could go wrong. We could detect srate changes & reinitialize stuff. But that’s an annoying solution to a rare issue…
 
 Waveform: Reset on duration change?
@@ -247,6 +252,7 @@ LIBRARY
 
 _.true = 1;
 _.false = 0;
+// TODO: _.infinity = _.db_to_linear(666); Denormalization issues?
 _.infinity = 10^20;
 _.infinitesimal = 1 / _.infinity;
 _.undefined = 99990000;
@@ -525,6 +531,11 @@ function _.map(value, from.minimum, from.maximum, to.minimum, to.maximum) (
 );
 function _.map.test() (
   _.map(0.5, -1, 1, 20, 60) == 50;
+);
+
+// TODO: TEST
+function _.normalize(value, from.minimum, from.maximum) (
+  _.map(value, from.minimum, from.maximum, 0, 1);
 );
 
 function _.clip(value, minimum, maximum) (
@@ -825,6 +836,142 @@ function _.bitmap.test() (
   _.bitmap.set(6 /* 110 */, 3, 0) ==  6 /* 0110 */;
 );
 
+// Root Mean Square (RMS)
+
+// Allow for changing the window length.
+
+_.rms.square_in_progress = 0;
+_.rms.square_in_progress.channels = 1;
+_.rms.window.length = 2;
+_.rms.running_sum_of_squares = 3;
+_.rms.running_sum_of_squares.clean = 4;
+_.rms.running_sum_of_squares.clean.length = 5;
+_.rms.squares = 6;
+_.rms.rms = 7;
+
+function _.rms.new(window.length.maximum)
+local(rms) (
+  rms = _.memory.new(8);
+  rms[_.rms.square_in_progress] = 0;
+  rms[_.rms.square_in_progress.channels] = 0;
+  rms[_.rms.window.length] = window.length.maximum;
+  rms[_.rms.running_sum_of_squares] = 0;
+  rms[_.rms.running_sum_of_squares.clean] = 0;
+  rms[_.rms.running_sum_of_squares.clean.length] = 0;
+  rms[_.rms.squares] = _.circular_buffer.new(window.length.maximum);
+  rms[_.rms.rms] = 0;
+  rms;
+);
+
+function _.rms.window.length.set(rms, window.length.new)
+local(
+  window.length.old,
+  running_sum_of_squares,
+  running_sum_of_squares.clean,
+  running_sum_of_squares.clean.length,
+  squares,
+  rms.rms,
+) (
+  window.length.old = rms[_.rms.window.length];
+  window.length.new != window.length.old ? (
+    running_sum_of_squares = rms[_.rms.running_sum_of_squares];
+    running_sum_of_squares.clean = rms[_.rms.running_sum_of_squares.clean];
+    running_sum_of_squares.clean.length = rms[_.rms.running_sum_of_squares.clean.length];
+    squares = rms[_.rms.squares];
+    rms.rms = rms[_.rms.rms];
+
+    window.length.new < window.length.old ? (
+      square.offset = -window.length.old;
+      loop(window.length.old - window.length.new,
+        running_sum_of_squares -= _.circular_buffer.get(squares, square.offset);
+        square.offset += 1;
+      );
+    ) : (
+      square.offset = -window.length.new;
+      loop(window.length.new - window.length.old,
+        running_sum_of_squares += _.circular_buffer.get(squares, square.offset);
+        square.offset += 1;
+      );
+    );
+
+    running_sum_of_squares.clean = 0;
+    running_sum_of_squares.clean.length = 0;
+
+    rms.rms = sqrt(running_sum_of_squares / window.length.new);
+
+    rms[_.rms.window.length] = window.length.new;
+    rms[_.rms.running_sum_of_squares] = running_sum_of_squares;
+    rms[_.rms.running_sum_of_squares.clean] = running_sum_of_squares.clean;
+    rms[_.rms.running_sum_of_squares.clean.length] = running_sum_of_squares.clean.length;
+    rms[_.rms.rms] = rms.rms;
+  );
+);
+
+function _.rms.add(rms, value)
+local (square_in_progress, square_in_progress.channels) (
+  square_in_progress = rms[_.rms.square_in_progress];
+  square_in_progress.channels = rms[_.rms.square_in_progress.channels];
+
+  square_in_progress += sqr(value);
+  square_in_progress.channels += 1;
+
+  rms[_.rms.square_in_progress] = square_in_progress;
+  rms[_.rms.square_in_progress.channels] = square_in_progress.channels;
+);
+
+function _.rms.advance(rms)
+local(
+  square_in_progress,
+  square_in_progress.channels,
+  window.length,
+  running_sum_of_squares,
+  running_sum_of_squares.clean,
+  running_sum_of_squares.clean.length,
+  squares,
+  rms.rms
+) (
+  square_in_progress = rms[_.rms.square_in_progress];
+  square_in_progress.channels = rms[_.rms.square_in_progress.channels];
+  window.length = rms[_.rms.window.length];
+  running_sum_of_squares = rms[_.rms.running_sum_of_squares];
+  running_sum_of_squares.clean = rms[_.rms.running_sum_of_squares.clean];
+  running_sum_of_squares.clean.length = rms[_.rms.running_sum_of_squares.clean.length];
+  squares = rms[_.rms.squares];
+
+  square_in_progress /= square_in_progress.channels;
+  running_sum_of_squares = max(0, running_sum_of_squares - _.circular_buffer.get(squares, -window.length) + square_in_progress);
+  running_sum_of_squares.clean += square_in_progress;
+  running_sum_of_squares.clean.length += 1;
+
+  _.circular_buffer.push(squares, square_in_progress);
+  square_in_progress = 0;
+  square_in_progress.channels = 0;
+
+  running_sum_of_squares.clean.length == window.length ? (
+    running_sum_of_squares = running_sum_of_squares.clean;
+    running_sum_of_squares.clean = 0;
+    running_sum_of_squares.clean.length = 0;
+  );
+
+  rms.rms = sqrt(running_sum_of_squares / window.length);
+
+  rms[_.rms.square_in_progress] = square_in_progress;
+  rms[_.rms.square_in_progress.channels] = square_in_progress.channels;
+  rms[_.rms.running_sum_of_squares] = running_sum_of_squares;
+  rms[_.rms.running_sum_of_squares.clean] = running_sum_of_squares.clean;
+  rms[_.rms.running_sum_of_squares.clean.length] = running_sum_of_squares.clean.length;
+  rms[_.rms.rms] = rms.rms;
+);
+
+function _.rms.test()
+local(rms) (
+  rms = _.rms.new(3);
+  _.rms.add(rms, 2);
+  _.rms.add(rms, 3);
+  _.rms.advance(rms);
+  rms[_.rms.rms] == sqrt((sqr(2) + sqr(3)) / (3 * 2));
+  // TODO: Write better tests for this.
+);
 
 // TESTS
 
@@ -858,8 +1005,10 @@ function _.tests() (
   #_.tests += "_.array.test(): "; _.array.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
   #_.tests += "_.circular_buffer.test(): "; _.circular_buffer.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
   #_.tests += "_.bitmap.test(): "; _.bitmap.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
+  #_.tests += "_.rms.test(): "; _.rms.test() ? #_.tests += "PASS\n" : #_.tests += "FAIL\n";
 );
 
+// TODO: ‘_.sample.play_state < 0’ is error?
 _.sample.play_state = _.undefined;
 _.sample.play_state.stopped = 0;
 _.sample.play_state.playing = 1;
@@ -868,6 +1017,9 @@ _.sample.play_state.recording = 5;
 _.sample.play_state.record_paused = 6;
 _.sample.play_position = play_position;
 function _.block() (
+  // TODO: Perhaps change the strategy to use ‘_.sample.time’ instead of a counter.
+  // TODO: Perhaps rename ‘_.sample’ stuff to ‘_.audio’
+
   // https://forums.cockos.com/showpost.php?p=1827391&postcount=2
   _.sample.reset = !_.sample.running;
   _.sample.running = 3;
@@ -887,6 +1039,8 @@ function _.block() (
     abs(play_position - _.sample.play_position) > samplesblock / srate * 5;
   _.sample.play_state = play_state;
   _.sample.play_position = play_position;
+
+  _.sample.time = time_precise();
 );
 
 // DESIGN SYSTEM
@@ -2196,4 +2350,154 @@ local(
   samples_per_line = duration.samples / main.length;
 
   waveform[_.waveform.samples_per_line] = samples_per_line;
+);
+
+// LINE GRAPHS
+
+_.line_graph.point = 0;
+_.line_graph.values_in_point = 1;
+_.line_graph.values_per_point = 2;
+_.line_graph.points = 3;
+
+function _.line_graph.new(points.length.maximum)
+local(line_graph) (
+  line_graph = _.memory.new(4);
+  line_graph[_.line_graph.point] = 0;
+  line_graph[_.line_graph.values_in_point] = 0;
+  line_graph[_.line_graph.values_per_point] = _.infinity;
+  line_graph[_.line_graph.points] = _.circular_buffer.new(points.length.maximum + 50);
+  line_graph;
+);
+
+function _.line_graph.reset(line_graph)
+local(points) (
+  points = line_graph[_.line_graph.points];
+  _.circular_buffer.reset(points);
+);
+
+function _.line_graph.push(line_graph, value)
+local(
+  point,
+  values_in_point,
+  values_per_point,
+  points,
+) (
+  point = line_graph[_.line_graph.point];
+  values_in_point = line_graph[_.line_graph.values_in_point];
+  values_per_point = line_graph[_.line_graph.values_per_point];
+  points = line_graph[_.line_graph.points];
+
+  point += value;
+
+  values_in_point = _.circular_counter(values_in_point, values_per_point);
+  _.circular_counter.wrapped(values_in_point) ? (
+    _.circular_buffer.push(points, point / values_per_point);
+    point = 0;
+  );
+
+  line_graph[_.line_graph.point] = point;
+  line_graph[_.line_graph.values_in_point] = values_in_point;
+
+  value;
+);
+
+// TODO: Test vertical
+// TODO: Different notions of accumulation (‘max()’, ‘min()’, and so forth, instead of average)
+function _.line_graph.draw(
+  line_graph,
+  minimum, maximum,
+  x, y,
+  width, height,
+  zoom,
+  duration.ms,
+  vertical,
+  stroke.color, stroke.width, stroke.opacity,
+)
+local(
+  points,
+  main.length,
+  cross.length,
+  point.main,
+  offset,
+  point,
+  point.cross,
+  point.main.start.x,
+  point.main.start.y,
+  point.main.end.x,
+  point.main.end.y,
+  duration.values,
+  values_per_point,
+) (
+  points = line_graph[_.line_graph.points];
+
+  vertical ? (
+    main.length = height;
+    cross.length = width;
+  ) : (
+    main.length = width;
+    cross.length = height;
+  );
+
+  point.main = 0;
+  offset = -1;
+  _.color(stroke.color);
+  gfx_a = stroke.opacity;
+  loop(main.length,
+    point = _.circular_buffer.get(points, offset);
+
+    point = _.normalize(point, minimum, maximum) * zoom;
+    point = _.clip(point, 0, 1);
+    point.cross = cross.length * (1 - point);
+
+    vertical ? (
+      point.main.start.x = point.cross - stroke.width / 2;
+      point.main.start.y = point.main;
+      point.main.end.x = point.cross + stroke.width / 2;
+      point.main.end.y = point.main.start.y;
+    ) : (
+      point.main.start.x = main.length - point.main;
+      point.main.start.y = point.cross - stroke.width / 2;
+      point.main.end.x = point.main.start.x;
+      point.main.end.y = point.cross + stroke.width / 2;
+    );
+
+    gfx_line(
+      x + point.main.start.x,
+      y + point.main.start.y,
+      x + point.main.end.x,
+      y + point.main.end.y
+    );
+
+    /*
+    // TODO: Fix stroke width
+    vertical ? (
+      point.main.start.x = point.cross;
+      point.main.start.y = point.main;
+      point.main.end.x = point.cross;
+      point.main.end.y = point.main.start.y;
+    ) : (
+      point.main.start.x = main.length - point.main;
+      point.main.start.y = point.cross;
+      point.main.end.x = point.main.start.x;
+      point.main.end.y = point.cross;
+    );
+
+    _.bezier.linear.draw(
+      x + point.main.start.x,
+      y + point.main.start.y,
+      x + point.main.end.x,
+      y + point.main.end.y,
+      stroke.color,
+      stroke.width
+    );
+    */
+
+    point.main += 1;
+    offset -= 1;
+  );
+
+  duration.values = _.milliseconds_to_samples(duration.ms);
+  values_per_point = duration.values / main.length;
+
+  line_graph[_.line_graph.values_per_point] = values_per_point;
 );
