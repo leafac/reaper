@@ -3,8 +3,8 @@
   <category name="Utility">
     <reapack name="leafac_Volume (Gain) (Trim) (Mixer Control Panel - MCP) (Track Control Panel - TCP).jsfx" type="effect">
       <version name="1.1.0">
-        <source file="leafac_Volume (Gain) (Trim) (Mixer Control Panel - MCP) (Track Control Panel - TCP)/leafac_Volume (Gain) (Trim) (Mixer Control Panel - MCP) (Track Control Panel - TCP).jsfx">https://github.com/leafac/reaper/raw/12eb8fea14f9b299b046e2a4e62741bc718081de/Effects/leafac_Volume%20(Gain)%20(Trim)%20(Mixer%20Control%20Panel%20-%20MCP)%20(Track%20Control%20Panel%20-%20TCP).jsfx</source>
-        <source file="leafac_Volume (Gain) (Trim) (Mixer Control Panel - MCP) (Track Control Panel - TCP)/leafac.jsfx-inc">https://github.com/leafac/reaper/raw/12eb8fea14f9b299b046e2a4e62741bc718081de/Effects/leafac.jsfx-inc</source>
+        <source file="leafac_Volume (Gain) (Trim) (Mixer Control Panel - MCP) (Track Control Panel - TCP)/leafac_Volume (Gain) (Trim) (Mixer Control Panel - MCP) (Track Control Panel - TCP).jsfx">https://github.com/leafac/reaper/raw/70dbcab08a5183cbc458c9ba2aa3cdd19569e7e3/Effects/leafac_Volume%20(Gain)%20(Trim)%20(Mixer%20Control%20Panel%20-%20MCP)%20(Track%20Control%20Panel%20-%20TCP).jsfx</source>
+        <source file="leafac_Volume (Gain) (Trim) (Mixer Control Panel - MCP) (Track Control Panel - TCP)/leafac.jsfx-inc">https://github.com/leafac/reaper/raw/70dbcab08a5183cbc458c9ba2aa3cdd19569e7e3/Effects/leafac.jsfx-inc</source>
       </version>
       <version name="1.0.0">
         <source>https://github.com/leafac/reaper/raw/7e9a83b52be2bb82aa4f02ee8e3768fff241faa7/Effects/leafac_Waveform.jsfx</source>
