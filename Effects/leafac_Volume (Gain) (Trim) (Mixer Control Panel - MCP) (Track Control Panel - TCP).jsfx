@@ -1,0 +1,83 @@
+desc:leafac_Volume (Gain) (Trim) (Mixer Control Panel - MCP) (Track Control Panel - TCP)
+
+slider1:channels.slider=0<0,0,0{Stereo,Multichannel}> 
+
+slider3:volume.db=0<-15,15,0.1>Volume (dB)
+
+import leafac.jsfx-inc
+
+@init
+
+volume.db.default = 0;
+volume.db.minimum = -200;
+volume.db.maximum = 200;
+volume.linear.maximum_change = _.db_to_linear(-60);
+
+channels.slider.stereo = 0;
+channels.slider.multichannel = 1;
+
+function slider() (
+  channels = channels.slider == channels.slider.stereo ? 2 : channels.slider == channels.slider.multichannel ? num_ch;
+
+  volume.linear = _.db_to_linear(volume.db);
+);
+
+@slider
+
+slider();
+
+@serialize
+
+version = 100;
+file_var(0, version);
+
+@block
+
+_.block();
+
+@sample
+
+volume.linear.smooth = _.follower(volume.linear.smooth, volume.linear, volume.linear.maximum_change);
+
+channel = 0;
+loop(channels,
+  spl(channel) *= volume.linear.smooth;
+  channel += 1;
+);
+
+@gfx 448 256
+
+_.gfx();
+
+gfx.interactive_area = _.interactive_area(gfx.interactive_area, _.space.0, _.space.0, gfx_w, gfx_h);
+
+_.bitmap.get(gfx.interactive_area, _.interactive_area.active) ? (
+  gfx.fine_adjustment = _.gfx.keyboard.control;
+  volume.db -= _.gfx.mouse.y.difference * (gfx.fine_adjustment ? 0.01 : 0.2);
+  volume.db = _.slider(volume.db, volume.db.minimum, volume.db.maximum, gfx.fine_adjustment ? 0.1 : 1);
+);
+
+_.bitmap.get(gfx.interactive_area, _.interactive_area.hover) && _.gfx.mouse.left.double_click ? volume.db = volume.db.default;
+
+// TODO: Check that the sliders have changed and that we actually need to call ‘slider()’
+slider();
+
+_.background_color(
+  _.bitmap.get(gfx.interactive_area, _.interactive_area.active) ? _.color.gray.warm.700 :
+  _.bitmap.get(gfx.interactive_area, _.interactive_area.hover) ?  _.color.gray.warm.800 :
+                                                                  _.color.gray.warm.900
+);
+
+_.print(
+  sprintf(#, "%+.1fdB", volume.db),
+  _.font_family.default,
+  _.font_size.small,
+  _.font_style.regular,
+  _.letter_spacing.normal,
+  _.text_align.horizontal.center,
+  _.text_align.vertical.center,
+  _.text_overflow.visible,
+  _.color.gray.warm.200,
+  _.space.2, _.space.2,
+  - _.space.2 + gfx_w - _.space.2, - _.space.2 + gfx_h - _.space.2
+);
