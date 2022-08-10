@@ -26,6 +26,8 @@ function slider() (
 
 slider();
 
+gfx.volume.db = volume.db;
+
 @serialize
 
 version = 100;
@@ -49,18 +51,30 @@ loop(channels,
 
 _.gfx();
 
+is_slider_needed = _.false;
+
 gfx.interactive_area = _.interactive_area(gfx.interactive_area, _.space.0, _.space.0, gfx_w, gfx_h);
 
-_.bitmap.get(gfx.interactive_area, _.interactive_area.active) ? (
+_.bitmap.get(gfx.interactive_area, _.interactive_area.active) || (
+  _.bitmap.get(gfx.interactive_area, _.interactive_area.hover) &&
+  _.gfx.mouse.wheel.scroll
+)
+? (
   gfx.fine_adjustment = _.gfx.keyboard.control;
-  volume.db -= _.gfx.mouse.y.difference * (gfx.fine_adjustment ? 0.01 : 0.2);
-  volume.db = _.slider(volume.db, volume.db.minimum, volume.db.maximum, gfx.fine_adjustment ? 0.1 : 1);
+  gfx.volume.db += _.bitmap.get(gfx.interactive_area, _.interactive_area.active) ?
+                   -_.gfx.mouse.y.difference * (gfx.fine_adjustment ? 0.003 : 0.03) :
+                   _.gfx.mouse.wheel * (gfx.fine_adjustment ? 0.001 : 0.01);
+  volume.db = _.slider(gfx.volume.db, volume.db.minimum, volume.db.maximum, gfx.fine_adjustment ? 0.1 : 1);
+  is_slider_needed = _.true;
 );
 
-_.bitmap.get(gfx.interactive_area, _.interactive_area.hover) && _.gfx.mouse.left.double_click ? volume.db = volume.db.default;
+_.bitmap.get(gfx.interactive_area, _.interactive_area.hover) && _.gfx.mouse.left.double_click ? (
+  gfx.volume.db = volume.db.default;
+  volume.db = volume.db.default;
+  is_slider_needed = _.true;
+);
 
-// TODO: Check that the sliders have changed and that we actually need to call ‘slider()’
-slider();
+is_slider_needed ? slider();
 
 _.background_color(
   _.bitmap.get(gfx.interactive_area, _.interactive_area.active) ? _.color.gray.warm.700 :
