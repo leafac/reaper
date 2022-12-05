@@ -1,4 +1,11 @@
 <!--
+Bug in Scripts/leafac_Explode multistream (multitrack) media file to new one-stream (one-track) media files.lua:
+Streams may be something other than video or audio. They may also be subtitles, attachments (data), and so forth. Right now, the script will try to treat them as audio and crash. These other streams should probably be ignored.
+
+
+
+
+
 Image to MIDI conversion
 
 
