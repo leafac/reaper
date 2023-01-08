@@ -1,4 +1,53 @@
 <!--
+
+// Tale
+
+desc:JSFX mouse cursors
+slider1:1<1,14,1{None*,Arrow,Text,Wait*,Crosshair*,Arrow Up,Size NW/SE,Size NE/SW,Size W/E,Size N/S,Size All,No,Hand,App Start*,Help*}>Cursor
+
+@init
+
+mem_set_values(tbl,
+  // 32511 or any other undefined resource ID.
+  32511, // None*
+
+  32512, // Arrow
+  32513, // Text
+  32514, // Wait*
+  32515, // Crosshair*
+  32516, // Arrow Up
+
+  32642, // Size NW/SE
+  32643, // Size NE/SW
+  32644, // Size W/E
+  32645, // Size N/S
+  32646, // Size All
+
+  32648, // No
+  32649, // Hand
+  32650, // App Start*
+  32651  // Help*
+);
+
+// * Not available on macOS.
+
+@gfx
+
+gfx_setcursor(tbl[slider1]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Bug in Scripts/leafac_Explode multistream (multitrack) media file to new one-stream (one-track) media files.lua:
 Streams may be something other than video or audio. They may also be subtitles, attachments (data), and so forth. Right now, the script will try to treat them as audio and crash. These other streams should probably be ignored. (Report back to Ockenden)
 
