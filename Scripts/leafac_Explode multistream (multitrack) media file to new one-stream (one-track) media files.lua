@@ -18,7 +18,7 @@ for selectedMediaItemIndex = 0, selectedMediaItemsCount - 1 do
     local file = string.gsub(reaper.GetMediaSourceFileName(source, ""), "\\",
                              "/")
     table.insert(mediasToInspect,
-                 {mediaItem = mediaItem, file = file, streams = {}})
+                 {mediaItem = mediaItem, takeName = reaper.GetTakeName(take), file = file, streams = {}})
 end
 
 local inspectCommandParts = {ffmpeg}
@@ -140,9 +140,12 @@ for _, media in ipairs(mediasToConvert) do
         reaper.SetMediaItemInfo_Value(streamMediaItem, "B_MUTE", mute)
         local streamTake = reaper.AddTakeToMediaItem(streamMediaItem)
         reaper.SetMediaItemTakeInfo_Value(streamTake, "D_STARTOFFS", startOffset)
+		reaper.GetSetMediaItemTakeInfo_String(streamTake, "P_NAME", stream.file, true) --media.takeName .. tostring(streamIndex)
         local source = reaper.PCM_Source_CreateFromFile(stream.file)
         reaper.SetMediaItemTake_Source(streamTake, source)
     end
 end
 reaper.Main_OnCommand(40047, 0) -- Peaks: Build any missing peaks
+
+
 
